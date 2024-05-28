@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Sync.Model;
 using Sync.Services.iml;
 using Sync.Services;
+using Sync.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<EFDataContext>(options =>
@@ -31,6 +32,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MigrationDB();
 
 app.UseAuthorization();
 
