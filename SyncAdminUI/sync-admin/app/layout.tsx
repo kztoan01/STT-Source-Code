@@ -7,9 +7,9 @@ import { User } from './user';
 import { NavItem } from './nav-item';
 
 export const metadata = {
-  title: 'Next.js App Router + NextAuth + Tailwind CSS',
+  title: 'Sync Admin Dashboard',
   description:
-    'A user admin dashboard configured with Next.js, Postgres, NextAuth, Tailwind CSS, TypeScript, and Prettier.'
+    'This is dashboard for admin of Sync.'
 };
 
 export default function RootLayout({
