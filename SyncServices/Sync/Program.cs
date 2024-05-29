@@ -11,6 +11,8 @@ CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 builder.Services.AddDbContext<EFDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EFDataContext")));
 
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
 // Add services to the container.
 builder.Services.AddScoped<ILoginService, LoginService>();
