@@ -1,5 +1,6 @@
 # Base image for runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0.3-jammy-amd64 AS base
+ENV ASPNETCORE_ENVIRONMENT = Development
 EXPOSE 8080
 EXPOSE 80
 
@@ -32,4 +33,4 @@ COPY --from=publish /app/out .
 RUN apt-get update && apt-get install -y iputils-ping
 
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-ENTRYPOINT [ "dotnet", "Sync.dll" ]
+ENTRYPOINT [ "dotnet", "Sync.dll", "--environment=Development"]
