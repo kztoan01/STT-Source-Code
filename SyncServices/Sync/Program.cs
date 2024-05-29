@@ -3,8 +3,11 @@ using Sync.Model;
 using Sync.Services.iml;
 using Sync.Services;
 using Sync.Extensions;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 builder.Services.AddDbContext<EFDataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EFDataContext")));
 
