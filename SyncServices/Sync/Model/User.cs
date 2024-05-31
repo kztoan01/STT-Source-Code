@@ -30,6 +30,9 @@ namespace Sync.Model
         [MaxLength(100)]
         public string City { get; set; }
 
+        [MaxLength(100)]
+        public string Role { get; set; }
+
         [Required]
         [MaxLength(50)]
         public string Status { get; set; }

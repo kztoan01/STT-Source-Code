@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Sync.DTOs;
 using Sync.Model;
+using Sync.Repository;
 
 namespace Sync.Services.iml
 {
@@ -7,17 +9,22 @@ namespace Sync.Services.iml
     {
         private readonly EFDataContext _context;
 
+        private IUserRepository userRepository;
+
         public LoginService(EFDataContext context)
         {
+            userRepository = new UserRepository(context);
             _context = context;
         }
 
-        public async Task<User> LoginAsync(string username, string password)
+        public UserDTO Login(string username, string password)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
+            return userRepository.Login(username, password);
+        }
 
-            return user;
+        public UserDTO Register(UserDTO userDTO)
+        {
+            return userRepository.Register(userDTO);
         }
     }
 }

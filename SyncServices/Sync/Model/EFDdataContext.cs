@@ -83,7 +83,8 @@ namespace Sync.Model
                         Address = "hell hell",
                         City = "hcm",
                         Status = "active",
-                        CountryId = 1
+                        CountryId = 1,
+                        Role = "Admin"
                     },
                     new User
                     {
@@ -95,7 +96,8 @@ namespace Sync.Model
                         Address = "123 Main St",
                         City = "New York",
                         Status = "inactive",
-                        CountryId = 2
+                        CountryId = 2,
+                        Role = "User"
                     }
                 );
             }

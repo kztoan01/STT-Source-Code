@@ -1,10 +1,13 @@
-﻿using Sync.Model;
+﻿using Sync.DTOs;
+using Sync.Model;
 
 namespace Sync.Services
 {
     public interface ILoginService
     {
-        Task<User> LoginAsync(string username, string password);
+        public UserDTO Register(UserDTO userDTO);
+
+        public UserDTO Login(string username, string password);
 
     }
 }
