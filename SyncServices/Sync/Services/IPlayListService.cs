@@ -2,7 +2,7 @@
 
 namespace Sync.Services
 {
-    public interface iPlayListService
+    public interface IPlayListService
     {
         PlaylistDTO AddPlaylist(PlaylistDTO playlistDTO);
         PlaylistDTO UpdatePlaylist(PlaylistDTO playlistDTO);

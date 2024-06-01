@@ -13,6 +13,10 @@ namespace Sync.Model
 
         public DateTime SongDate { get; set; }
 
+        public bool IsApproved { get; set; }
+
+        public int RePlayTimes { get; set; }
+
         [ForeignKey("Album")]
         public Guid AlbumId { get; set; }
         public virtual Album Album { get; set; }
