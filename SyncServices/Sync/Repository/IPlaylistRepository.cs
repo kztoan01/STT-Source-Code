@@ -11,7 +11,6 @@ namespace Sync.Repository
         void DeletePlaylist(Guid playlistId);
         PlaylistDTO GetPlaylistById(Guid playlistId);
         List<PlaylistDTO> GetAllPlaylists();
-
         int GetTotalPlaylists();
         int GetPlaylistsCreatedInLastMonth();
         PlaylistDTO GetMostPopularPlaylist();
