@@ -1,4 +1,9 @@
 
+using Microsoft.EntityFrameworkCore;
+using sync_music_service.Data;
+using sync_music_service.Interfaces;
+using sync_music_service.Repository;
+
 namespace sync_music_service
 {
     public class Program
@@ -14,6 +19,12 @@ namespace sync_music_service
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<ApplicationDBContext>(options =>{
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
