@@ -7,6 +7,7 @@ using sync_service.Dtos.Playlist;
 using sync_service.Interfaces;
 using sync_service.Mappers;
 using sync_service.Models;
+using sync_service.Service.Interfaces;
 
 
 namespace sync_service.Controllers
@@ -15,11 +16,11 @@ namespace sync_service.Controllers
     [ApiController]
     public class PlaylistController : ControllerBase
     {
-        private readonly IPlaylistRepository _playlistRepository;
+        private readonly IPlaylistService _playlistService;
 
-        public PlaylistController(IPlaylistRepository playlistRepository)
+        public PlaylistController(IPlaylistService playlistService)
         {
-            _playlistRepository = playlistRepository;
+            _playlistService = playlistService;
         }
 
         [HttpGet("getUserPlaylist")]
@@ -28,7 +29,7 @@ namespace sync_service.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userPlaylist = await _playlistRepository.GetUserPlaylistAsync(userId);
+            var userPlaylist = await _playlistService.GetUserPlaylistAsync(userId);
 
             return Ok(userPlaylist);
         }
@@ -39,7 +40,7 @@ namespace sync_service.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var playlist = await _playlistRepository.GetPlaylistByIdAsync(id);
+            var playlist = await _playlistService.GetPlaylistByIdAsync(id);
 
             if(playlist == null)
                 return NotFound();
@@ -54,7 +55,7 @@ namespace sync_service.Controllers
                 return BadRequest(ModelState);
 
             var playlistModel = playlist.ToPlaylistFromCreate();
-            await _playlistRepository.CreatePlaylistAsync(playlistModel);
+            await _playlistService.CreatePlaylistAsync(playlistModel);
 
             return CreatedAtAction(nameof(GetPlaylistById), new { id = playlistModel.Id }, playlistModel);
         }

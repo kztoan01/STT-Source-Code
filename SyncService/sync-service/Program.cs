@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using sync_service.Data;
 using sync_service.Interfaces;
 using sync_service.Repository;
+using sync_service.Service.Interfaces;
+using sync_service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>{
 });
 
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,6 +28,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.MapControllers();
 
 app.Run();
