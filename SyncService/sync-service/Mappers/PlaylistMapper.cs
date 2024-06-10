@@ -23,13 +23,14 @@ namespace sync_service.Mappers
             };
         }
 
-        public static Playlist ToPlaylistFromCreate (this CreatePlaylistDTO playlistDTO)
+        public static Playlist ToPlaylistFromCreate (this CreatePlaylistDTO playlistDTO, string userId)
         {
             return new Playlist
             {
                 playlistName = playlistDTO.playlistName,
                 playlistDescription = playlistDTO.playlistDescription,
                 playlistPicture = playlistDTO.playlistPicture,
+                userId = userId,
             };
         }
     }

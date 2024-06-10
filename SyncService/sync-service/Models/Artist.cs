@@ -7,10 +7,12 @@ namespace sync_service.Models
 {
     public class Artist
     {
-        public int Id { get; set; }
-        public int userId { get; set; }
-        public int artistDescription { get; set; }
+        public Guid Id { get; set; }
+        public string userId { get; set; }
+        public string artistDescription { get; set; } = string.Empty;
         public List<Album> Albums { get; set; } = new List<Album>();
         public List<Music> Musics { get; set; } = new List<Music>();
+        public List<Follower> Followers { get; set; } = new List<Follower>();
+        public User User { get; set; }
     }
 }

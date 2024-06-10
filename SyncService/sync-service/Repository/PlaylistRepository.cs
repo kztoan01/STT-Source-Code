@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using sync_service.Data;
+using sync_service.Dtos.Playlist;
 using sync_service.Interfaces;
 using sync_service.Models;
 
@@ -24,7 +25,7 @@ namespace sync_service.Repository
             return playlist;
         }
 
-        public async Task<Playlist?> DeletePlaylistAsync(int id)
+        public async Task<Playlist?> DeletePlaylistAsync(Guid id)
         {
             var playlistModel = await _context.Playlists.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -37,17 +38,27 @@ namespace sync_service.Repository
             return playlistModel;
         }
 
-        public async Task<Playlist?> GetPlaylistByIdAsync(int id)
+        public async Task<Playlist?> GetPlaylistByIdAsync(Guid id)
         {
             return await _context.Playlists.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<List<Playlist>> GetUserPlaylistAsync(int userId)
+        public async Task<List<PlaylistDTO>> GetUserPlaylistAsync(string userId)
         {
-            return await _context.Playlists.Where(c => c.userId == userId).ToListAsync();
+            return await _context.Playlists
+                .Where(c => c.userId == userId)
+                .Select(c => new PlaylistDTO
+                {
+                    Id = c.Id,
+                    playlistName = c.playlistName,
+                    playlistDescription = c.playlistDescription,
+                    createdDate = c.createdDate,
+                    updatedDate = c.updatedDate,
+                })
+                .ToListAsync();
         }
 
-        public async Task<Playlist?> UpdatePlaylistAsync(int id, Playlist playlistModel)
+        public async Task<Playlist?> UpdatePlaylistAsync(Guid id, Playlist playlistModel)
         {
             var existingPlaylist = await _context.Playlists.FindAsync(id);
 
