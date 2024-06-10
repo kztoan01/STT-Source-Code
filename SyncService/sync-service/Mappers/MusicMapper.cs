@@ -15,7 +15,10 @@ namespace sync_service.Mappers
             {
                 musicTitle = musicDTO.musicTitle,
                 musicPlays = musicDTO.musicPlays,
-                musicDuration = musicDTO.musicDuration
+                musicDuration = musicDTO.musicDuration,
+                albumId = musicDTO.albumId,
+                artistId = musicDTO.artistId,
+                genreId = musicDTO.genreId,
             };
         }
     }

@@ -19,7 +19,7 @@ namespace sync_service.Service
 
         public async Task<Music> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
         {
-            return await _musicRepository.UploadMusicAsync(music, fileMusic, fileMusic);
+            return await _musicRepository.UploadMusicAsync(music, fileMusic, fileImage);
         }
     }
 }

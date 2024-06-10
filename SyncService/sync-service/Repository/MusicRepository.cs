@@ -24,18 +24,15 @@ namespace sync_service.Repository
         }
         public async Task<Music> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
         {
-            await UploadedFiles(fileMusic);
-            var fileMusicPath = $"{fileMusic.FileName}";
+            var imageUrl = await UploadedFiles(fileImage, music.Id, "image");
+            var musicUrl = await UploadedFiles(fileMusic, music.Id, "music");
 
-            await UploadedFiles(fileImage);
-            var fileImagePath = $"{fileImage.FileName}";
-
-
-            var musicModel = new Music{
+            var musicModel = new Music
+            {
                 Id = music.Id,
                 musicTitle = music.musicTitle,
-                musicUrl = GetPreSignedURL(fileMusicPath),
-                musicPicture = GetPreSignedURL(fileImagePath),
+                musicUrl = musicUrl,
+                musicPicture = imageUrl,
                 musicPlays = music.musicPlays,
                 musicDuration = music.musicDuration,
                 releaseDate = music.releaseDate,
@@ -47,27 +44,24 @@ namespace sync_service.Repository
                 Genre = music.Genre,
                 playlistMusics = music.playlistMusics
             };
-            
+
             await _context.Musics.AddAsync(musicModel);
             await _context.SaveChangesAsync();
 
             return musicModel;
-
         }
 
-        public async Task UploadedFiles(IFormFile file)
+        public async Task<string> UploadedFiles(IFormFile file, Guid musicId, string fileType)
         {
             var fileTransferUtility = new TransferUtility(_s3Client);
-            var filePath = $"{file.FileName}";
+            var fileExtension = Path.GetExtension(file.FileName);
+            var filePath = $"{fileType}{Guid.NewGuid()}{fileExtension}";
 
             using (var stream = file.OpenReadStream())
             {
                 await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
             }
-        }
 
-        public string GetPreSignedURL(string filePath)
-        {
             var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
             {
                 BucketName = _bucketName,

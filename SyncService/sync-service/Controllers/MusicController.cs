@@ -15,23 +15,21 @@ namespace sync_service.Controllers
     [ApiController]
     public class MusicController : ControllerBase
     {
-        private readonly ILogger<MusicController> _logger;
         private readonly IMusicService _musicService;
 
-        public MusicController(ILogger<MusicController> logger, IMusicService musicService)
+        public MusicController(IMusicService musicService)
         {
-            _logger = logger;
             _musicService = musicService;
         }
 
-        [HttpPost("add-new-music")]
-        public async Task<IActionResult> AddNewMusic([FromForm] AddMusicDTO music, [FromForm] IFormFile fileMusic, [FromForm] IFormFile fileImage)
+        [HttpPost("add")]
+        public async Task<IActionResult> AddNewMusic([FromForm] AddMusicDTO music)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var musicModel = music.ToMusicFromCreate();
-            var newMusic = await _musicService.UploadMusicAsync(musicModel, fileMusic, fileImage);
+            var newMusic = await _musicService.UploadMusicAsync(musicModel, music.fileMusic, music.fileImage);
             return Ok(newMusic);
         }
     }
