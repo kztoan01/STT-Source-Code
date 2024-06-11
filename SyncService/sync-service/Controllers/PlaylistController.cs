@@ -73,7 +73,6 @@ namespace sync_service.Controllers
                 await _playlistService.CreatePlaylistAsync(playlistModel);
                 return CreatedAtAction(nameof(GetPlaylistById), new { id = playlistModel.Id }, playlistModel);
             }
-
             return NotFound("User not found");
         }
     }
