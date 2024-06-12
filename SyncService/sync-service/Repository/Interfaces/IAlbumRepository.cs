@@ -1,3 +1,4 @@
+using sync_service.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,6 @@ namespace sync_service.Interfaces
 {
     public interface IAlbumRepository
     {
-        
+        Task <List<Album>> getAlbumByGenreNameAsync (string genreName);
     }
 }
