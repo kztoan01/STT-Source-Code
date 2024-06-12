@@ -60,7 +60,7 @@ namespace sync_service.Controllers
         }
 
         [HttpGet("getPlaylistByGenreName/{genreName}")]
-        [Authorize]
+       // [Authorize]
         public async Task<IActionResult> GetPlaylistsByGenreName([FromRoute] string genreName)
         {
             if (!ModelState.IsValid)

@@ -50,6 +50,7 @@ namespace sync_service.Repository
             return await _context.Playlists
                 .Where(p=> p.playlistMusics
                 .Any(pm => pm.Music.Genre.genreName == genreName))
+                .Include(pm => pm.playlistMusics)
                 .ToListAsync();
         }
 

@@ -18,8 +18,16 @@ namespace sync_service.Repository
         {
             // handle mapper later
             return await _context.Albums
+                .Include(a =>a.Musics)
                 .Where(a => a.Musics
                 .Any(m => m.Genre.genreName == genreName))
+                .ToListAsync();
+        }
+
+        public async Task<List<Album>> getAllAlbumsAsync()
+        {
+            return await _context.Albums
+                .Include (a => a.Musics)
                 .ToListAsync();
         }
     }

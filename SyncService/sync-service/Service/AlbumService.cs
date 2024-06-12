@@ -15,5 +15,10 @@ namespace sync_service.Service
         {
             return await _albumRepository.getAlbumByGenreNameAsync(genreName);
         }
+
+        public async Task<List<Album>> getAllAlbumsAsync()
+        {
+            return await _albumRepository.getAllAlbumsAsync();
+        }
     }
 }

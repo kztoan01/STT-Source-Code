@@ -9,5 +9,7 @@ namespace sync_service.Service.Interfaces
     public interface IAlbumService
     {
         Task<List<Album>> getAlbumByGenreNameAsync (string genreName);
+        Task<List<Album>> getAllAlbumsAsync();
+
     }
 }

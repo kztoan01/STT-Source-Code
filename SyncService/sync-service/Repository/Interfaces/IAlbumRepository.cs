@@ -9,5 +9,6 @@ namespace sync_service.Interfaces
     public interface IAlbumRepository
     {
         Task <List<Album>> getAlbumByGenreNameAsync (string genreName);
+        Task<List<Album>> getAllAlbumsAsync();
     }
 }

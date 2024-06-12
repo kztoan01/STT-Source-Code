@@ -34,5 +34,21 @@ namespace sync_service.Controllers
 
             return Ok(albums);
         }
+
+
+        [HttpGet("getAllAlbums")]
+        //[Authorize]
+        public async Task<IActionResult> GetAllAlbums()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var albums = await _albumService.getAllAlbumsAsync();
+
+            if (albums == null)
+                return NotFound();
+
+            return Ok(albums);
+        }
     }
 }
