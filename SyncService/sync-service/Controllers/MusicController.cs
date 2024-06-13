@@ -32,5 +32,28 @@ namespace sync_service.Controllers
             var newMusic = await _musicService.UploadMusicAsync(musicModel, music.fileMusic, music.fileImage);
             return Ok(newMusic);
         }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllMusic()
+        {
+            var allMusic = await _musicService.GetAllMusicAsync();
+            return Ok(allMusic);
+        }
+
+
+        [HttpPost("getMusicById")]
+        public async Task<IActionResult> GetMusicById(Guid id)
+        {
+            var music = await _musicService.GetMusicById(id);
+            return Ok(music);
+        }
+
+        [HttpPost("getMusicByArtistId")]
+        public async Task<MusicDTO> GetMusicByArtistId(Guid id)
+        {
+            return await _musicService.GetMusicByArtistId(id);
+        }
+
+
     }
 }

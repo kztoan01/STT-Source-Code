@@ -21,8 +21,8 @@ namespace sync_service.Models
         public Guid genreId { get; set; }
         public Genre Genre { get; set; }
         public List<PlaylistMusic> playlistMusics { get; set; } = new List<PlaylistMusic>();
-        
 
-        
+        public List<Collaboration> collaborations { get; set; } = new List<Collaboration>();
+
     }
 }

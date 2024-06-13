@@ -5,8 +5,12 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using Microsoft.EntityFrameworkCore;
 using sync_service.Data;
+using sync_service.Dtos.Album;
+using sync_service.Dtos.Music;
 using sync_service.Interfaces;
+using sync_service.Mappers;
 using sync_service.Models;
 
 namespace sync_service.Repository
@@ -71,5 +75,74 @@ namespace sync_service.Repository
 
             return url;
         }
+        public async Task<List<MusicDTO>> GetAllMusicAsync()
+        {
+            return await _context.Musics
+                .Include(m => m.Album)
+                .Include(m => m.Artist)
+                .Include(m => m.Genre).Select(m => new MusicDTO
+                {
+                    Id = m.Id,
+                    genreName = m.Genre.genreName,
+                    musicDuration = m.musicDuration,
+                    musicPicture = m.musicPicture,
+                    musicPlays = m.musicPlays,
+                    musicTitle = m.musicTitle,
+                    musicUrl = m.musicUrl,
+                    releaseDate = m.releaseDate,
+                    AlbumDTO = new AlbumDTO
+                    {
+                        Id = m.Album.Id,
+                        albumTitle = m.Album.albumTitle
+                    },
+                    artistName = m.Artist.User.userFullName,
+
+                })
+                .ToListAsync();
+        }
+
+        public async Task<MusicDTO> GetMusicById(Guid id)
+        {
+            Music music = await _context.Musics
+                .Include(m => m.Album)
+                .Include(m => m.Artist)
+                .Include(m => m.Genre)
+                .Include(m => m.Artist.User)
+                .FirstOrDefaultAsync(m => m.Id.Equals(id));
+
+            if (music == null)
+            {
+                return null; 
+            }
+
+            var musicDTO = MusicMapper.Convert(music);
+
+            return musicDTO;
+        }
+
+        public async Task<MusicDTO> GetMusicByArtistId(Guid id)
+        {
+            Music music = await _context.Musics
+                .Include(m => m.Album)
+                .Include(m => m.Artist)
+                .Include(m => m.Genre)
+                .Include(m => m.Artist.User)
+                .FirstOrDefaultAsync(m => m.artistId.Equals(id));
+
+            if (music == null)
+            {
+                return null;
+            }
+
+            var musicDTO = MusicMapper.Convert(music);
+
+            return musicDTO;
+        }
+
+
+
+
+
+
     }
 }
