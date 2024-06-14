@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using sync_service.Data;
+using sync_service.Dtos.Album;
 using sync_service.Dtos.Artist;
+using sync_service.Dtos.Music;
 using sync_service.Interfaces;
 using sync_service.Models;
 

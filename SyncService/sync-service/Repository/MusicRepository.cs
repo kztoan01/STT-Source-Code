@@ -138,7 +138,74 @@ namespace sync_service.Repository
 
             return musicDTO;
         }
+        public async Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId)
+        {
+            var music = await _context.Musics
+                .FirstOrDefaultAsync(m => m.Id == musicId);
 
+            if (music == null)
+            {
+                return null;
+            }
+
+            music.musicPlays++;
+
+            var today = DateTime.UtcNow.Date;
+            var musicListen = await _context.MusicListens
+                .FirstOrDefaultAsync(ml => ml.MusicId == musicId && ml.ListenDate == today);
+
+            if (musicListen == null)
+            {
+                musicListen = new MusicListen
+                {
+                    Id = Guid.NewGuid(),
+                    MusicId = musicId,
+                    ListenDate = today,
+                    ListenCount = 1
+                };
+                _context.MusicListens.Add(musicListen);
+            }
+            else
+            {
+                musicListen.ListenCount++;
+                _context.MusicListens.Update(musicListen);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return "Added";
+        }
+
+
+        public async Task<int> ListenTimeOnThisDay(Guid musicId)
+        {
+            var today = DateTime.UtcNow.Date;
+            var listenCount = await _context.MusicListens
+                .Where(ml => ml.MusicId == musicId && ml.ListenDate == today)
+                .SumAsync(ml => (int?)ml.ListenCount) ?? 0;
+
+            return listenCount;
+        }
+
+        public async Task<int> ListenTimeOnThisMonth(Guid musicId)
+        {
+            var firstDayOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var listenCount = await _context.MusicListens
+                .Where(ml => ml.MusicId == musicId && ml.ListenDate >= firstDayOfMonth)
+                .SumAsync(ml => (int?)ml.ListenCount) ?? 0;
+
+            return listenCount;
+        }
+
+        public async Task<int> ListenTimeOnThisYear(Guid musicId)
+        {
+            var firstDayOfYear = new DateTime(DateTime.UtcNow.Year, 1, 1);
+            var listenCount = await _context.MusicListens
+                .Where(ml => ml.MusicId == musicId && ml.ListenDate >= firstDayOfYear)
+                .SumAsync(ml => (int?)ml.ListenCount) ?? 0;
+
+            return listenCount;
+        }
 
 
 

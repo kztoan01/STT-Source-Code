@@ -26,6 +26,6 @@ namespace sync_service.Service.Interfaces
         Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId(Guid artistId);
         Task<string> DeleteAMusicInPlaylist(Guid musicId, Guid playlistId);
 
-        Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, Guid musicId2, Guid playlistId);
+        Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, int newPosition, Guid playlistId);
     }
 }

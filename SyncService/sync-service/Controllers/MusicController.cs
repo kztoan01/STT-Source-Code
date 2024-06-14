@@ -55,5 +55,29 @@ namespace sync_service.Controllers
         }
 
 
+        [HttpPost("ListenTimeOnThisYear")]
+        public async Task<int> ListenTimeOnThisYear(Guid musicId)
+        {
+            return await _musicService.ListenTimeOnThisYear(musicId);
+        }
+
+        [HttpPost("ListenTimeOnThisMonth")]
+        public async Task<int> ListenTimeOnThisMonth(Guid musicId)
+        {
+            return await _musicService.ListenTimeOnThisMonth(musicId);
+        }
+
+        [HttpPost("ListenTimeOnThisDay")]
+        public async Task<int> ListenTimeOnThisDay(Guid musicId)
+        {
+            return await _musicService.ListenTimeOnThisDay(musicId);
+        }
+
+        [HttpPost("Add1ListenTimeWhenMusicIsListened")]
+        public async Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId)
+        {
+            return await _musicService.Add1ListenTimeWhenMusicIsListened(musicId);
+        }
+
     }
 }

@@ -118,9 +118,9 @@ namespace sync_service.Controllers
 
 
         [HttpPost("ChangeMusicPositionInPlaylist")]
-        public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, Guid musicId2, Guid playlistId)
+        public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, int newPosition, Guid playlistId)
         {
-            return await _playlistService.ChangeMusicPositionInPlaylist(musicId1, musicId2, playlistId);
+            return await _playlistService.ChangeMusicPositionInPlaylist(musicId1, newPosition, playlistId);
         }
     }
 

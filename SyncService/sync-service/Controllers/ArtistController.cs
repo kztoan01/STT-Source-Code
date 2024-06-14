@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using sync_service.Dtos.Artist;
 using sync_service.Models;
 using sync_service.Service;
 using sync_service.Service.Interfaces;

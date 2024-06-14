@@ -1,3 +1,4 @@
+using sync_service.Dtos.Album;
 using sync_service.Models;
 using System;
 using System.Collections.Generic;

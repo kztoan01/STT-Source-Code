@@ -21,6 +21,9 @@ namespace sync_service.Data
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Album> Albums { get; set; }
         public DbSet<Music> Musics { get; set; }
+        public DbSet<MusicListen> MusicListens { get; set; }
+
+        public DbSet<Collaboration> Collaborations { get; set; }
         public DbSet<PlaylistMusic> PlaylistMusics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -47,6 +50,16 @@ namespace sync_service.Data
                 .WithMany(p => p.playlistMusics)
                 .HasForeignKey(pm => pm.playlistId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MusicListen>()
+                .HasOne(ml => ml.Music)
+                .WithMany(m => m.MusicListens)
+                .HasForeignKey(ml => ml.MusicId);
+
+            modelBuilder.Entity<Collaboration>()
+                .HasOne(ml => ml.Music)
+                .WithMany(m => m.collaborations)
+                .HasForeignKey(ml => ml.MusicId);
 
             modelBuilder.Entity<PlaylistMusic>()
                 .HasOne(pm => pm.Music)

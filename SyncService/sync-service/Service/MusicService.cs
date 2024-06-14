@@ -38,6 +38,26 @@ namespace sync_service.Service
             return await _musicRepository.GetMusicByArtistId(id);
         }
 
+        public async Task<int> ListenTimeOnThisYear(Guid musicId)
+
+        {
+           return await _musicRepository.ListenTimeOnThisYear(musicId);
+        }
+
+        public async Task<int> ListenTimeOnThisMonth(Guid musicId)
+        {
+            return await _musicRepository.ListenTimeOnThisMonth(musicId);
+        }
+
+        public async Task<int> ListenTimeOnThisDay(Guid musicId)
+        {
+            return await _musicRepository.ListenTimeOnThisDay(musicId);
+        }
+
+        public async Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId)
+        {
+            return await _musicRepository.Add1ListenTimeWhenMusicIsListened(musicId);
+        }
 
     }
 }
