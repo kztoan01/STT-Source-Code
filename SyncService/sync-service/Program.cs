@@ -91,7 +91,12 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IMusicRepository, MusicRepository>();
 builder.Services.AddScoped<IMusicService, MusicService>();
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
-builder.Services.AddScoped<IArtistRepository,ArtistRepository>();
+builder.Services.AddScoped<IAlbumService, AlbumService>();
+builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
+builder.Services.AddScoped<IArtistService, ArtistService>();
+
+
+
 
 var app = builder.Build();
 

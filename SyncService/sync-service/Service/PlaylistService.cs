@@ -36,6 +36,11 @@ namespace sync_service.Service
             return await _playlistRepository.GetPlaylistByIdAsync(id);
         }
 
+        public async Task<List<Playlist>> GetPlaylistsByGenreNameAsync(string genreName)
+        {
+            return await _playlistRepository.GetPlaylistsByGenreNameAsync(genreName);
+        }
+
         public async Task<List<PlaylistDTO>> GetUserPlaylistAsync(string userId)
         {
             return await _playlistRepository.GetUserPlaylistAsync(userId);

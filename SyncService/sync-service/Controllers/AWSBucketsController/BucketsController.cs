@@ -22,6 +22,7 @@ namespace sync_service.Controllers.AWSBucketsController
         {
             _s3Client = s3Client;
         }
+        
         [HttpGet("list-buckets")]
         public async Task<IActionResult> ListBukets()
         {

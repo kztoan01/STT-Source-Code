@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using sync_service.Data;
-using sync_service.Dtos.Album;
 using sync_service.Interfaces;
+using sync_service.Models;
 
 namespace sync_service.Repository
 {
@@ -13,6 +13,7 @@ namespace sync_service.Repository
         {
             _context = context;
         }
+
         public async Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId(Guid artistId)
         {
             var albums = await _context.Albums
@@ -31,5 +32,21 @@ namespace sync_service.Repository
             return albumDTOs;
         }
 
+        public async Task<List<Album>> getAlbumByGenreNameAsync(string genreName)
+        {
+            // handle mapper later
+            return await _context.Albums
+                .Include(a =>a.Musics)
+                .Where(a => a.Musics
+                .Any(m => m.Genre.genreName == genreName))
+                .ToListAsync();
+        }
+
+        public async Task<List<Album>> getAllAlbumsAsync()
+        {
+            return await _context.Albums
+                .Include (a => a.Musics)
+                .ToListAsync();
+        }
     }
 }

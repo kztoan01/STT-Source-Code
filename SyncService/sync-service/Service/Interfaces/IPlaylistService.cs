@@ -11,6 +11,8 @@ namespace sync_service.Service.Interfaces
     public interface IPlaylistService
     {
         Task<List<PlaylistDTO>> GetUserPlaylistAsync(string userId);
+        Task<List<Playlist>> GetPlaylistsByGenreNameAsync(string genreName);
+
         Task<Playlist?> GetPlaylistByIdAsync(Guid id);
         Task<Playlist> CreatePlaylistAsync(Playlist playlist);
         Task<Playlist?> UpdatePlaylistAsync(Guid id, Playlist playlistModel);

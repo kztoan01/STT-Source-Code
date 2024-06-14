@@ -45,6 +45,17 @@ namespace sync_service.Repository
             return await _context.Playlists.FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<List<Playlist>> GetPlaylistsByGenreNameAsync(string genreName)
+        {
+            // Playlist -> PlaylistMusic -> Music -> Genre
+            // handle mapper later 
+            return await _context.Playlists
+                .Where(p=> p.playlistMusics
+                .Any(pm => pm.Music.Genre.genreName == genreName))
+                .Include(pm => pm.playlistMusics)
+                .ToListAsync();
+        }
+
         public async Task<List<PlaylistDTO>> GetUserPlaylistAsync(string userId)
         {
             return await _context.Playlists

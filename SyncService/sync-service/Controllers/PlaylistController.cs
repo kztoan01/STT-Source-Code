@@ -60,6 +60,21 @@ namespace sync_service.Controllers
             return Ok(playlist);
         }
 
+        [HttpGet("getPlaylistByGenreName/{genreName}")]
+       // [Authorize]
+        public async Task<IActionResult> GetPlaylistsByGenreName([FromRoute] string genreName)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var playlists = await _playlistService.GetPlaylistsByGenreNameAsync(genreName);
+
+            if (playlists == null)
+                return NotFound();
+
+            return Ok(playlists);
+        }
+
         [HttpPost("createPlaylist")]
         [Authorize]
         public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistDTO playlist)
@@ -74,7 +89,6 @@ namespace sync_service.Controllers
                 await _playlistService.CreatePlaylistAsync(playlistModel);
                 return CreatedAtAction(nameof(GetPlaylistById), new { id = playlistModel.Id }, playlistModel);
             }
-
             return NotFound("User not found");
         }
 
