@@ -220,14 +220,13 @@ namespace sync_service.Repository
             return "Removed music from playlist successfully!";
         }
 
-        public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, Guid musicId2, Guid playlistId)
+        public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, int newPosistion, Guid playlistId)
         {
             var music1 = await _context.PlaylistMusics.FirstOrDefaultAsync(m => m.musicId == musicId1 && m.playlistId == playlistId);
-            var music2 = await _context.PlaylistMusics.FirstOrDefaultAsync(m => m.musicId == musicId2 && m.playlistId == playlistId);
 
-            if (music1 == null || music2 == null)
+            if (music1 == null )
             {
-                return "One or both of the specified music IDs were not found in the playlist.";
+                return "the specified music IDs were not found in the playlist.";
             }
 
             List<PlaylistMusic> playlistMusics = _context.PlaylistMusics
@@ -236,42 +235,38 @@ namespace sync_service.Repository
                 .ToList();
 
 
+            int oldPosition1 = music1.position;
+            int newPosition1 = newPosistion;
 
-            if(music1.position > music2.position)
+            if (oldPosition1 > newPosition1)
             {
-                int oldPosition1 = music1.position;
-                music1.position = music2.position;
-                foreach (var playlistMusic in playlistMusics)
+                music1.position = newPosition1;
+                var changeList = await _context.PlaylistMusics
+                    .Where(pm => pm.playlistId == playlistId && pm.position >= newPosition1 && pm.position < oldPosition1)
+                    .ToListAsync();
+                foreach (var item in changeList)
                 {
-                        if (playlistMusic.position >= music2.position && playlistMusic.position < oldPosition1)
-                        {
-                            playlistMusic.position = playlistMusic.position + 1;
-                        }                
+                    item.position++;
                 }
-
             }
-            else
+            else if (oldPosition1 < newPosition1)
             {
-
-               int oldPosition1 = music1.position;
-               int music2Position = music2.position;
-                foreach (var playlistMusic in playlistMusics)
+                music1.position = newPosition1;
+                var changeList = await _context.PlaylistMusics
+                    .Where(pm => pm.playlistId == playlistId && pm.position > oldPosition1 && pm.position <= newPosition1)
+                    .ToListAsync();
+                foreach (var item in changeList)
                 {
-                    if (playlistMusic.position <= music2.position && playlistMusic.position > oldPosition1)
-                    {
-                        playlistMusic.position = playlistMusic.position - 1;
-                    }
+                    item.position--;
                 }
-                music1.position = music2Position;
             }
-
-
 
 
             await _context.SaveChangesAsync();
 
             return "Music positions in the playlist have been updated successfully.";
         }
+
 
 
     }
