@@ -205,31 +205,38 @@ namespace sync_service.Repository
                 .Include(p => p.playlistMusics)
                 .FirstOrDefaultAsync(p => p.Id == playlistId);
 
- 
             if (playlist == null)
             {
-                return "Plau list is null!"; 
+                return "Playlist is null!";
             }
 
             var music = await _context.Musics.FindAsync(musicId);
 
             if (music == null)
             {
-                return "Music list is null!";
+                return "Music is null!";
             }
 
             var playlistMusic = playlist.playlistMusics.FirstOrDefault(pm => pm.musicId == musicId);
 
             if (playlistMusic == null)
             {
-                return "Invalid request";
+                return "Invalid";
             }
 
+            int deletedPosition = playlistMusic.position;
+
             playlist.playlistMusics.Remove(playlistMusic);
+
+            foreach (var item in playlist.playlistMusics.Where(pm => pm.position > deletedPosition))
+            {
+                item.position--;
+            }
 
             await _context.SaveChangesAsync();
             return "Removed music from playlist successfully!";
         }
+
 
         public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, int newPosistion, Guid playlistId)
         {
