@@ -1,3 +1,4 @@
+using sync_service.Dtos.Album;
 using sync_service.Models;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace sync_service.Service.Interfaces
     {
         Task<List<Album>> getAlbumByGenreNameAsync (string genreName);
         Task<List<Album>> getAllAlbumsAsync();
-
+        Task<AlbumResponseDTO> GetAlbumDetail(Guid albumId);
+        Task<Album> GetMostListenAlbum();
     }
 }

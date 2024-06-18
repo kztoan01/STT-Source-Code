@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using sync_service.Dtos.Artist;
+using sync_service.Dtos.Album;
 
 namespace sync_service.Interfaces
 {

@@ -12,6 +12,7 @@ namespace sync_service.Interfaces
         Task <List<Album>> getAlbumByGenreNameAsync (string genreName);
         Task<List<Album>> getAllAlbumsAsync();
         Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId(Guid artistId);
-
+        Task<Album> GetMostListenAlbum();
+        Task<AlbumResponseDTO> GetAlbumDetails(Guid albumId);
     }
 }

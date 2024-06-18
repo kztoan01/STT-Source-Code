@@ -50,5 +50,34 @@ namespace sync_service.Controllers
 
             return Ok(albums);
         }
+        [HttpGet("getMostViewAlbums")]
+        //[Authorize]
+        public async Task<IActionResult> GetMostViewAlbum()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var albums = await _albumService.GetMostListenAlbum();
+
+            if (albums == null)
+                return NotFound();
+
+            return Ok(albums);
+        }
+
+        [HttpGet("getAlbumDetail/{albumId:Guid}")]
+        //[Authorize]
+        public async Task<IActionResult> GetAlbumDetail([FromRoute]Guid albumId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var albums = await _albumService.GetAlbumDetail(albumId);
+
+            if (albums == null)
+                return NotFound();
+
+            return Ok(albums);
+        }
     }
 }
