@@ -75,6 +75,14 @@ namespace sync_service.Controllers
             return Ok(playlists);
         }
 
+        [HttpGet("createPlaylist")]
+        public async Task<List<Playlist>> ShowPlaylistByUserId()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            return await _playlistService.ShowPlaylistByUserId(new Guid(user.Id));
+
+        }
+
         [HttpPost("createPlaylist")]
         [Authorize]
         public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistDTO playlist)
