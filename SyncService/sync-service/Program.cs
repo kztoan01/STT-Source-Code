@@ -95,8 +95,16 @@ builder.Services.AddScoped<IAlbumService, AlbumService>();
 builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
 
+//CORS
 
-
+builder.Services.AddCors(options => {
+    options.AddPolicy("SyncWeb", policyBuilder => {
+        policyBuilder.WithOrigins("https://localhost:5000");
+        policyBuilder.AllowAnyHeader();
+        policyBuilder.AllowAnyMethod();
+        policyBuilder.AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -109,9 +117,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+app.UseCors("SyncWeb");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
 
 app.Run();
