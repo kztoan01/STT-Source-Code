@@ -29,9 +29,14 @@ builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
+var dbServer = Environment.GetEnvironmentVariable("LOCALDB");
+var dbPass = Environment.GetEnvironmentVariable("PASSDB");
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    .Replace("{LOCALDB}", dbServer)
+    .Replace("{PASSDB}", dbPass);builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(connectionString);
 });
 
 //authentication plugin
