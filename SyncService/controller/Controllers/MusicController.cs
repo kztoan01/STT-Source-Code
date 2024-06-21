@@ -38,38 +38,38 @@ public class MusicController : ControllerBase
     [HttpPost("getMusicById")]
     public async Task<IActionResult> GetMusicById(Guid id)
     {
-        var music = await _musicService.GetMusicById(id);
+        var music = await _musicService.GetMusicByIdAsync(id);
         return Ok(music);
     }
 
     [HttpPost("getMusicByArtistId")]
     public async Task<MusicDTO> GetMusicByArtistId(Guid id)
     {
-        return await _musicService.GetMusicByArtistId(id);
+        return await _musicService.GetMusicByArtistIdAsync(id);
     }
 
 
     [HttpPost("ListenTimeOnThisYear")]
     public async Task<int> ListenTimeOnThisYear(Guid musicId)
     {
-        return await _musicService.ListenTimeOnThisYear(musicId);
+        return await _musicService.ListenTimeOnThisYearAsync(musicId);
     }
 
     [HttpPost("ListenTimeOnThisMonth")]
     public async Task<int> ListenTimeOnThisMonth(Guid musicId)
     {
-        return await _musicService.ListenTimeOnThisMonth(musicId);
+        return await _musicService.ListenTimeOnThisMonthAsync(musicId);
     }
 
     [HttpPost("ListenTimeOnThisDay")]
     public async Task<int> ListenTimeOnThisDay(Guid musicId)
     {
-        return await _musicService.ListenTimeOnThisDay(musicId);
+        return await _musicService.ListenTimeOnThisDayAsync(musicId);
     }
 
     [HttpPost("Add1ListenTimeWhenMusicIsListened")]
     public async Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId)
     {
-        return await _musicService.Add1ListenTimeWhenMusicIsListened(musicId);
+        return await _musicService.Add1ListenTimeWhenMusicIsListenedAsync(musicId);
     }
 }
