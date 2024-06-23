@@ -1,3 +1,5 @@
+using core.Dtos.Music;
+
 namespace core.Dtos.Playlist;
 
 public class PlaylistDTO
@@ -9,4 +11,6 @@ public class PlaylistDTO
     public DateTime createdDate { get; set; } = DateTime.Now;
     public DateTime updatedDate { get; set; } = DateTime.Now;
     public string userId { get; set; }
+
+    public List<MusicDTO> musics { get; set; }
 }

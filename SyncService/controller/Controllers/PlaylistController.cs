@@ -42,7 +42,6 @@ public class PlaylistController : ControllerBase
     }
 
     [HttpGet("getPlaylistById/{id:Guid}")]
-    [Authorize]
     public async Task<IActionResult> GetPlaylistById([FromRoute] Guid id)
     {
         if (!ModelState.IsValid)
@@ -101,8 +100,8 @@ public class PlaylistController : ControllerBase
         return await _playlistService.AddEntireAlbumIntoPlaylistAsync(albumId, playlistId);
     }
 
-    [HttpPost("GetAlbumByContainArtistByArtistId")]
-    public async Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId(Guid artistId)
+    [HttpGet("GetAlbumByContainArtistByArtistId/{artistId}")]
+    public async Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId([FromRoute] Guid artistId)
     {
         return await _playlistService.GetAlbumByContainArtistByArtistId(artistId);
     }
@@ -118,5 +117,11 @@ public class PlaylistController : ControllerBase
     public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, int newPosition, Guid playlistId)
     {
         return await _playlistService.ChangeMusicPositionInPlaylistAsync(musicId1, newPosition, playlistId);
+    }
+
+    [HttpPost("DeletePlaylistById")]
+    public async Task<Playlist?> DeletePlaylistAsync(Guid id)
+    {
+        return await _playlistService.DeletePlaylistAsync(id);
     }
 }

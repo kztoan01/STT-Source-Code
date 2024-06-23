@@ -30,10 +30,12 @@ namespace repository.Repository
             return await _context.Musics
                 .Include(m => m.Album)
                 .Include(m => m.Artist)
+                    .ThenInclude(a => a.User)
                 .Include(m => m.Genre)
                 .Include(m => m.MusicListens)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
+
 
         public async Task<List<Music>> GetAllMusicAsync()
         {
@@ -86,6 +88,11 @@ namespace repository.Repository
         public async Task<List<Music>>  GetMusicByAlbumIdAsync(Guid albumId)
         {
             return await _context.Musics.Where(x => x.albumId.Equals(albumId)).ToListAsync();
+        }
+
+        public async Task<List<PlaylistMusic>> GetMusicInPlaylistByPlaylsitIdAsync(Guid playlistId)
+        {
+            return await _context.PlaylistMusics.Where(x => x.playlistId.Equals(playlistId)).ToListAsync();
         }
     }
 }
