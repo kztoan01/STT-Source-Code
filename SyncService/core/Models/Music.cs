@@ -9,7 +9,7 @@ public class Music
     public int musicPlays { get; set; }
     public double musicDuration { get; set; }
     public DateTime releaseDate { get; set; }
-    public Guid albumId { get; set; }
+    public Guid? albumId { get; set; }
     public Album Album { get; set; }
     public Guid artistId { get; set; }
     public Artist Artist { get; set; }

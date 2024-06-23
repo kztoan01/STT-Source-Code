@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using data.Data;
 
@@ -11,9 +12,11 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240623123956_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0c7e78f2-62f3-4a67-b4a4-44dc7286a409",
+                            Id = "26110c47-6d53-4233-96f7-5b3beab9ba3f",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "562eb858-f84c-44b2-b5e4-f2c847808b2a",
+                            Id = "ecfacaff-e3b9-4a1b-8242-75b3aa9f0eb4",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "45bdae82-46bf-4203-9624-c03f6d8099cf",
+                            Id = "eb3f0343-5b6e-4d30-9da2-390cc58b4982",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -293,7 +296,7 @@ namespace data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("albumId")
+                    b.Property<Guid>("albumId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("artistId")
@@ -601,7 +604,8 @@ namespace data.Migrations
                     b.HasOne("core.Models.Album", "Album")
                         .WithMany("Musics")
                         .HasForeignKey("albumId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")

@@ -33,7 +33,7 @@ public class PlaylistController : ControllerBase
         var user = await _userManager.GetUserAsync(User);
         if (user != null)
         {
-            var userPlaylist = await _playlistService.GetUserPlaylistAsync(user.Id);
+            var userPlaylist = await _playlistService.GetUserPlaylistsAsync(user.Id);
 
             return Ok(userPlaylist);
         }
@@ -42,7 +42,6 @@ public class PlaylistController : ControllerBase
     }
 
     [HttpGet("getPlaylistById/{id:Guid}")]
-    [Authorize]
     public async Task<IActionResult> GetPlaylistById([FromRoute] Guid id)
     {
         if (!ModelState.IsValid)
@@ -92,17 +91,17 @@ public class PlaylistController : ControllerBase
     [HttpPost("addMusicIntoPlaylist")]
     public async Task<string> AddMusicIntoPlaylist(Guid musicId, Guid playlistId)
     {
-        return await _playlistService.AddMusicIntoPlaylist(musicId, playlistId);
+        return await _playlistService.AddMusicIntoPlaylistAsync(musicId, playlistId);
     }
 
     [HttpPost("AddEntireAlbumIntoPlaylist")]
     public async Task<string> AddEntireAlbumIntoPlaylist(Guid albumId, Guid playlistId)
     {
-        return await _playlistService.AddEntireAlbumIntoPlaylist(albumId, playlistId);
+        return await _playlistService.AddEntireAlbumIntoPlaylistAsync(albumId, playlistId);
     }
 
-    [HttpPost("GetAlbumByContainArtistByArtistId")]
-    public async Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId(Guid artistId)
+    [HttpGet("GetAlbumByContainArtistByArtistId/{artistId}")]
+    public async Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId([FromRoute] Guid artistId)
     {
         return await _playlistService.GetAlbumByContainArtistByArtistId(artistId);
     }
@@ -110,13 +109,19 @@ public class PlaylistController : ControllerBase
     [HttpPost("DeleteAMusicInPlaylist")]
     public async Task<string> DeleteAMusicInPlaylist(Guid musicId, Guid playlistId)
     {
-        return await _playlistService.DeleteAMusicInPlaylist(musicId, playlistId);
+        return await _playlistService.DeleteMusicInPlaylistAsync(musicId, playlistId);
     }
 
 
     [HttpPost("ChangeMusicPositionInPlaylist")]
     public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, int newPosition, Guid playlistId)
     {
-        return await _playlistService.ChangeMusicPositionInPlaylist(musicId1, newPosition, playlistId);
+        return await _playlistService.ChangeMusicPositionInPlaylistAsync(musicId1, newPosition, playlistId);
+    }
+
+    [HttpPost("DeletePlaylistById")]
+    public async Task<Playlist?> DeletePlaylistAsync(Guid id)
+    {
+        return await _playlistService.DeletePlaylistAsync(id);
     }
 }

@@ -12,8 +12,8 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240620171448_Initial")]
-    partial class Initial
+    [Migration("20240623151624_updateMusicEntity")]
+    partial class updateMusicEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "00cd9901-6d65-4426-b75a-484e72d86f5c",
+                            Id = "0c7e78f2-62f3-4a67-b4a4-44dc7286a409",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "05a6e83d-5ead-45bd-aef2-331daae07c17",
+                            Id = "562eb858-f84c-44b2-b5e4-f2c847808b2a",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "7b0234f3-bb10-4038-ae13-54147a1209c9",
+                            Id = "45bdae82-46bf-4203-9624-c03f6d8099cf",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -296,7 +296,7 @@ namespace data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("albumId")
+                    b.Property<Guid?>("albumId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("artistId")
@@ -604,8 +604,7 @@ namespace data.Migrations
                     b.HasOne("core.Models.Album", "Album")
                         .WithMany("Musics")
                         .HasForeignKey("albumId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")
