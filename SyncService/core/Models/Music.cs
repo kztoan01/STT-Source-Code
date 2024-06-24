@@ -15,6 +15,8 @@ public class Music
     public Artist Artist { get; set; }
     public Guid genreId { get; set; }
     public Genre Genre { get; set; }
+
+
     public List<PlaylistMusic> playlistMusics { get; set; } = new();
 
     public List<MusicListen> MusicListens { get; set; } = new();

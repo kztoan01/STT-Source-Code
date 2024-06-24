@@ -68,7 +68,7 @@ public class AlbumController : ControllerBase
     }
 
 
-    [HttpPost("updateAlbum/{albumId:guid}")]
+    [HttpPut("updateAlbum/{albumId:guid}")]
     [Authorize]
     public async Task<IActionResult> DeleteAlbum([FromBody] CreateAlbumDTO albumDTO, [FromRoute] Guid albumId)
     {
@@ -94,7 +94,7 @@ public class AlbumController : ControllerBase
     }
 
 
-    [HttpPost("deleteAlbum/{albumId:guid}")]
+    [HttpDelete("deleteAlbum/{albumId:guid}")]
     [Authorize]
     public async Task<IActionResult> DeleteAlbum([FromRoute] Guid albumId)
     {
