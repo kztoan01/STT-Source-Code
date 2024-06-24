@@ -24,19 +24,19 @@ public class AlbumRepository : IAlbumRepository
         return album;
     }
 
-    public async Task<Album> DeleteAlbumAsync(Guid albumId)
+    public async Task<bool> DeleteAlbumAsync(Guid albumId)
     {
         var album = await _context.Albums.FirstOrDefaultAsync(a => a.Id == albumId);
 
         if (album == null)
         {
-            return null;
+            return false;
         }
 
         _context.Albums.Remove(album);
         await _context.SaveChangesAsync();
 
-        return null; 
+        return true; 
     }
 
     public async Task<Album> EditAlbumAsync(Album album)

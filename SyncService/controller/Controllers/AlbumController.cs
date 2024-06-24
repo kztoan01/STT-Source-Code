@@ -85,7 +85,7 @@ public class AlbumController : ControllerBase
 
         var artist = await _artistService.GetArtistByUserIdAsync(Guid.Parse(user.Id));
 
-        if (artist == null || artist == null || artist.Id == Guid.Empty)
+        if (artist == null || artist.Id == Guid.Empty)
         {
             return Forbid("Only artists can update albums.");
         }

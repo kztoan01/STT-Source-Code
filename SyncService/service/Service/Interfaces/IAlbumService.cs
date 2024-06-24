@@ -10,7 +10,7 @@ public interface IAlbumService
     Task<AlbumResponseDTO> GetAlbumDetail(Guid albumId);
     Task<Album> GetMostListenAlbum();
     Task<Album> CreateAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId);
-    Task<Album> DeleteAlbumAsync(Guid albumId);
+    Task<bool> DeleteAlbumAsync(Guid albumId);
     Task<Album> GetAlbumByIdAsync(Guid albumId);
     Task<Album> EditAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId, Guid albumId);
 }

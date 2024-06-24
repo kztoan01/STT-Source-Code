@@ -159,5 +159,15 @@ namespace service.Service
                 artistName = music.Artist.User.userFullName
             };
         }
+
+        public async Task<bool> DeleteMusicByIdAsync(Guid musicId)
+        {
+            return await _musicRepository.DeleteMusicAsync(musicId);
+        }
+
+        public async Task<Music> GetMusicByMusicIdAsync(Guid musicId)
+        {
+            return await _musicRepository.GetMusicByIdAsync(musicId);
+        }
     }
 }

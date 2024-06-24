@@ -28,7 +28,7 @@ public class AlbumService : IAlbumService
 
     }
 
-    public async Task<Album> DeleteAlbumAsync(Guid albumId)
+    public async Task<bool> DeleteAlbumAsync(Guid albumId)
     {
         return await _albumRepository.DeleteAlbumAsync(albumId);    
     }

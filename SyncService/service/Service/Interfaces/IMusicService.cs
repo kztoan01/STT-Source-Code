@@ -14,5 +14,8 @@ namespace service.Service.Interfaces
         Task<int> ListenTimeOnThisMonthAsync(Guid musicId);
         Task<int> ListenTimeOnThisDayAsync(Guid musicId);
         Task<MusicDTO?> GetMusicByArtistIdAsync(Guid artistId);
+        Task<bool> DeleteMusicByIdAsync(Guid musicId);
+
+        Task<Music> GetMusicByMusicIdAsync(Guid musicId);
     }
 }
