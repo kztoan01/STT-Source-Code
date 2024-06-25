@@ -5,6 +5,7 @@ using service.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using core.Dtos.Album;
 using core.Dtos.Music;
+using core.Objects;
 
 namespace service.Service
 {
@@ -76,13 +77,24 @@ namespace service.Service
         }
 
 
-        public async Task<List<PlaylistDTO>> GetUserPlaylistsAsync(string userId)
+        public async Task<List<PlaylistDTO>> GetUserPlaylistsAsync(string userId, QueryObject query)
         {
             var playlists = await _playlistRepository.GetUserPlaylistsAsync(userId);
 
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                playlists = query.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase)
+                    ? query.IsDecsending ? playlists.OrderByDescending(p => p.playlistName).ToList()
+                                         : playlists.OrderBy(p => p.playlistName).ToList()
+                    : playlists;
+            }
+
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            var paginatedPlaylists = playlists.Skip(skipNumber).Take(query.PageSize).ToList();
+
             List<PlaylistDTO> playlistDTOs = new List<PlaylistDTO>();
 
-            foreach (var playlist in playlists)
+            foreach (var playlist in paginatedPlaylists)
             {
                 PlaylistDTO playlistDTO = new PlaylistDTO
                 {
@@ -100,10 +112,13 @@ namespace service.Service
                 foreach (var music in musicsList)
                 {
                     var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
+                    if (existMusic == null)
+                        throw new Exception("Music is null or not found");
+
                     playlistDTO.musics.Add(new MusicDTO
                     {
-                        artistName = existMusic.Artist.User.UserName,
-                        genreName = existMusic.Genre.genreName,
+                        artistName = existMusic.Artist?.User?.UserName ?? "No artist available",
+                        genreName = existMusic.Genre?.genreName ?? "No genre available",
                         musicDuration = existMusic.musicDuration,
                         musicPicture = existMusic.musicPicture,
                         musicPlays = existMusic.musicPlays,
@@ -119,13 +134,25 @@ namespace service.Service
             return playlistDTOs;
         }
 
-        public async Task<List<PlaylistDTO>> GetPlaylistsByGenreNameAsync(string genreName)
+
+        public async Task<List<PlaylistDTO>> GetPlaylistsByGenreNameAsync(string genreName, QueryObject query)
         {
             var playlists = await _playlistRepository.GetPlaylistsByGenreNameAsync(genreName);
 
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                playlists = query.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase)
+                    ? query.IsDecsending ? playlists.OrderByDescending(p => p.playlistName).ToList()
+                                         : playlists.OrderBy(p => p.playlistName).ToList()
+                    : playlists;
+            }
+
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            var paginatedPlaylists = playlists.Skip(skipNumber).Take(query.PageSize).ToList();
+
             List<PlaylistDTO> playlistDTOs = new List<PlaylistDTO>();
 
-            foreach (var playlist in playlists)
+            foreach (var playlist in paginatedPlaylists)
             {
                 PlaylistDTO playlistDTO = new PlaylistDTO
                 {
@@ -143,10 +170,13 @@ namespace service.Service
                 foreach (var music in musicsList)
                 {
                     var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
+                    if (existMusic == null)
+                        throw new Exception("Music is null or not found");
+
                     playlistDTO.musics.Add(new MusicDTO
                     {
-                        artistName = existMusic.Artist.User.UserName,
-                        genreName = existMusic.Genre.genreName,
+                        artistName = existMusic.Artist?.User?.UserName ?? "No artist available",
+                        genreName = existMusic.Genre?.genreName ?? "No genre available",
                         musicDuration = existMusic.musicDuration,
                         musicPicture = existMusic.musicPicture,
                         musicPlays = existMusic.musicPlays,
@@ -162,13 +192,25 @@ namespace service.Service
             return playlistDTOs;
         }
 
-        public async Task<List<PlaylistDTO>> ShowPlaylistsByUserIdAsync(Guid userId)
+
+        public async Task<List<PlaylistDTO>> ShowPlaylistsByUserIdAsync(Guid userId, QueryObject query)
         {
             var playlists = await _playlistRepository.ShowPlaylistsByUserIdAsync(userId);
 
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                playlists = query.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase)
+                    ? query.IsDecsending ? playlists.OrderByDescending(p => p.playlistName).ToList()
+                                         : playlists.OrderBy(p => p.playlistName).ToList()
+                    : playlists;
+            }
+
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            var paginatedPlaylists = playlists.Skip(skipNumber).Take(query.PageSize).ToList();
+
             List<PlaylistDTO> playlistDTOs = new List<PlaylistDTO>();
 
-            foreach (var playlist in playlists)
+            foreach (var playlist in paginatedPlaylists)
             {
                 PlaylistDTO playlistDTO = new PlaylistDTO
                 {
@@ -186,10 +228,13 @@ namespace service.Service
                 foreach (var music in musicsList)
                 {
                     var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
+                    if (existMusic == null)
+                        throw new Exception("Music is null or not found");
+
                     playlistDTO.musics.Add(new MusicDTO
                     {
-                        artistName = existMusic.Artist.User.UserName,
-                        genreName = existMusic.Genre.genreName,
+                        artistName = existMusic.Artist?.User?.UserName ?? "No artist available",
+                        genreName = existMusic.Genre?.genreName ?? "No genre available",
                         musicDuration = existMusic.musicDuration,
                         musicPicture = existMusic.musicPicture,
                         musicPlays = existMusic.musicPlays,
@@ -204,6 +249,7 @@ namespace service.Service
 
             return playlistDTOs;
         }
+
 
 
         public async Task<Playlist?> UpdatePlaylistAsync(Guid id, Playlist playlistModel)

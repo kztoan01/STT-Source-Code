@@ -43,8 +43,11 @@ namespace repository.Repository
                 .Include(m => m.Album)
                 .Include(m => m.Artist)
                 .Include(m => m.Genre)
+                .Include(m => m.Artist).ThenInclude(a => a.User)
                 .Include(m => m.MusicListens)
                 .ToListAsync();
+
+           
         }
 
         public async Task<Music?> UpdateMusicAsync(Guid id, Music music)

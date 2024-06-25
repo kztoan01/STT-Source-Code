@@ -74,17 +74,16 @@ namespace repository.Repository
         {
             return await _context.Playlists
                 .Where(p => p.userId == userId)
+                .Include(p => p.playlistMusics)
                 .ToListAsync();
         }
-
         public async Task<List<Playlist>> GetPlaylistsByGenreNameAsync(string genreName)
         {
             return await _context.Playlists
-                .Where(p => p.playlistMusics
-                    .Any(pm => pm.Music.Genre.genreName == genreName))
+                .Where(p => p.playlistMusics.Any(pm => pm.Music.Genre.genreName == genreName))
+                .Include(p => p.playlistMusics)
                 .ToListAsync();
         }
-
         public async Task<List<Playlist>> ShowPlaylistsByUserIdAsync(Guid userId)
         {
             return await _context.Playlists

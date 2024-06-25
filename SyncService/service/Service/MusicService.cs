@@ -41,7 +41,7 @@ namespace service.Service
         public async Task<List<MusicDTO>> GetAllMusicAsync()
         {
             var musics = await _musicRepository.GetAllMusicAsync();
-            return musics.Select(ConvertToDto).ToList();
+            return musics.Select(x => ConvertToDto(x)).ToList();
         }
 
         public async Task<MusicDTO?> GetMusicByIdAsync(Guid id)

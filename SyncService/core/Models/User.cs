@@ -13,5 +13,5 @@ public class User : IdentityUser
     public List<Follower> Followers { get; set; } = new();
     public Artist Artist { get; set; }
 
-    public AccountDetail AccountDetail { get; set; }
+    //public AccountDetail AccountDetail { get; set; }
 }
