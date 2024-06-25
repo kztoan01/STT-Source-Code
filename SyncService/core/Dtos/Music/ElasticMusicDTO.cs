@@ -6,5 +6,4 @@ public class ElasticMusicDTO
     public string musicTitle { get; set; } = string.Empty;
     public string musicUrl { get; set; } = string.Empty;
     public string musicPicture { get; set; } = string.Empty;
-    
 }

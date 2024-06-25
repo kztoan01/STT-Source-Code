@@ -16,30 +16,26 @@ public class AlbumService : IAlbumService
 
     public async Task<Album> CreateAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId)
     {
-        Album album = new Album
+        var album = new Album
         {
             Id = new Guid(),
             albumTitle = albumDTO.albumTitle,
             artistId = artistId,
             albumDescription = albumDTO.albumDescription,
-            releaseDate = albumDTO.releaseDate,
+            releaseDate = albumDTO.releaseDate
         };
         return await _albumRepository.CreateAlbumAsync(album);
-
     }
 
     public async Task<bool> DeleteAlbumAsync(Guid albumId)
     {
-        return await _albumRepository.DeleteAlbumAsync(albumId);    
+        return await _albumRepository.DeleteAlbumAsync(albumId);
     }
 
     public async Task<Album> EditAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId, Guid albumId)
     {
         var album = _albumRepository.GetAlbumById(albumId);
-        if (album == null)
-        {
-            return null;
-        }
+        if (album == null) return null;
         album.Result.albumTitle = albumDTO.albumTitle;
         album.Result.albumDescription = albumDTO.albumDescription;
         album.Result.releaseDate = albumDTO.releaseDate;

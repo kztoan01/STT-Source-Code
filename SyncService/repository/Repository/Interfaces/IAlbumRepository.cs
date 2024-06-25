@@ -11,7 +11,7 @@ public interface IAlbumRepository
     Task<Album> GetMostListenAlbum();
     Task<AlbumResponseDTO> GetAlbumDetails(Guid albumId);
     Task<Album> CreateAlbumAsync(Album album);
-    Task<bool> DeleteAlbumAsync (Guid albumId);
+    Task<bool> DeleteAlbumAsync(Guid albumId);
     Task<Album> GetAlbumById(Guid albumId);
     Task<Album> EditAlbumAsync(Album album);
 }

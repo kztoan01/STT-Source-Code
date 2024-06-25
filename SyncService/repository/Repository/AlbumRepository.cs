@@ -7,7 +7,6 @@ using repository.Repository.Interfaces;
 
 namespace repository.Repository;
 
-
 public class AlbumRepository : IAlbumRepository
 {
     private readonly ApplicationDBContext _context;
@@ -28,15 +27,12 @@ public class AlbumRepository : IAlbumRepository
     {
         var album = await _context.Albums.FirstOrDefaultAsync(a => a.Id == albumId);
 
-        if (album == null)
-        {
-            return false;
-        }
+        if (album == null) return false;
 
         _context.Albums.Remove(album);
         await _context.SaveChangesAsync();
 
-        return true; 
+        return true;
     }
 
     public async Task<Album> EditAlbumAsync(Album album)
@@ -89,11 +85,11 @@ public class AlbumRepository : IAlbumRepository
 
         var artist = await _context.Artists
             .FirstOrDefaultAsync(a => a.Id == artistId);
-        ArtistDTO artistDTO = new ArtistDTO
+        var artistDTO = new ArtistDTO
         {
             Id = artist.Id,
             AristName = "handle later",
-            artistDescription = artist.artistDescription,
+            artistDescription = artist.artistDescription
         };
         var albumDTO = new AlbumResponseDTO
         {
