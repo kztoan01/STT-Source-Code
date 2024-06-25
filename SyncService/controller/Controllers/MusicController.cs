@@ -10,10 +10,11 @@ namespace controller.Controllers;
 public class MusicController : ControllerBase
 {
     private readonly IMusicService _musicService;
-
-    public MusicController(IMusicService musicService)
+    private readonly IElasticService<ElasticMusicDTO> _elasticService;
+    public MusicController(IMusicService musicService,IElasticService<ElasticMusicDTO> elasticService)
     {
         _musicService = musicService;
+        _elasticService = elasticService;
     }
 
     [HttpPost("add")]
@@ -23,6 +24,8 @@ public class MusicController : ControllerBase
             return BadRequest(ModelState);
 
         var musicModel = music.ToMusicFromCreate();
+        var elasticModel = musicModel.ToElasticFromMusic();
+        await _elasticService.CreateDocumentAsync(elasticModel);
         var newMusic = await _musicService.UploadMusicAsync(musicModel, music.fileMusic, music.fileImage);
         return Ok(newMusic);
     }
