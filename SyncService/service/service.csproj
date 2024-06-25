@@ -7,8 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\data\data.csproj"/>
-        <ProjectReference Include="..\repository\repository.csproj"/>
+      <PackageReference Include="PayPalCheckoutSdk" Version="1.0.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\data\data.csproj" />
+        <ProjectReference Include="..\repository\repository.csproj" />
     </ItemGroup>
 
     <ItemGroup>
