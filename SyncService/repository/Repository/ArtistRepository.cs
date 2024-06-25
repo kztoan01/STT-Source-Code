@@ -1,6 +1,7 @@
 ﻿using core.Dtos.Album;
 using core.Dtos.Artist;
 using core.Dtos.Music;
+using core.Models;
 using data.Data;
 using Microsoft.EntityFrameworkCore;
 using repository.Repository.Interfaces;
@@ -90,4 +91,11 @@ public class ArtistRepository : IArtistRepository
             })
             .ToListAsync();
     }
+
+    public async Task<Artist> GetArtistByUserId(Guid userId)
+    {
+        return await _context.Artists.FirstOrDefaultAsync(a => a.userId == userId.ToString());
+    }
+
+
 }

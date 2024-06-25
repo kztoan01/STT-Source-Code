@@ -4,6 +4,7 @@ using repository.Repository.Interfaces;
 using service.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using core.Dtos.Album;
+using core.Dtos.Music;
 
 namespace service.Service
 {
@@ -30,33 +31,180 @@ namespace service.Service
             return await _playlistRepository.DeletePlaylistAsync(id);
         }
 
-        public async Task<Playlist?> GetPlaylistByIdAsync(Guid id)
+        public async Task<PlaylistDTO> GetPlaylistByIdAsync(Guid id)
         {
-            return await _playlistRepository.GetPlaylistByIdAsync(id);
+            Playlist playlist = await _playlistRepository.GetPlaylistByIdAsync(id);
+            PlaylistDTO playlistDTO = new PlaylistDTO
+            {
+                Id = playlist.Id,
+                createdDate = playlist.createdDate,
+                playlistDescription = playlist.playlistDescription,
+                playlistName = playlist.playlistName,
+                playlistPicture = playlist.playlistPicture,
+                userId = playlist.userId,
+                updatedDate = playlist.updatedDate,
+                musics = new List<MusicDTO>()
+            };
+
+            var musicsList = await _musicRepository.GetMusicInPlaylistByPlaylsitIdAsync(playlist.Id);
+            foreach (var music in musicsList)
+            {
+                var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
+                if (existMusic == null || existMusic.Id == Guid.Empty)
+                {
+                    throw new Exception("Music is null or not found");
+                }
+
+                var artistName = existMusic.Artist?.User?.UserName ?? "No artist available";
+                var genreName = existMusic.Genre?.genreName ?? "No genre available";
+
+                playlistDTO.musics.Add(new MusicDTO
+                {
+                    artistName = artistName,
+                    genreName = genreName,
+                    musicDuration = existMusic.musicDuration,
+                    musicPicture = existMusic.musicPicture,
+                    musicPlays = existMusic.musicPlays,
+                    musicTitle = existMusic.musicTitle,
+                    musicUrl = existMusic.musicUrl,
+                    releaseDate = existMusic.releaseDate,
+                    Id = existMusic.Id,
+                });
+            }
+
+            return playlistDTO;
         }
+
 
         public async Task<List<PlaylistDTO>> GetUserPlaylistsAsync(string userId)
         {
             var playlists = await _playlistRepository.GetUserPlaylistsAsync(userId);
-            return playlists.Select(p => new PlaylistDTO
+
+            List<PlaylistDTO> playlistDTOs = new List<PlaylistDTO>();
+
+            foreach (var playlist in playlists)
             {
-                Id = p.Id,
-                playlistName = p.playlistName,
-                playlistDescription = p.playlistDescription,
-                createdDate = p.createdDate,
-                updatedDate = p.updatedDate
-            }).ToList();
+                PlaylistDTO playlistDTO = new PlaylistDTO
+                {
+                    Id = playlist.Id,
+                    createdDate = playlist.createdDate,
+                    playlistDescription = playlist.playlistDescription,
+                    playlistName = playlist.playlistName,
+                    playlistPicture = playlist.playlistPicture,
+                    userId = playlist.userId,
+                    updatedDate = playlist.updatedDate,
+                    musics = new List<MusicDTO>()
+                };
+
+                var musicsList = await _musicRepository.GetMusicInPlaylistByPlaylsitIdAsync(playlist.Id);
+                foreach (var music in musicsList)
+                {
+                    var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
+                    playlistDTO.musics.Add(new MusicDTO
+                    {
+                        artistName = existMusic.Artist.User.UserName,
+                        genreName = existMusic.Genre.genreName,
+                        musicDuration = existMusic.musicDuration,
+                        musicPicture = existMusic.musicPicture,
+                        musicPlays = existMusic.musicPlays,
+                        musicTitle = existMusic.musicTitle,
+                        musicUrl = existMusic.musicUrl,
+                        releaseDate = existMusic.releaseDate,
+                        Id = existMusic.Id,
+                    });
+                }
+                playlistDTOs.Add(playlistDTO);
+            }
+
+            return playlistDTOs;
         }
 
-        public async Task<List<Playlist>> GetPlaylistsByGenreNameAsync(string genreName)
+        public async Task<List<PlaylistDTO>> GetPlaylistsByGenreNameAsync(string genreName)
         {
-            return await _playlistRepository.GetPlaylistsByGenreNameAsync(genreName);
+            var playlists = await _playlistRepository.GetPlaylistsByGenreNameAsync(genreName);
+
+            List<PlaylistDTO> playlistDTOs = new List<PlaylistDTO>();
+
+            foreach (var playlist in playlists)
+            {
+                PlaylistDTO playlistDTO = new PlaylistDTO
+                {
+                    Id = playlist.Id,
+                    createdDate = playlist.createdDate,
+                    playlistDescription = playlist.playlistDescription,
+                    playlistName = playlist.playlistName,
+                    playlistPicture = playlist.playlistPicture,
+                    userId = playlist.userId,
+                    updatedDate = playlist.updatedDate,
+                    musics = new List<MusicDTO>()
+                };
+
+                var musicsList = await _musicRepository.GetMusicInPlaylistByPlaylsitIdAsync(playlist.Id);
+                foreach (var music in musicsList)
+                {
+                    var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
+                    playlistDTO.musics.Add(new MusicDTO
+                    {
+                        artistName = existMusic.Artist.User.UserName,
+                        genreName = existMusic.Genre.genreName,
+                        musicDuration = existMusic.musicDuration,
+                        musicPicture = existMusic.musicPicture,
+                        musicPlays = existMusic.musicPlays,
+                        musicTitle = existMusic.musicTitle,
+                        musicUrl = existMusic.musicUrl,
+                        releaseDate = existMusic.releaseDate,
+                        Id = existMusic.Id,
+                    });
+                }
+                playlistDTOs.Add(playlistDTO);
+            }
+
+            return playlistDTOs;
         }
 
-        public async Task<List<Playlist>> ShowPlaylistsByUserIdAsync(Guid userId)
+        public async Task<List<PlaylistDTO>> ShowPlaylistsByUserIdAsync(Guid userId)
         {
-            return await _playlistRepository.ShowPlaylistsByUserIdAsync(userId);
+            var playlists = await _playlistRepository.ShowPlaylistsByUserIdAsync(userId);
+
+            List<PlaylistDTO> playlistDTOs = new List<PlaylistDTO>();
+
+            foreach (var playlist in playlists)
+            {
+                PlaylistDTO playlistDTO = new PlaylistDTO
+                {
+                    Id = playlist.Id,
+                    createdDate = playlist.createdDate,
+                    playlistDescription = playlist.playlistDescription,
+                    playlistName = playlist.playlistName,
+                    playlistPicture = playlist.playlistPicture,
+                    userId = playlist.userId,
+                    updatedDate = playlist.updatedDate,
+                    musics = new List<MusicDTO>()
+                };
+
+                var musicsList = await _musicRepository.GetMusicInPlaylistByPlaylsitIdAsync(playlist.Id);
+                foreach (var music in musicsList)
+                {
+                    var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
+                    playlistDTO.musics.Add(new MusicDTO
+                    {
+                        artistName = existMusic.Artist.User.UserName,
+                        genreName = existMusic.Genre.genreName,
+                        musicDuration = existMusic.musicDuration,
+                        musicPicture = existMusic.musicPicture,
+                        musicPlays = existMusic.musicPlays,
+                        musicTitle = existMusic.musicTitle,
+                        musicUrl = existMusic.musicUrl,
+                        releaseDate = existMusic.releaseDate,
+                        Id = existMusic.Id,
+                    });
+                }
+                playlistDTOs.Add(playlistDTO);
+            }
+
+            return playlistDTOs;
         }
+
 
         public async Task<Playlist?> UpdatePlaylistAsync(Guid id, Playlist playlistModel)
         {
