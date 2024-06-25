@@ -17,11 +17,13 @@ public class MusicController : ControllerBase
     private readonly UserManager<User> _userManager;
     private readonly IArtistService _artistService;
 
-    public MusicController(IMusicService musicService, UserManager<User> userManager, IArtistService artistService)
+    private readonly IElasticService<ElasticMusicDTO> _elasticService;
+    public MusicController(IMusicService musicService,IElasticService<ElasticMusicDTO> elasticService,UserManager<User> userManager,IArtistService artistService)
     {
         _musicService = musicService;
         _userManager = userManager;
         _artistService = artistService;
+        _elasticService = elasticService;
     }
 
     [HttpPost("add")]
@@ -31,6 +33,8 @@ public class MusicController : ControllerBase
             return BadRequest(ModelState);
 
         var musicModel = music.ToMusicFromCreate();
+        var elasticModel = musicModel.ToElasticFromMusic();
+        await _elasticService.CreateDocumentAsync(elasticModel);
         var newMusic = await _musicService.UploadMusicAsync(musicModel, music.fileMusic, music.fileImage);
         return Ok(newMusic);
     }
