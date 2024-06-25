@@ -94,5 +94,6 @@ namespace repository.Repository
         {
             return await _context.PlaylistMusics.Where(x => x.playlistId.Equals(playlistId)).ToListAsync();
         }
+
     }
 }

@@ -1,10 +1,12 @@
 ﻿using core.Dtos.Album;
+using core.Dtos.Artist;
 using core.Models;
 using data.Data;
 using Microsoft.EntityFrameworkCore;
 using repository.Repository.Interfaces;
 
 namespace repository.Repository;
+
 
 public class AlbumRepository : IAlbumRepository
 {
@@ -13,6 +15,35 @@ public class AlbumRepository : IAlbumRepository
     public AlbumRepository(ApplicationDBContext context)
     {
         _context = context;
+    }
+
+    public async Task<Album> CreateAlbumAsync(Album album)
+    {
+        _context.Albums.Add(album);
+        await _context.SaveChangesAsync();
+        return album;
+    }
+
+    public async Task<bool> DeleteAlbumAsync(Guid albumId)
+    {
+        var album = await _context.Albums.FirstOrDefaultAsync(a => a.Id == albumId);
+
+        if (album == null)
+        {
+            return false;
+        }
+
+        _context.Albums.Remove(album);
+        await _context.SaveChangesAsync();
+
+        return true; 
+    }
+
+    public async Task<Album> EditAlbumAsync(Album album)
+    {
+        _context.Albums.Update(album);
+        await _context.SaveChangesAsync();
+        return album;
     }
 
     public async Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId(Guid artistId)
@@ -43,6 +74,11 @@ public class AlbumRepository : IAlbumRepository
             .ToListAsync();
     }
 
+    public async Task<Album> GetAlbumById(Guid albumId)
+    {
+        return await _context.Albums.FirstOrDefaultAsync(a => a.Id == albumId);
+    }
+
     public async Task<AlbumResponseDTO> GetAlbumDetails(Guid albumId)
     {
         var album = await _context.Albums
@@ -53,12 +89,19 @@ public class AlbumRepository : IAlbumRepository
 
         var artist = await _context.Artists
             .FirstOrDefaultAsync(a => a.Id == artistId);
+        ArtistDTO artistDTO = new ArtistDTO
+        {
+            Id = artist.Id,
+            AristName = "handle later",
+            artistDescription = artist.artistDescription,
+        };
         var albumDTO = new AlbumResponseDTO
         {
             Id = album.Id,
             albumTitle = album.albumTitle,
             releaseDate = album.releaseDate,
-            albumDescription = album.albumDescription
+            albumDescription = album.albumDescription,
+            artist = artistDTO
         };
         return albumDTO;
     }
