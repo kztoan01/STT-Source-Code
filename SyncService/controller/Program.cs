@@ -24,13 +24,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 var cloudId = builder.Configuration["Elastic:CloudId"];
 var apiKey = builder.Configuration["Elastic:ApiKey"];
-// var setting = new ElasticsearchClientSettings(
-//     cloudId!,
-//     new ApiKey(apiKey!)).DefaultIndex("syncmusic");
-var settings = new ElasticsearchClientSettings(new Uri("https://192.168.1.7:9200"))
-    .CertificateFingerprint("44564D41433B8E121BAA3BC9455A0ED7DA3CE2D7E499629796C1F18D0C65BF7A")
-    .Authentication(new BasicAuthentication("elastic", "changeme"))
-    .DefaultIndex("testhehe");
+var settings = new ElasticsearchClientSettings(
+    cloudId!,
+    new ApiKey(apiKey!)).DefaultIndex("syncmusic");
+// var settings = new ElasticsearchClientSettings(new Uri("https://192.168.1.7:9200"))
+//     .CertificateFingerprint("44564D41433B8E121BAA3BC9455A0ED7DA3CE2D7E499629796C1F18D0C65BF7A")
+//     .Authentication(new BasicAuthentication("elastic", "changeme"))
+//     .DefaultIndex("testhehe");
 var clientElastic = new ElasticsearchClient(settings);
 builder.Services.AddSingleton(clientElastic);
 // TODO: add scope sau
