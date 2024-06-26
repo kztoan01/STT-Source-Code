@@ -1,5 +1,6 @@
 ﻿using core.Dtos.Album;
 using core.Models;
+using repository.Repository;
 using repository.Repository.Interfaces;
 using service.Service.Interfaces;
 
@@ -46,8 +47,11 @@ public class AlbumService : IAlbumService
 
         return await _albumRepository.EditAlbumAsync(album.Result);
     }
-
-    public async Task<List<Album>> getAlbumByGenreNameAsync(string genreName)
+    public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId)
+    {
+        return await _albumRepository.GetAllArtistAlbumsAsync(artistId);
+    }
+    public async Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName)
     {
         return await _albumRepository.getAlbumByGenreNameAsync(genreName);
     }

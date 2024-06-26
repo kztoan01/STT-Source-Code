@@ -27,7 +27,7 @@ public class AlbumController : ControllerBase
         _artistService = artistService;
     }
 
-    [HttpGet("getAlbumByGenreName/{genreName}")]
+    [HttpGet("getAlbumsByGenreName/{genreName}")]
     //[Authorize]
     public async Task<IActionResult> GetAlbumByGenreName([FromRoute] string genreName)
     {
@@ -42,6 +42,21 @@ public class AlbumController : ControllerBase
         return Ok(albums);
     }
 
+    [HttpGet("getAllArtistAlbums/{artistId}")]
+    //[Authorized]
+    public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var albums = await _albumService.GetAllArtistAlbumsAsync(artistId);
+
+
+        if (albums == null)
+            return NotFound();
+
+        return Ok(albums);
+    }
 
     [HttpPost("createAlbum")]
     [Authorize]

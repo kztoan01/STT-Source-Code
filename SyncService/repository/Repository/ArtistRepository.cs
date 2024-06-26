@@ -12,25 +12,13 @@ public class ArtistRepository : IArtistRepository
 {
     private readonly ApplicationDBContext _context;
 
-    public ArtistRepository(ApplicationDBContext context)
+    public ArtistRepository(ApplicationDBContext context )
     {
         _context = context;
+
     }
 
-    public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId)
-    {
-        return await _context.Albums
-            .Where(a => a.artistId == artistId)
-            .Select(a => new AlbumResponseDTO
-            {
-                Id = a.Id,
-                albumTitle = a.albumTitle,
-                albumDescription = a.albumDescription,
-                releaseDate = a.releaseDate
-            })
-            .ToListAsync();
-    }
-
+ 
     public async Task<ArtistDTO> GetArtistDTOById(Guid id)
     {
         var artist = await _context.Artists
@@ -85,6 +73,7 @@ public class ArtistRepository : IArtistRepository
                 musicTitle = m.musicTitle,
                 musicUrl = m.musicUrl,
                 musicPicture = m.musicPicture,
+                releaseDate = m.releaseDate,
                 musicPlays = m.musicPlays,
                 genreName = m.Genre.genreName,
                 albumTitle = m.Album.albumTitle

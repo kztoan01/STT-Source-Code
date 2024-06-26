@@ -16,10 +16,7 @@ public class ArtistService : IArtistService
         _artistRepository = artistRepository;
     }
 
-    public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId)
-    {
-        return await _artistRepository.GetAllArtistAlbumsAsync(artistId);
-    }
+
 
     public async Task<ArtistDTO> GetArtistDTOById(Guid id)
     {

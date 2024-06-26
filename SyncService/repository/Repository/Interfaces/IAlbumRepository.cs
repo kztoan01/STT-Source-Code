@@ -5,7 +5,7 @@ namespace repository.Repository.Interfaces;
 
 public interface IAlbumRepository
 {
-    Task<List<Album>> getAlbumByGenreNameAsync(string genreName);
+    Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName);
     Task<List<Album>> getAllAlbumsAsync();
     Task<List<AlbumDTO>> GetAlbumByContainArtistByArtistId(Guid artistId);
     Task<Album> GetMostListenAlbum();
@@ -14,4 +14,5 @@ public interface IAlbumRepository
     Task<bool> DeleteAlbumAsync (Guid albumId);
     Task<Album> GetAlbumById(Guid albumId);
     Task<Album> EditAlbumAsync(Album album);
+    Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId);
 }
