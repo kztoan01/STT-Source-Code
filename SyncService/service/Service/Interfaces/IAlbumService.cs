@@ -1,12 +1,13 @@
 using core.Dtos.Album;
 using core.Models;
+using core.Objects;
 
 namespace service.Service.Interfaces;
 
 public interface IAlbumService
 {
     Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName);
-    Task<List<Album>> getAllAlbumsAsync();
+    Task<List<AlbumResponseDTO>> getAllAlbumsAsync(QueryObject query);
     Task<AlbumResponseDTO> GetAlbumDetail(Guid albumId);
     Task<Album> GetMostListenAlbum();
     Task<Album> CreateAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId);

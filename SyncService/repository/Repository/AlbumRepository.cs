@@ -150,15 +150,16 @@ public class AlbumRepository : IAlbumRepository
         return albumDTO;
     }
 
-    public async Task<List<Album>> getAllAlbumsAsync()
+    public async Task<List<AlbumResponseDTO>> getAllAlbumsAsync()
     {
-        return await _context.Albums
-            .Include(a => a.Musics)
-                .ThenInclude(m => m.Artist)
-
-            .Include(a => a.Musics)
-                .ThenInclude(m => m.Genre)
-            .ToListAsync();
+        var albumList = await _context.Albums.ToListAsync();
+        List<AlbumResponseDTO> list = new List<AlbumResponseDTO>();
+        foreach(var album in albumList)
+        {
+            var albumRes = GetAlbumDetails(album.Id);
+            list.Add(albumRes.Result);
+        }
+        return list;
     }
 
     public async Task<Album> GetMostListenAlbum()

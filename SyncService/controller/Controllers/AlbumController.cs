@@ -112,7 +112,7 @@ public class AlbumController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var albums = await _albumService.getAllAlbumsAsync();
+        var albums = await _albumService.getAllAlbumsAsync(null);
 
         if (albums == null)
             return NotFound();

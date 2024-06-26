@@ -1,5 +1,6 @@
 ﻿using core.Dtos.Album;
 using core.Models;
+using core.Objects;
 using repository.Repository;
 using repository.Repository.Interfaces;
 using service.Service.Interfaces;
@@ -62,8 +63,20 @@ public class AlbumService : IAlbumService
         return await _albumRepository.GetAlbumDetails(albumId);
     }
 
-    public async Task<List<Album>> getAllAlbumsAsync()
+    public async Task<List<AlbumResponseDTO>> getAllAlbumsAsync(QueryObject query)
     {
+        //var albums = await _albumRepository.getAllAlbumsAsync();
+
+        //if (!string.IsNullOrWhiteSpace(query.SortBy))
+        //    albums = query.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase)
+        //        ? query.IsDecsending
+        //            ? albums.OrderByDescending(a => a.albumTitle).ToList()
+        //            : albums.OrderBy(a => a.albumTitle).ToList()
+        //        : albums;
+
+        //var skipNumber = (query.PageNumber - 1) * query.PageSize;
+        //var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();
+
         return await _albumRepository.getAllAlbumsAsync();
     }
 
