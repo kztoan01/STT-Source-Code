@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
-using core.Dtos;
 using core.Dtos.Music;
 using core.Models;
 using data.Data;
@@ -52,10 +51,8 @@ var dbPass = Environment.GetEnvironmentVariable("PASSDB");
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     .Replace("{LOCALDB}", dbServer)
-    .Replace("{PASSDB}", dbPass);builder.Services.AddDbContext<ApplicationDBContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
+    .Replace("{PASSDB}", dbPass);
+builder.Services.AddDbContext<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); });
 
 //authentication plugin
 

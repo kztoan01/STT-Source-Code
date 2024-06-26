@@ -9,5 +9,5 @@ public interface IArtistService
     Task<List<MusicResponseDTO>> GetAllArtistMusicsAsync(Guid artistId);
 
     Task<ArtistDTO> GetArtistDTOById(Guid id);
-    Task<Artist> GetArtistByUserIdAsync (Guid userId);
+    Task<Artist> GetArtistByUserIdAsync(Guid userId);
 }

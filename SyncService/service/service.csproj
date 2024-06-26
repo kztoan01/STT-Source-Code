@@ -7,12 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="PayPalCheckoutSdk" Version="1.0.4" />
+        <PackageReference Include="PayPalCheckoutSdk" Version="1.0.4"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\data\data.csproj" />
-        <ProjectReference Include="..\repository\repository.csproj" />
+        <ProjectReference Include="..\data\data.csproj"/>
+        <ProjectReference Include="..\repository\repository.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.14.3" />
+        <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.14.3"/>
     </ItemGroup>
 
 </Project>

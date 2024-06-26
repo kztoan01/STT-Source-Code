@@ -16,6 +16,7 @@ public static class MusicMapper
             musicPicture = music.musicPicture
         };
     }
+
     public static Music ToMusicFromCreate(this AddMusicDTO musicDTO)
     {
         return new Music

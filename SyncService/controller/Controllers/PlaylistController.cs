@@ -1,10 +1,10 @@
+using core.Dtos.Album;
+using core.Dtos.Playlist;
+using core.Models;
+using core.Objects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using core.Dtos.Album;
-using core.Dtos.Playlist;
-using repository.Mappers;
-using core.Models;
 using service.Service.Interfaces;
 using service.Service.Mappers;
 
@@ -23,9 +23,9 @@ public class PlaylistController : ControllerBase
         _playlistService = playlistService;
     }
 
-    [HttpGet("getUserPlaylist")]
+    [HttpPost("getUserPlaylist")]
     [Authorize]
-    public async Task<IActionResult> GetUserPlaylist()
+    public async Task<IActionResult> GetUserPlaylist(QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -33,7 +33,7 @@ public class PlaylistController : ControllerBase
         var user = await _userManager.GetUserAsync(User);
         if (user != null)
         {
-            var userPlaylist = await _playlistService.GetUserPlaylistsAsync(user.Id);
+            var userPlaylist = await _playlistService.GetUserPlaylistsAsync(user.Id, queryObject);
 
             return Ok(userPlaylist);
         }
@@ -55,14 +55,14 @@ public class PlaylistController : ControllerBase
         return Ok(playlist);
     }
 
-    [HttpGet("getPlaylistByGenreName/{genreName}")]
+    [HttpPost("getPlaylistByGenreName")]
     [Authorize]
-    public async Task<IActionResult> GetPlaylistsByGenreName([FromRoute] string genreName)
+    public async Task<IActionResult> GetPlaylistsByGenreName(string genreName, QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var playlists = await _playlistService.GetPlaylistsByGenreNameAsync(genreName);
+        var playlists = await _playlistService.GetPlaylistsByGenreNameAsync(genreName, queryObject);
 
         if (playlists == null)
             return NotFound();

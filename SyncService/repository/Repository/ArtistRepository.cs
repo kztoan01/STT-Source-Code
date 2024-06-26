@@ -85,6 +85,4 @@ public class ArtistRepository : IArtistRepository
     {
         return await _context.Artists.FirstOrDefaultAsync(a => a.userId == userId.ToString());
     }
-
-
 }
