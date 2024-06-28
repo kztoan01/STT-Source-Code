@@ -1,17 +1,15 @@
-using core.Dtos.Music;
 using core.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace repository.Repository.Interfaces;
 
 public interface IMusicRepository
 {
-    Task<Music> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage);
-    Task<List<MusicDTO>> GetAllMusicAsync();
-    Task<MusicDTO> GetMusicById(Guid id);
-    Task<int> ListenTimeOnThisYear(Guid musicId);
-    Task<int> ListenTimeOnThisMonth(Guid musicId);
-    Task<int> ListenTimeOnThisDay(Guid musicId);
-    Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId);
-    Task<MusicDTO> GetMusicByArtistId(Guid id);
+    Task<Music> CreateMusicAsync(Music music);
+    Task<Music?> GetMusicByIdAsync(Guid id);
+    Task<List<Music>> GetAllMusicAsync();
+    Task<Music?> UpdateMusicAsync(Guid id, Music music);
+    Task<bool> DeleteMusicAsync(Guid id);
+    Task<int> GetListenCountAsync(Guid musicId, DateTime startDate, DateTime endDate);
+    Task<List<Music>> GetMusicByAlbumIdAsync(Guid albumId);
+    Task<List<PlaylistMusic>> GetMusicInPlaylistByPlaylsitIdAsync(Guid playlistId);
 }

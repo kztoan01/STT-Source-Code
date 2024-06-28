@@ -9,12 +9,14 @@ public class Music
     public int musicPlays { get; set; }
     public double musicDuration { get; set; }
     public DateTime releaseDate { get; set; }
-    public Guid albumId { get; set; }
+    public Guid? albumId { get; set; }
     public Album Album { get; set; }
     public Guid artistId { get; set; }
     public Artist Artist { get; set; }
     public Guid genreId { get; set; }
     public Genre Genre { get; set; }
+
+
     public List<PlaylistMusic> playlistMusics { get; set; } = new();
 
     public List<MusicListen> MusicListens { get; set; } = new();

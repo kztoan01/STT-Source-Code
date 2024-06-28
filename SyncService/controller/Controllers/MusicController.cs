@@ -1,5 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
 using core.Dtos.Music;
+using core.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using repository.Mappers;
 using service.Service.Interfaces;
 
@@ -9,25 +12,37 @@ namespace controller.Controllers;
 [ApiController]
 public class MusicController : ControllerBase
 {
-    private readonly IMusicService _musicService;
+    private readonly IArtistService _artistService;
 
-    public MusicController(IMusicService musicService)
+    private readonly IElasticService<ElasticMusicDTO> _elasticService;
+    private readonly IMusicService _musicService;
+    private readonly UserManager<User> _userManager;
+
+    public MusicController(IMusicService musicService, IElasticService<ElasticMusicDTO> elasticService,
+        UserManager<User> userManager, IArtistService artistService)
     {
         _musicService = musicService;
+        _userManager = userManager;
+        _artistService = artistService;
+        _elasticService = elasticService;
     }
 
     [HttpPost("add")]
+    [Authorize]
     public async Task<IActionResult> AddNewMusic([FromForm] AddMusicDTO music)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var musicModel = music.ToMusicFromCreate();
+        var elasticModel = musicModel.ToElasticFromMusic();
+        await _elasticService.CreateDocumentAsync(elasticModel);
         var newMusic = await _musicService.UploadMusicAsync(musicModel, music.fileMusic, music.fileImage);
         return Ok(newMusic);
     }
 
     [HttpGet("all")]
+    [Authorize]
     public async Task<IActionResult> GetAllMusic()
     {
         var allMusic = await _musicService.GetAllMusicAsync();
@@ -35,41 +50,67 @@ public class MusicController : ControllerBase
     }
 
 
-    [HttpPost("getMusicById")]
-    public async Task<IActionResult> GetMusicById(Guid id)
+    [HttpGet("getMusicById/{musicId:Guid}")]
+    [Authorize]
+    public async Task<IActionResult> GetMusicById([FromRoute] Guid musicId)
     {
-        var music = await _musicService.GetMusicById(id);
+        var music = await _musicService.GetMusicByIdAsync(musicId);
         return Ok(music);
     }
 
-    [HttpPost("getMusicByArtistId")]
-    public async Task<MusicDTO> GetMusicByArtistId(Guid id)
+
+    [HttpPost("getMusicByArtistId/{artistId:Guid}")]
+    [Authorize]
+    public async Task<MusicDTO> GetMusicByArtistId([FromRoute] Guid artistId)
     {
-        return await _musicService.GetMusicByArtistId(id);
+        return await _musicService.GetMusicByArtistIdAsync(artistId);
     }
 
 
-    [HttpPost("ListenTimeOnThisYear")]
-    public async Task<int> ListenTimeOnThisYear(Guid musicId)
+    [HttpGet("ListenTimeOnThisYear/{musicId:Guid}")]
+    [Authorize]
+    public async Task<int> ListenTimeOnThisYear([FromRoute] Guid musicId)
     {
-        return await _musicService.ListenTimeOnThisYear(musicId);
+        return await _musicService.ListenTimeOnThisYearAsync(musicId);
     }
 
-    [HttpPost("ListenTimeOnThisMonth")]
-    public async Task<int> ListenTimeOnThisMonth(Guid musicId)
+    [HttpGet("ListenTimeOnThisMonth/{musicId:guid}")]
+    [Authorize]
+    public async Task<int> ListenTimeOnThisMonth([FromRoute] Guid musicId)
     {
-        return await _musicService.ListenTimeOnThisMonth(musicId);
+        return await _musicService.ListenTimeOnThisMonthAsync(musicId);
     }
 
-    [HttpPost("ListenTimeOnThisDay")]
-    public async Task<int> ListenTimeOnThisDay(Guid musicId)
+    [HttpGet("ListenTimeOnThisDay/{musicId:guid}")]
+    [Authorize]
+    public async Task<int> ListenTimeOnThisDay([FromRoute] Guid musicId)
     {
-        return await _musicService.ListenTimeOnThisDay(musicId);
+        return await _musicService.ListenTimeOnThisDayAsync(musicId);
     }
 
-    [HttpPost("Add1ListenTimeWhenMusicIsListened")]
+    [HttpPut("Add1ListenTimeWhenMusicIsListened")]
+    [Authorize]
     public async Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId)
     {
-        return await _musicService.Add1ListenTimeWhenMusicIsListened(musicId);
+        return await _musicService.Add1ListenTimeWhenMusicIsListenedAsync(musicId);
+    }
+
+    [HttpDelete("deleteMusic/{musicId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteAlbum([FromRoute] Guid musicId)
+    {
+        // only creator can delete music
+        var music = await _musicService.GetMusicByMusicIdAsync(musicId);
+        if (music == null) return NotFound("Music not found");
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound("User not found");
+
+        var artist = await _artistService.GetArtistByUserIdAsync(Guid.Parse(user.Id));
+
+        if (artist == null || artist.Id == Guid.Empty || !artist.Id.Equals(music.artistId))
+            return Forbid("Only creator can delete this music.");
+
+        var deleteMusic = await _musicService.DeleteMusicByIdAsync(musicId);
+        return Ok("Music deleted successfully");
     }
 }

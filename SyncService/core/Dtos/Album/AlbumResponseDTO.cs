@@ -1,4 +1,6 @@
 ﻿using core.Dtos.Artist;
+using core.Dtos.Music;
+using core.Models;
 
 namespace core.Dtos.Album;
 
@@ -10,4 +12,5 @@ public class AlbumResponseDTO
     public DateTime releaseDate { get; set; }
 
     public ArtistDTO? artist { get; set; }
+    public List<MusicDTO> musics { get; set; }
 }

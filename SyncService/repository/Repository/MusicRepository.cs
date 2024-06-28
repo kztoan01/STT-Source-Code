@@ -1,199 +1,94 @@
-using Amazon.S3;
-using Amazon.S3.Model;
-using Amazon.S3.Transfer;
-using core.Dtos.Album;
-using core.Dtos.Music;
 using core.Models;
 using data.Data;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using repository.Mappers;
 using repository.Repository.Interfaces;
 
 namespace repository.Repository;
 
 public class MusicRepository : IMusicRepository
 {
-    private readonly string _bucketName = "sync-music-storage";
     private readonly ApplicationDBContext _context;
-    private readonly IAmazonS3 _s3Client;
 
-    public MusicRepository(ApplicationDBContext context, IAmazonS3 s3Client)
+    public MusicRepository(ApplicationDBContext context)
     {
         _context = context;
-        _s3Client = s3Client;
     }
 
-    public async Task<Music> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
+    public async Task<Music> CreateMusicAsync(Music music)
     {
-        var imageUrl = await UploadedFiles(fileImage, music.Id, "image");
-        var musicUrl = await UploadedFiles(fileMusic, music.Id, "music");
-
-        var musicModel = new Music
-        {
-            Id = music.Id,
-            musicTitle = music.musicTitle,
-            musicUrl = musicUrl,
-            musicPicture = imageUrl,
-            musicPlays = music.musicPlays,
-            musicDuration = music.musicDuration,
-            releaseDate = music.releaseDate,
-            albumId = music.albumId,
-            Album = music.Album,
-            artistId = music.artistId,
-            Artist = music.Artist,
-            genreId = music.genreId,
-            Genre = music.Genre,
-            playlistMusics = music.playlistMusics
-        };
-
-        await _context.Musics.AddAsync(musicModel);
+        await _context.Musics.AddAsync(music);
         await _context.SaveChangesAsync();
-
-        return musicModel;
+        return music;
     }
 
-    public async Task<List<MusicDTO>> GetAllMusicAsync()
+    public async Task<Music?> GetMusicByIdAsync(Guid id)
     {
         return await _context.Musics
             .Include(m => m.Album)
             .Include(m => m.Artist)
-            .Include(m => m.Genre).Select(m => new MusicDTO
-            {
-                Id = m.Id,
-                genreName = m.Genre.genreName,
-                musicDuration = m.musicDuration,
-                musicPicture = m.musicPicture,
-                musicPlays = m.musicPlays,
-                musicTitle = m.musicTitle,
-                musicUrl = m.musicUrl,
-                releaseDate = m.releaseDate,
-                AlbumDTO = new AlbumDTO
-                {
-                    Id = m.Album.Id,
-                    albumTitle = m.Album.albumTitle
-                },
-                artistName = m.Artist.User.userFullName
-            })
+            .ThenInclude(a => a.User)
+            .Include(m => m.Genre)
+            .Include(m => m.MusicListens)
+            .FirstOrDefaultAsync(m => m.Id == id);
+    }
+
+
+    public async Task<List<Music>> GetAllMusicAsync()
+    {
+        return await _context.Musics
+            .Include(m => m.Album)
+            .Include(m => m.Artist)
+            .Include(m => m.Genre)
+            .Include(m => m.Artist).ThenInclude(a => a.User)
+            .Include(m => m.MusicListens)
             .ToListAsync();
     }
 
-    public async Task<MusicDTO> GetMusicById(Guid id)
+    public async Task<Music?> UpdateMusicAsync(Guid id, Music music)
     {
-        var music = await _context.Musics
-            .Include(m => m.Album)
-            .Include(m => m.Artist)
-            .Include(m => m.Genre)
-            .Include(m => m.Artist.User)
-            .FirstOrDefaultAsync(m => m.Id.Equals(id));
+        var existingMusic = await _context.Musics.FindAsync(id);
+        if (existingMusic == null)
+            return null;
 
-        if (music == null) return null;
-
-        var musicDTO = MusicMapper.Convert(music);
-
-        return musicDTO;
-    }
-
-    public async Task<MusicDTO> GetMusicByArtistId(Guid id)
-    {
-        var music = await _context.Musics
-            .Include(m => m.Album)
-            .Include(m => m.Artist)
-            .Include(m => m.Genre)
-            .Include(m => m.Artist.User)
-            .FirstOrDefaultAsync(m => m.artistId.Equals(id));
-
-        if (music == null) return null;
-
-        var musicDTO = MusicMapper.Convert(music);
-
-        return musicDTO;
-    }
-
-    public async Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId)
-    {
-        var music = await _context.Musics
-            .FirstOrDefaultAsync(m => m.Id == musicId);
-
-        if (music == null) return null;
-
-        music.musicPlays++;
-
-        var today = DateTime.UtcNow.Date;
-        var musicListen = await _context.MusicListens
-            .FirstOrDefaultAsync(ml => ml.MusicId == musicId && ml.ListenDate == today);
-
-        if (musicListen == null)
-        {
-            musicListen = new MusicListen
-            {
-                Id = Guid.NewGuid(),
-                MusicId = musicId,
-                ListenDate = today,
-                ListenCount = 1
-            };
-            _context.MusicListens.Add(musicListen);
-        }
-        else
-        {
-            musicListen.ListenCount++;
-            _context.MusicListens.Update(musicListen);
-        }
+        existingMusic.musicTitle = music.musicTitle;
+        existingMusic.musicUrl = music.musicUrl;
+        existingMusic.musicPicture = music.musicPicture;
+        existingMusic.musicPlays = music.musicPlays;
+        existingMusic.musicDuration = music.musicDuration;
+        existingMusic.releaseDate = music.releaseDate;
+        existingMusic.albumId = music.albumId;
+        existingMusic.artistId = music.artistId;
+        existingMusic.genreId = music.genreId;
 
         await _context.SaveChangesAsync();
-
-        return "Added";
+        return existingMusic;
     }
 
-
-    public async Task<int> ListenTimeOnThisDay(Guid musicId)
+    public async Task<bool> DeleteMusicAsync(Guid id)
     {
-        var today = DateTime.UtcNow.Date;
-        var listenCount = await _context.MusicListens
-            .Where(ml => ml.MusicId == musicId && ml.ListenDate == today)
+        var music = await _context.Musics.FindAsync(id);
+        if (music == null)
+            return false;
+
+        _context.Musics.Remove(music);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<int> GetListenCountAsync(Guid musicId, DateTime startDate, DateTime endDate)
+    {
+        return await _context.MusicListens
+            .Where(ml => ml.MusicId == musicId && ml.ListenDate >= startDate && ml.ListenDate <= endDate)
             .SumAsync(ml => (int?)ml.ListenCount) ?? 0;
-
-        return listenCount;
     }
 
-    public async Task<int> ListenTimeOnThisMonth(Guid musicId)
+    public async Task<List<Music>> GetMusicByAlbumIdAsync(Guid albumId)
     {
-        var firstDayOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-        var listenCount = await _context.MusicListens
-            .Where(ml => ml.MusicId == musicId && ml.ListenDate >= firstDayOfMonth)
-            .SumAsync(ml => (int?)ml.ListenCount) ?? 0;
-
-        return listenCount;
+        return await _context.Musics.Where(x => x.albumId.Equals(albumId)).ToListAsync();
     }
 
-    public async Task<int> ListenTimeOnThisYear(Guid musicId)
+    public async Task<List<PlaylistMusic>> GetMusicInPlaylistByPlaylsitIdAsync(Guid playlistId)
     {
-        var firstDayOfYear = new DateTime(DateTime.UtcNow.Year, 1, 1);
-        var listenCount = await _context.MusicListens
-            .Where(ml => ml.MusicId == musicId && ml.ListenDate >= firstDayOfYear)
-            .SumAsync(ml => (int?)ml.ListenCount) ?? 0;
-
-        return listenCount;
-    }
-
-    public async Task<string> UploadedFiles(IFormFile file, Guid musicId, string fileType)
-    {
-        var fileTransferUtility = new TransferUtility(_s3Client);
-        var fileExtension = Path.GetExtension(file.FileName);
-        var filePath = $"{fileType}{Guid.NewGuid()}{fileExtension}";
-
-        using (var stream = file.OpenReadStream())
-        {
-            await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
-        }
-
-        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
-        {
-            BucketName = _bucketName,
-            Key = filePath,
-            Expires = DateTime.UtcNow.AddMinutes(30)
-        });
-
-        return url;
+        return await _context.PlaylistMusics.Where(x => x.playlistId.Equals(playlistId)).ToListAsync();
     }
 }

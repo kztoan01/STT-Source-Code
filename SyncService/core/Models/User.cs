@@ -12,4 +12,7 @@ public class User : IdentityUser
     public List<Playlist> Playlists { get; set; } = new();
     public List<Follower> Followers { get; set; } = new();
     public Artist Artist { get; set; }
+
+    //public AccountDetail AccountDetail { get; set; }
+
 }

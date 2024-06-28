@@ -6,6 +6,17 @@ namespace repository.Mappers;
 
 public static class MusicMapper
 {
+    public static ElasticMusicDTO ToElasticFromMusic(this Music music)
+    {
+        return new ElasticMusicDTO
+        {
+            Id = music.Id,
+            musicTitle = music.musicTitle,
+            musicUrl = music.musicUrl,
+            musicPicture = music.musicPicture
+        };
+    }
+
     public static Music ToMusicFromCreate(this AddMusicDTO musicDTO)
     {
         return new Music

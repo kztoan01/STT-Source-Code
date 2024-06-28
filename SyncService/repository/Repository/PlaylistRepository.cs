@@ -1,9 +1,6 @@
-using core.Dtos.Music;
-using core.Dtos.Playlist;
 using core.Models;
 using data.Data;
 using Microsoft.EntityFrameworkCore;
-using repository.Mappers;
 using repository.Repository.Interfaces;
 
 namespace repository.Repository;
@@ -26,218 +23,70 @@ public class PlaylistRepository : IPlaylistRepository
 
     public async Task<Playlist?> DeletePlaylistAsync(Guid id)
     {
-        var playlistModel = await _context.Playlists.FirstOrDefaultAsync(x => x.Id == id);
-
-        if (playlistModel == null)
+        var playlist = await _context.Playlists.FindAsync(id);
+        if (playlist == null)
             return null;
 
-        _context.Playlists.Remove(playlistModel);
+        _context.Playlists.Remove(playlist);
         await _context.SaveChangesAsync();
-
-        return playlistModel;
+        return playlist;
     }
 
     public async Task<Playlist?> GetPlaylistByIdAsync(Guid id)
     {
-        return await _context.Playlists.FirstOrDefaultAsync(x => x.Id == id);
+        return await _context.Playlists.Include(p => p.playlistMusics).FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<List<Playlist>> GetPlaylistsByGenreNameAsync(string genreName)
+    public async Task<Playlist?> UpdatePlaylistAsync(Guid id, Playlist playlist)
     {
-        // Playlist -> PlaylistMusic -> Music -> Genre
-        // handle mapper later 
-        return await _context.Playlists
-            .Where(p => p.playlistMusics
-                .Any(pm => pm.Music.Genre.genreName == genreName))
-            .Include(pm => pm.playlistMusics)
-            .ToListAsync();
-    }
-
-    public async Task<List<PlaylistDTO>> GetUserPlaylistAsync(string userId)
-    {
-        return await _context.Playlists
-            .Where(c => c.userId == userId)
-            .Select(c => new PlaylistDTO
-            {
-                Id = c.Id,
-                playlistName = c.playlistName,
-                playlistDescription = c.playlistDescription,
-                createdDate = c.createdDate,
-                updatedDate = c.updatedDate
-            })
-            .ToListAsync();
-    }
-
-    public async Task<Playlist?> UpdatePlaylistAsync(Guid id, Playlist playlistModel)
-    {
-        var existingPlaylist = await _context.Playlists.FindAsync(id);
+        var existingPlaylist = await _context.Playlists
+            .Include(p => p.playlistMusics)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (existingPlaylist == null)
             return null;
 
-        existingPlaylist.playlistName = playlistModel.playlistName;
-        existingPlaylist.playlistDescription = playlistModel.playlistDescription;
-        existingPlaylist.playlistPicture = playlistModel.playlistPicture;
-        existingPlaylist.createdDate = playlistModel.createdDate;
-        existingPlaylist.updatedDate = playlistModel.updatedDate;
-        existingPlaylist.userId = existingPlaylist.userId;
+        existingPlaylist.playlistName = playlist.playlistName;
+        existingPlaylist.playlistDescription = playlist.playlistDescription;
+        existingPlaylist.playlistPicture = playlist.playlistPicture;
+        existingPlaylist.createdDate = playlist.createdDate;
+        existingPlaylist.updatedDate = playlist.updatedDate;
+        existingPlaylist.userId = playlist.userId;
+
+        foreach (var playlistMusic in playlist.playlistMusics)
+        {
+            var existingMusic = existingPlaylist.playlistMusics
+                .FirstOrDefault(pm => pm.musicId == playlistMusic.musicId);
+            if (existingMusic != null)
+                existingMusic.position = playlistMusic.position;
+            else
+                existingPlaylist.playlistMusics.Add(playlistMusic);
+        }
 
         await _context.SaveChangesAsync();
-
         return existingPlaylist;
     }
 
-    public async Task<string> AddMusicIntoPlaylist(Guid musicId, Guid playlistId)
-    {
-        var playlist = await _context.Playlists.Include(p => p.playlistMusics)
-            .FirstOrDefaultAsync(p => p.Id == playlistId);
-        var music = await _context.Musics.FirstOrDefaultAsync(m => m.Id == musicId);
-
-
-        if (playlist == null || music == null) return "Music or Playlist are not available!";
-
-        if (playlist.playlistMusics.Any(pm => pm.musicId == musicId))
-            return "This music is already added into this Playlist.";
-
-        var nextPosition = playlist.playlistMusics.Count + 1;
-
-        var playlistMusic = new PlaylistMusic
-        {
-            playlistId = playlistId,
-            musicId = musicId,
-            addedAt = DateTime.UtcNow,
-            position = nextPosition,
-            Music = music,
-            Playlist = playlist
-        };
-
-        _context.PlaylistMusics.Add(playlistMusic);
-
-        await _context.SaveChangesAsync();
-
-        return "Added successfully!";
-    }
-
-    public async Task<string> AddEntireAlbumIntoPlaylist(Guid albumId, Guid playlistId)
-    {
-        var musicDTOs = await GetMusicByAlbumId(albumId);
-
-        if (musicDTOs == null || musicDTOs.Count == 0) return "No music found in the specified album.";
-
-        var playlist = await _context.Playlists.Include(p => p.playlistMusics)
-            .FirstOrDefaultAsync(p => p.Id == playlistId);
-
-        if (playlist == null) return "Playlist not found.";
-
-        var addedMusicTitles = new List<string>();
-        var skippedMusicTitles = new List<string>();
-
-        foreach (var music in musicDTOs)
-        {
-            var result = await AddMusicIntoPlaylist(music.Id, playlistId);
-
-            if (result.Equals("This music is already added into this Playlist."))
-                skippedMusicTitles.Add(music.musicTitle);
-            else
-                addedMusicTitles.Add(music.musicTitle);
-        }
-
-        var message = "Album added to playlist successfully!";
-
-        if (addedMusicTitles.Count > 0) message += "Added music:" + string.Join(";", addedMusicTitles);
-
-        if (skippedMusicTitles.Count > 0) message += "Skipped music" + string.Join(";", skippedMusicTitles);
-
-        return message;
-    }
-
-    public async Task<List<Playlist>> ShowPlaylistByUserId(Guid UserId)
+    public async Task<List<Playlist>> GetUserPlaylistsAsync(string userId)
     {
         return await _context.Playlists
-            .Where(p => p.userId == UserId.ToString())
-            .ToListAsync();
-    }
-
-    public async Task<string> DeleteAMusicInPlaylist(Guid musicId, Guid playlistId)
-    {
-        var playlist = await _context.Playlists
+            .Where(p => p.userId == userId)
             .Include(p => p.playlistMusics)
-            .FirstOrDefaultAsync(p => p.Id == playlistId);
-
-        if (playlist == null) return "Playlist is null!";
-
-        var music = await _context.Musics.FindAsync(musicId);
-
-        if (music == null) return "Music is null!";
-
-        var playlistMusic = playlist.playlistMusics.FirstOrDefault(pm => pm.musicId == musicId);
-
-        if (playlistMusic == null) return "Invalid";
-
-        var deletedPosition = playlistMusic.position;
-
-        playlist.playlistMusics.Remove(playlistMusic);
-
-        foreach (var item in playlist.playlistMusics.Where(pm => pm.position > deletedPosition)) item.position--;
-
-        await _context.SaveChangesAsync();
-        return "Removed music from playlist successfully!";
-    }
-
-
-    public async Task<string> ChangeMusicPositionInPlaylist(Guid musicId1, int newPosistion, Guid playlistId)
-    {
-        var music1 =
-            await _context.PlaylistMusics.FirstOrDefaultAsync(m => m.musicId == musicId1 && m.playlistId == playlistId);
-
-        if (music1 == null) return "the specified music IDs were not found in the playlist.";
-
-        var playlistMusics = _context.PlaylistMusics
-            .Where(pm => pm.playlistId == playlistId)
-            .OrderBy(pm => pm.position)
-            .ToList();
-
-
-        var oldPosition1 = music1.position;
-        var newPosition1 = newPosistion;
-
-        if (oldPosition1 > newPosition1)
-        {
-            music1.position = newPosition1;
-            var changeList = await _context.PlaylistMusics
-                .Where(pm => pm.playlistId == playlistId && pm.position >= newPosition1 && pm.position < oldPosition1)
-                .ToListAsync();
-            foreach (var item in changeList) item.position++;
-        }
-        else if (oldPosition1 < newPosition1)
-        {
-            music1.position = newPosition1;
-            var changeList = await _context.PlaylistMusics
-                .Where(pm => pm.playlistId == playlistId && pm.position > oldPosition1 && pm.position <= newPosition1)
-                .ToListAsync();
-            foreach (var item in changeList) item.position--;
-        }
-
-
-        await _context.SaveChangesAsync();
-
-        return "Music positions in the playlist have been updated successfully.";
-    }
-
-    public async Task<List<MusicDTO>> GetMusicByAlbumId(Guid albumId)
-    {
-        var musics = await _context.Musics
-            .Include(m => m.Album)
-            .Include(m => m.Artist)
-            .ThenInclude(a => a.User)
-            .Include(m => m.Genre)
-            .Where(m => m.albumId.Equals(albumId))
             .ToListAsync();
+    }
 
-        if (musics == null || musics.Count == 0) return null;
+    public async Task<List<Playlist>> GetPlaylistsByGenreNameAsync(string genreName)
+    {
+        return await _context.Playlists
+            .Where(p => p.playlistMusics.Any(pm => pm.Music.Genre.genreName == genreName))
+            .Include(p => p.playlistMusics)
+            .ToListAsync();
+    }
 
-        var musicDTOs = musics.Select(music => MusicMapper.Convert(music)).ToList();
-
-        return musicDTOs;
+    public async Task<List<Playlist>> ShowPlaylistsByUserIdAsync(Guid userId)
+    {
+        return await _context.Playlists
+            .Where(p => p.userId == userId.ToString())
+            .ToListAsync();
     }
 }

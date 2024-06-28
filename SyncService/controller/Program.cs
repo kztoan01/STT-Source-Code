@@ -1,8 +1,11 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
+using core.Dtos.Music;
 using core.Models;
 using data.Data;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,8 +21,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+var cloudId = builder.Configuration["Elastic:CloudId"];
+var apiKey = builder.Configuration["Elastic:ApiKey"];
+var settings = new ElasticsearchClientSettings(
+    cloudId!,
+    new ApiKey(apiKey!)).DefaultIndex("syncmusic");
+// var settings = new ElasticsearchClientSettings(new Uri("https://192.168.1.7:9200"))
+//     .CertificateFingerprint("44564D41433B8E121BAA3BC9455A0ED7DA3CE2D7E499629796C1F18D0C65BF7A")
+//     .Authentication(new BasicAuthentication("elastic", "changeme"))
+//     .DefaultIndex("testhehe");
+var clientElastic = new ElasticsearchClient(settings);
+builder.Services.AddSingleton(clientElastic);
+// TODO: add scope sau
+builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<ElasticMusicDTO>>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
@@ -29,10 +46,13 @@ builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+var dbServer = Environment.GetEnvironmentVariable("LOCALDB");
+var dbPass = Environment.GetEnvironmentVariable("PASSDB");
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    .Replace("{LOCALDB}", dbServer)
+    .Replace("{PASSDB}", dbPass);
+builder.Services.AddDbContext<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); });
 
 //authentication plugin
 
@@ -91,6 +111,8 @@ builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IAlbumService, AlbumService>();
 builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 //CORS
 

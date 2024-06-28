@@ -1,6 +1,7 @@
 ﻿using core.Dtos.Album;
 using core.Dtos.Artist;
 using core.Dtos.Music;
+using core.Models;
 using data.Data;
 using Microsoft.EntityFrameworkCore;
 using repository.Repository.Interfaces;
@@ -11,25 +12,13 @@ public class ArtistRepository : IArtistRepository
 {
     private readonly ApplicationDBContext _context;
 
-    public ArtistRepository(ApplicationDBContext context)
+    public ArtistRepository(ApplicationDBContext context )
     {
         _context = context;
+
     }
 
-    public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId)
-    {
-        return await _context.Albums
-            .Where(a => a.artistId == artistId)
-            .Select(a => new AlbumResponseDTO
-            {
-                Id = a.Id,
-                albumTitle = a.albumTitle,
-                albumDescription = a.albumDescription,
-                releaseDate = a.releaseDate
-            })
-            .ToListAsync();
-    }
-
+ 
     public async Task<ArtistDTO> GetArtistDTOById(Guid id)
     {
         var artist = await _context.Artists
@@ -84,10 +73,16 @@ public class ArtistRepository : IArtistRepository
                 musicTitle = m.musicTitle,
                 musicUrl = m.musicUrl,
                 musicPicture = m.musicPicture,
+                releaseDate = m.releaseDate,
                 musicPlays = m.musicPlays,
                 genreName = m.Genre.genreName,
                 albumTitle = m.Album.albumTitle
             })
             .ToListAsync();
+    }
+
+    public async Task<Artist> GetArtistByUserId(Guid userId)
+    {
+        return await _context.Artists.FirstOrDefaultAsync(a => a.userId == userId.ToString());
     }
 }

@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="PayPalCheckoutSdk" Version="1.0.4"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\core\core.csproj" />
         <ProjectReference Include="..\repository\repository.csproj" />
     </ItemGroup>
@@ -15,6 +19,10 @@
         <Reference Include="Microsoft.AspNetCore.Http.Features">
             <HintPath>..\..\..\..\..\.dotnet\shared\Microsoft.AspNetCore.App\8.0.6\Microsoft.AspNetCore.Http.Features.dll</HintPath>
         </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.14.3"/>
     </ItemGroup>
 
 </Project>
