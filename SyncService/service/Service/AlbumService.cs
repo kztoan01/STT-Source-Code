@@ -1,4 +1,6 @@
 ﻿using core.Dtos.Album;
+using core.Dtos.Artist;
+using core.Dtos.Music;
 using core.Models;
 using core.Objects;
 using repository.Repository;
@@ -10,10 +12,12 @@ namespace service.Service;
 public class AlbumService : IAlbumService
 {
     private readonly IAlbumRepository _albumRepository;
+    private readonly IArtistRepository _artistRepository;
 
-    public AlbumService(IAlbumRepository albumRepository)
+    public AlbumService(IAlbumRepository albumRepository, IArtistRepository artistRepository)
     {
         _albumRepository = albumRepository;
+        _artistRepository = artistRepository;
     }
 
     public async Task<Album> CreateAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId)
@@ -44,13 +48,137 @@ public class AlbumService : IAlbumService
 
         return await _albumRepository.EditAlbumAsync(album.Result);
     }
-    public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId)
+    public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId, QueryObject query)
     {
-        return await _albumRepository.GetAllArtistAlbumsAsync(artistId);
+        var albums = await _albumRepository.GetAllArtistAlbumsAsync(artistId);
+
+        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        {
+            albums = albums.Where(a => a.albumTitle.Contains(query.Symbol, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        {
+            albums = query.SortBy.Equals("Title", StringComparison.OrdinalIgnoreCase)
+                ? query.IsDecsending
+                    ? albums.OrderByDescending(a => a.albumTitle).ToList()
+                    : albums.OrderBy(a => a.albumTitle).ToList()
+                : albums;
+        }
+
+        var skipNumber = (query.PageNumber - 1) * query.PageSize;
+        var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();
+
+        var albumResponseDTOs = new List<AlbumResponseDTO>();
+
+        foreach (var album in paginatedAlbums)
+        {
+            var albumResponseDTO = new AlbumResponseDTO
+            {
+                Id = album.Id,
+                albumTitle = album.albumTitle,
+                albumDescription = album.albumDescription,
+                releaseDate = album.releaseDate,
+                musics = new List<MusicDTO>()
+            };
+
+            var musicsList = album.musics;
+
+            foreach (var music in musicsList)
+            {
+                var musicDTO = new MusicDTO
+                {
+                    Id = music.Id,
+                    musicTitle = music.musicTitle,
+                    musicUrl = music.musicUrl,
+                    musicPicture = music.musicPicture,
+                    musicPlays = music.musicPlays,
+                    musicDuration = music.musicDuration,
+                    releaseDate = music.releaseDate,
+                    genreName = music.genreName,
+                    artistName = music.artistName,
+                    AlbumDTO = new AlbumDTO
+                    {
+                        Id = album.Id,
+                        albumTitle = album.albumTitle,
+                    }
+                };
+
+                albumResponseDTO.musics.Add(musicDTO);
+            }
+            var artistAlbum = await _albumRepository.GetAlbumById(album.Id);
+            var artistDTO = await _artistRepository.GetArtistDTOById(artistAlbum.artistId);
+            albumResponseDTO.artist = artistDTO;
+            albumResponseDTOs.Add(albumResponseDTO);
+        }
+
+        return albumResponseDTOs;
+
     }
-    public async Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName)
+    public async Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName, QueryObject query)
     {
-        return await _albumRepository.getAlbumByGenreNameAsync(genreName);
+        var albums =  await _albumRepository.getAlbumByGenreNameAsync(genreName);
+        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        {
+            albums = albums.Where(a => a.albumTitle.Contains(query.Symbol, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        {
+            albums = query.SortBy.Equals("Title", StringComparison.OrdinalIgnoreCase)
+                ? query.IsDecsending
+                    ? albums.OrderByDescending(a => a.albumTitle).ToList()
+                    : albums.OrderBy(a => a.albumTitle).ToList()
+                : albums;
+        }
+
+        var skipNumber = (query.PageNumber - 1) * query.PageSize;
+        var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();
+
+        var albumResponseDTOs = new List<AlbumResponseDTO>();
+
+        foreach (var album in paginatedAlbums)
+        {
+            var albumResponseDTO = new AlbumResponseDTO
+            {
+                Id = album.Id,
+                albumTitle = album.albumTitle,
+                albumDescription = album.albumDescription,
+                releaseDate = album.releaseDate,
+                musics = new List<MusicDTO>()
+            };
+
+            var musicsList = album.musics;
+
+            foreach (var music in musicsList)
+            {
+                var musicDTO = new MusicDTO
+                {
+                    Id = music.Id,
+                    musicTitle = music.musicTitle,
+                    musicUrl = music.musicUrl,
+                    musicPicture = music.musicPicture,
+                    musicPlays = music.musicPlays,
+                    musicDuration = music.musicDuration,
+                    releaseDate = music.releaseDate,
+                    genreName = music.genreName,
+                    artistName = music.artistName,
+                    AlbumDTO = new AlbumDTO
+                    {
+                        Id = album.Id,
+                        albumTitle = album.albumTitle,
+                    }
+                };
+
+                albumResponseDTO.musics.Add(musicDTO);
+            }
+            var artistAlbum = await _albumRepository.GetAlbumById(album.Id);
+            var artistDTO = await _artistRepository.GetArtistDTOById(artistAlbum.artistId);
+            albumResponseDTO.artist = artistDTO;
+            albumResponseDTOs.Add(albumResponseDTO);
+        }
+
+        return albumResponseDTOs;
     }
 
     public async Task<Album> GetAlbumByIdAsync(Guid albumId)
@@ -65,20 +193,72 @@ public class AlbumService : IAlbumService
 
     public async Task<List<AlbumResponseDTO>> getAllAlbumsAsync(QueryObject query)
     {
-        //var albums = await _albumRepository.getAllAlbumsAsync();
+        var albums = await _albumRepository.getAllAlbumsAsync();
 
-        //if (!string.IsNullOrWhiteSpace(query.SortBy))
-        //    albums = query.SortBy.Equals("Name", StringComparison.OrdinalIgnoreCase)
-        //        ? query.IsDecsending
-        //            ? albums.OrderByDescending(a => a.albumTitle).ToList()
-        //            : albums.OrderBy(a => a.albumTitle).ToList()
-        //        : albums;
+        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        {
+            albums = albums.Where(a => a.albumTitle.Contains(query.Symbol, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
 
-        //var skipNumber = (query.PageNumber - 1) * query.PageSize;
-        //var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();
+        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        {
+            albums = query.SortBy.Equals("Title", StringComparison.OrdinalIgnoreCase)
+                ? query.IsDecsending
+                    ? albums.OrderByDescending(a => a.albumTitle).ToList()
+                    : albums.OrderBy(a => a.albumTitle).ToList()
+                : albums;
+        }
 
-        return await _albumRepository.getAllAlbumsAsync();
+        var skipNumber = (query.PageNumber - 1) * query.PageSize;
+        var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();
+
+        var albumResponseDTOs = new List<AlbumResponseDTO>();
+
+        foreach (var album in paginatedAlbums)
+        {
+            var albumResponseDTO = new AlbumResponseDTO
+            {
+                Id = album.Id,
+                albumTitle = album.albumTitle,
+                albumDescription = album.albumDescription,
+                releaseDate = album.releaseDate,
+                musics = new List<MusicDTO>()
+            };
+
+            var musicsList = album.musics;
+
+            foreach (var music in musicsList)
+            {
+                var musicDTO = new MusicDTO
+                {
+                    Id = music.Id,
+                    musicTitle = music.musicTitle,
+                    musicUrl = music.musicUrl,
+                    musicPicture = music.musicPicture,
+                    musicPlays = music.musicPlays,
+                    musicDuration = music.musicDuration,
+                    releaseDate = music.releaseDate,
+                    genreName = music.genreName,
+                    artistName = music.artistName,
+                    AlbumDTO = new AlbumDTO
+                    {
+                        Id = album.Id,
+                        albumTitle = album.albumTitle,
+                    }
+                };
+
+                albumResponseDTO.musics.Add(musicDTO);
+            }
+            var artistAlbum = await _albumRepository.GetAlbumById(album.Id);
+            var artistDTO = await _artistRepository.GetArtistDTOById(artistAlbum.artistId);
+            albumResponseDTO.artist = artistDTO;
+            albumResponseDTOs.Add(albumResponseDTO);
+        }
+
+        return albumResponseDTOs;
     }
+
+
 
     public async Task<Album> GetMostListenAlbum()
     {
