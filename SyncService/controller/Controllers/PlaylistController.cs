@@ -1,13 +1,12 @@
+using core.Dtos.Album;
+using core.Dtos.Playlist;
+using core.Models;
+using core.Objects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using core.Dtos.Album;
-using core.Dtos.Playlist;
-using repository.Mappers;
-using core.Models;
 using service.Service.Interfaces;
 using service.Service.Mappers;
-using core.Objects;
 
 namespace sync_service.Controllers;
 
@@ -34,7 +33,7 @@ public class PlaylistController : ControllerBase
         var user = await _userManager.GetUserAsync(User);
         if (user != null)
         {
-            var userPlaylist = await _playlistService.GetUserPlaylistsAsync(user.Id,queryObject );
+            var userPlaylist = await _playlistService.GetUserPlaylistsAsync(user.Id, queryObject);
 
             return Ok(userPlaylist);
         }

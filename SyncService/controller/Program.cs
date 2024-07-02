@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
-using core.Dtos;
 using core.Dtos.Music;
 using core.Models;
 using data.Data;
@@ -52,10 +51,8 @@ var dbPass = Environment.GetEnvironmentVariable("PASSDB");
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     .Replace("{LOCALDB}", dbServer)
-    .Replace("{PASSDB}", dbPass);builder.Services.AddDbContext<ApplicationDBContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
+    .Replace("{PASSDB}", dbPass);
+builder.Services.AddDbContext<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); });
 
 //authentication plugin
 
@@ -117,6 +114,17 @@ builder.Services.AddScoped<IArtistService, ArtistService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+//CORS
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("SyncWeb", policyBuilder => {
+        policyBuilder.WithOrigins("http://localhost:3000");
+        policyBuilder.AllowAnyHeader();
+        policyBuilder.AllowAnyMethod();
+        policyBuilder.AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -128,9 +136,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+app.UseCors("SyncWeb");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
 
 app.Run();

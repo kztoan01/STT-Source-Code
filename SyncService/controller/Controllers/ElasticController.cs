@@ -1,8 +1,5 @@
-using core.Dtos;
 using core.Dtos.Music;
-using core.Models;
 using Microsoft.AspNetCore.Mvc;
-using service.Service;
 using service.Service.Interfaces;
 
 namespace controller.Controllers;

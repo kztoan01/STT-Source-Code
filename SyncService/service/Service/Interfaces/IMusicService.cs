@@ -19,6 +19,5 @@ namespace service.Service.Interfaces
         Task<MusicDTO?> GetMusicByArtistIdAsync(Guid artistId);
         Task<bool> DeleteMusicByIdAsync(Guid musicId);
 
-        Task<Music> GetMusicByMusicIdAsync(Guid musicId);
-    }
+    Task<Music> GetMusicByMusicIdAsync(Guid musicId);
 }

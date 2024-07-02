@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using core.Dtos.Album;
 using core.Models;
-using service.Service.Interfaces;
-using core.Dtos.Playlist;
+using core.Objects;
 using Microsoft.AspNetCore.Authorization;
-using service.Service;
-using core.Dtos.Album;
-using Amazon.Runtime.Internal;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using service.Service.Interfaces;
 
 namespace sync_service.Controllers;
 
@@ -15,11 +13,12 @@ namespace sync_service.Controllers;
 public class AlbumController : ControllerBase
 {
     private readonly IAlbumService _albumService;
+    private readonly IArtistService _artistService;
     private readonly UserManager<User> _userManager;
     private readonly IUserService _userService;
-    private readonly IArtistService _artistService;
 
-    public AlbumController(UserManager<User> userManager, IAlbumService albumService, IUserService userService, IArtistService artistService)
+    public AlbumController(UserManager<User> userManager, IAlbumService albumService, IUserService userService,
+        IArtistService artistService)
     {
         _userManager = userManager;
         _albumService = albumService;
@@ -27,14 +26,14 @@ public class AlbumController : ControllerBase
         _artistService = artistService;
     }
 
-    [HttpGet("getAlbumByGenreName/{genreName}")]
+    [HttpGet("getAlbumsByGenreName/{genreName}")]
     //[Authorize]
-    public async Task<IActionResult> GetAlbumByGenreName([FromRoute] string genreName)
+    public async Task<IActionResult> GetAlbumByGenreName([FromRoute] string genreName, [FromQuery] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var albums = await _albumService.getAlbumByGenreNameAsync(genreName);
+        var albums = await _albumService.getAlbumByGenreNameAsync(genreName, queryObject);
 
         if (albums == null)
             return NotFound();
@@ -42,6 +41,21 @@ public class AlbumController : ControllerBase
         return Ok(albums);
     }
 
+    [HttpGet("getAllArtistAlbums/{artistId}")]
+    //[Authorized]
+    public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId, [FromQuery] QueryObject queryObject)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var albums = await _albumService.GetAllArtistAlbumsAsync(artistId, queryObject);
+
+
+        if (albums == null)
+            return NotFound();
+
+        return Ok(albums);
+    }
 
     [HttpPost("createAlbum")]
     [Authorize]
@@ -51,17 +65,12 @@ public class AlbumController : ControllerBase
             return BadRequest(ModelState);
 
         var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return NotFound("User not found");
-        }
+        if (user == null) return NotFound("User not found");
 
         var artist = await _artistService.GetArtistByUserIdAsync(Guid.Parse(user.Id));
 
         if (artist == null || artist == null || artist.Id == Guid.Empty)
-        {
             return Forbid("Only artists can create albums.");
-        }
 
         await _albumService.CreateAlbumAsync(album, artist.Id);
         return Ok("Album created successfully");
@@ -73,23 +82,14 @@ public class AlbumController : ControllerBase
     public async Task<IActionResult> DeleteAlbum([FromBody] CreateAlbumDTO albumDTO, [FromRoute] Guid albumId)
     {
         var album = await _albumService.GetAlbumByIdAsync(albumId);
-        if (album == null)
-        {
-            return NotFound("Album not found");
-        }
+        if (album == null) return NotFound("Album not found");
         var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return NotFound("User not found");
-        }
+        if (user == null) return NotFound("User not found");
 
         var artist = await _artistService.GetArtistByUserIdAsync(Guid.Parse(user.Id));
 
-        if (artist == null || artist.Id == Guid.Empty)
-        {
-            return Forbid("Only artists can update albums.");
-        }
-        var updateAlbum = await _albumService.EditAlbumAsync(albumDTO,artist.Id,albumId);
+        if (artist == null || artist.Id == Guid.Empty) return Forbid("Only artists can update albums.");
+        var updateAlbum = await _albumService.EditAlbumAsync(albumDTO, artist.Id, albumId);
         return Ok("Album deleted successfully");
     }
 
@@ -99,25 +99,21 @@ public class AlbumController : ControllerBase
     public async Task<IActionResult> DeleteAlbum([FromRoute] Guid albumId)
     {
         var album = await _albumService.GetAlbumByIdAsync(albumId);
-        if (album == null)
-        {
-            return NotFound("Album not found");
-        }
+        if (album == null) return NotFound("Album not found");
 
         var deletedAlbum = await _albumService.DeleteAlbumAsync(albumId);
         return Ok("Album deleted successfully");
     }
 
 
-
-    [HttpGet("getAllAlbums")]
+    [HttpPost("getAllAlbums")]
     //[Authorize]
-    public async Task<IActionResult> GetAllAlbums()
+    public async Task<IActionResult> GetAllAlbums([FromQuery] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var albums = await _albumService.getAllAlbumsAsync();
+        var albums = await _albumService.getAllAlbumsAsync(queryObject);
 
         if (albums == null)
             return NotFound();

@@ -1,5 +1,4 @@
-﻿using Amazon.Runtime.Internal;
-using core.Dtos.Album;
+﻿using core.Dtos.Album;
 using core.Dtos.Artist;
 using core.Models;
 using repository.Repository.Interfaces;
@@ -16,10 +15,7 @@ public class ArtistService : IArtistService
         _artistRepository = artistRepository;
     }
 
-    public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId)
-    {
-        return await _artistRepository.GetAllArtistAlbumsAsync(artistId);
-    }
+
 
     public async Task<ArtistDTO> GetArtistDTOById(Guid id)
     {

@@ -6,6 +6,7 @@ public class MusicResponseDTO
     public string musicTitle { get; set; }
     public string musicUrl { get; set; }
     public string musicPicture { get; set; }
+    public DateTime releaseDate { get; set; }
     public int musicPlays { get; set; }
     public string genreName { get; set; }
     public string albumTitle { get; set; }

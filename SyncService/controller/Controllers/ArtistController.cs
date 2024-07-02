@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using core.Dtos.Artist;
 using core.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using service.Service.Interfaces;
 
 namespace controller.Controllers;
@@ -19,21 +19,6 @@ public class ArtistController : ControllerBase
         _artistService = artistService;
     }
 
-    [HttpGet("getAllArtistAlbums/{artistId}")]
-    //[Authorized]
-    public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var albums = await _artistService.GetAllArtistAlbumsAsync(artistId);
-
-
-        if (albums == null)
-            return NotFound();
-
-        return Ok(albums);
-    }
 
     [HttpPost("GetArtistDTOById")]
     public async Task<ArtistDTO> GetArtistDTOById(Guid id)

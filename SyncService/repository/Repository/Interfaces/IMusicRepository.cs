@@ -1,5 +1,6 @@
 using core.Models;
-using System;
+
+namespace repository.Repository.Interfaces;
 
 namespace repository.Repository.Interfaces
 {

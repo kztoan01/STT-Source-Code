@@ -51,6 +51,10 @@ public class TokenRepository : ITokenRepository
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var userClaims = new[]
         {
+            /*new Claim("id", user.Id),
+            new Claim("name", user.Name),
+            new Claim("email", user.Email),
+            new Claim("role", user.Role)*/
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Email, user.Email),

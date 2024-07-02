@@ -293,7 +293,7 @@ namespace data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("albumId")
+                    b.Property<Guid>("albumId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("artistId")
@@ -626,7 +626,8 @@ namespace data.Migrations
                     b.HasOne("core.Models.Album", "Album")
                         .WithMany("Musics")
                         .HasForeignKey("albumId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")

@@ -16,4 +16,5 @@ public class User : IdentityUser
     public Artist Artist { get; set; }
 
     //public AccountDetail AccountDetail { get; set; }
+
 }

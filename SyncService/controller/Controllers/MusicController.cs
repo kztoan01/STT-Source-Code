@@ -1,5 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
 using core.Dtos.Music;
+using core.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using repository.Mappers;
 using service.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +17,14 @@ namespace controller.Controllers;
 [ApiController]
 public class MusicController : ControllerBase
 {
-    private readonly IMusicService _musicService;
-    private readonly UserManager<User> _userManager;
     private readonly IArtistService _artistService;
 
     private readonly IElasticService<ElasticMusicDTO> _elasticService;
-    public MusicController(IMusicService musicService,IElasticService<ElasticMusicDTO> elasticService,UserManager<User> userManager,IArtistService artistService)
+    private readonly IMusicService _musicService;
+    private readonly UserManager<User> _userManager;
+
+    public MusicController(IMusicService musicService, IElasticService<ElasticMusicDTO> elasticService,
+        UserManager<User> userManager, IArtistService artistService)
     {
         _musicService = musicService;
         _userManager = userManager;
@@ -121,22 +126,14 @@ public class MusicController : ControllerBase
     {
         // only creator can delete music
         var music = await _musicService.GetMusicByMusicIdAsync(musicId);
-        if (music == null)
-        {
-            return NotFound("Music not found");
-        }
+        if (music == null) return NotFound("Music not found");
         var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            return NotFound("User not found");
-        }
+        if (user == null) return NotFound("User not found");
 
         var artist = await _artistService.GetArtistByUserIdAsync(Guid.Parse(user.Id));
 
         if (artist == null || artist.Id == Guid.Empty || !artist.Id.Equals(music.artistId))
-        {
             return Forbid("Only creator can delete this music.");
-        }
 
         var deleteMusic = await _musicService.DeleteMusicByIdAsync(musicId);
         return Ok("Music deleted successfully");
