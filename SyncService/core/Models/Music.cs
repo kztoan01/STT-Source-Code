@@ -19,6 +19,8 @@ public class Music
 
     public List<PlaylistMusic> playlistMusics { get; set; } = new();
 
+    public List<MusicHistory> MusicHistories { get; set; } = new();
+
     public List<MusicListen> MusicListens { get; set; } = new();
 
     public List<Collaboration> collaborations { get; set; } = new();

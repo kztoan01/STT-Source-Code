@@ -16,13 +16,15 @@ namespace service.Service
     public class MusicService : IMusicService
     {
         private readonly IMusicRepository _musicRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IAmazonS3 _s3Client;
         private readonly string _bucketName = "sync-music-storage";
 
-        public MusicService(IMusicRepository musicRepository, IAmazonS3 s3Client)
+        public MusicService(IMusicRepository musicRepository, IAmazonS3 s3Client,IUserRepository userRepository)
         {
             _musicRepository = musicRepository;
             _s3Client = s3Client;
+            _userRepository = userRepository;
         }
 
         public async Task<MusicDTO> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
@@ -37,6 +39,23 @@ namespace service.Service
 
             return ConvertToDto(createdMusic);
         }
+        public async Task<List<MusicDTO>> GetAllMusicHistoryByUserIdAsync(string userId)
+        {
+            User user = await _userRepository.GetUserById(userId);
+
+            List<MusicHistory> musicHistorys = user.MusicHistories.Where(mh => mh.UserId.Equals(userId)).ToList();
+
+            List<MusicDTO> result = new List<MusicDTO>();   
+            foreach(var musicHistory in musicHistorys)
+            {
+                var music = ConvertToDto( await _musicRepository.GetMusicByIdAsync(musicHistory.MusicId));
+                result.Add(music);
+            }
+            return result;
+        }
+
+
+
 
         public async Task<List<MusicDTO>> GetAllMusicAsync()
         {
@@ -57,10 +76,13 @@ namespace service.Service
             return music != null ? ConvertToDto(music) : null;
         }
 
-        public async Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId)
+        public async Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId,string userId)
         {
             var music = await _musicRepository.GetMusicByIdAsync(musicId);
             if (music == null)
+                return "Music not found.";
+
+            if (userId == null)
                 return "Music not found.";
 
             music.musicPlays++;
@@ -68,6 +90,9 @@ namespace service.Service
             var today = DateTime.UtcNow.Date; 
 
             var musicListen = music.MusicListens?.Find(ml => ml.ListenDate.Date == today);
+
+           
+
 
             if (musicListen == null)
             {
@@ -86,6 +111,26 @@ namespace service.Service
             else
             {
                 musicListen.ListenCount++;
+            }
+
+            var musicHistory = music.MusicHistories?.Find(mh => mh.MusicId == musicId && mh.UserId == userId);
+            if (musicHistory == null)
+            {
+                var newMusicHistory = new MusicHistory()
+                {
+                    MusicId = musicId,
+                    UserId = userId,
+                    ListenTime = DateTime.Now
+                };
+                if (music.MusicHistories == null)
+                {
+                    music.MusicHistories= new List<MusicHistory>();
+                }
+                music.MusicHistories.Add(newMusicHistory);
+            }
+            else
+            {
+                musicHistory.ListenTime = DateTime.Now; 
             }
 
             await _musicRepository.UpdateMusicAsync(musicId, music);

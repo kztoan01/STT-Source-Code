@@ -24,5 +24,12 @@ namespace repository.Repository
                 .Include(u => u.Artist)
                 .FirstOrDefaultAsync(u => u.Id.Equals(userId));
         }
+
+        public async Task<User> GetUserById(string userId)
+        {
+            return await _context.Users
+                 .Include(u => u.MusicHistories)
+                 .FirstOrDefaultAsync(u => u.Id.Equals(userId));
+        }
     }
 }

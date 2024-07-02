@@ -1,3 +1,4 @@
+using core.Dtos.Music;
 using core.Models;
 using data.Data;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ namespace repository.Repository
                 .Include(m => m.Artist)
                     .ThenInclude(a => a.User)
                 .Include(m => m.Genre)
+                .Include(m => m.MusicHistories)
                 .Include(m => m.MusicListens)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
@@ -65,6 +67,7 @@ namespace repository.Repository
             existingMusic.albumId = music.albumId;
             existingMusic.artistId = music.artistId;
             existingMusic.genreId = music.genreId;
+            existingMusic.MusicHistories = music.MusicHistories;
 
             await _context.SaveChangesAsync();
             return existingMusic;

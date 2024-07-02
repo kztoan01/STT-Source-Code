@@ -11,6 +11,8 @@ public class User : IdentityUser
     public bool status { get; set; }
     public List<Playlist> Playlists { get; set; } = new();
     public List<Follower> Followers { get; set; } = new();
+
+    public List<MusicHistory> MusicHistories  { get; set; } = new();
     public Artist Artist { get; set; }
 
     //public AccountDetail AccountDetail { get; set; }

@@ -8,8 +8,11 @@ namespace service.Service.Interfaces
     {
         Task<MusicDTO> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage);
         Task<List<MusicDTO>> GetAllMusicAsync();
+
+        Task<List<MusicDTO>> GetAllMusicHistoryByUserIdAsync(string userId);
+
         Task<MusicDTO?> GetMusicByIdAsync(Guid id);
-        Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId);
+        Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId,string userId);
         Task<int> ListenTimeOnThisYearAsync(Guid musicId);
         Task<int> ListenTimeOnThisMonthAsync(Guid musicId);
         Task<int> ListenTimeOnThisDayAsync(Guid musicId);

@@ -14,6 +14,7 @@ namespace repository.Repository.Interfaces
         Task<List<Music>> GetMusicByAlbumIdAsync(Guid albumId);
         Task<List<PlaylistMusic>> GetMusicInPlaylistByPlaylsitIdAsync(Guid playlistId);
 
- 
+
+
     }
 }
