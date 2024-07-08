@@ -22,7 +22,7 @@ public class MusicService : IMusicService
         _s3Client = s3Client;
     }
 
-    public async Task<MusicDTO> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
+    public async Task<Music> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
     {
         var imageUrl = await UploadFileAsync(fileImage, music.Id, "image");
         var musicUrl = await UploadFileAsync(fileMusic, music.Id, "music");
@@ -32,7 +32,7 @@ public class MusicService : IMusicService
 
         var createdMusic = await _musicRepository.CreateMusicAsync(music);
 
-        return ConvertToDto(createdMusic);
+        return createdMusic;
     }
 
     public async Task<List<MusicDTO>> GetAllMusicAsync()
@@ -47,11 +47,30 @@ public class MusicService : IMusicService
         return music != null ? ConvertToDto(music) : null;
     }
 
-    public async Task<MusicDTO?> GetMusicByArtistIdAsync(Guid artistId)
+    public async Task<List<MusicDTO>> GetMusicByArtistIdAsync(Guid artistId)
     {
         var musics = await _musicRepository.GetAllMusicAsync();
-        var music = musics.FirstOrDefault(m => m.artistId == artistId);
-        return music != null ? ConvertToDto(music) : null;
+
+        return musics.Where(m => m.artistId == artistId).Select(music => new MusicDTO
+        {
+            Id = music.Id,
+            genreName = music.Genre.genreName,
+            musicDuration = music.musicDuration,
+            musicPicture = music.musicPicture,
+            musicPlays = music.musicPlays,
+            musicTitle = music.musicTitle,
+            musicUrl = music.musicUrl,
+            releaseDate = music.releaseDate,
+            AlbumDTO = new AlbumDTO
+            {
+                Id = music.Album.Id,
+                albumTitle = music.Album.albumTitle
+            },
+            artistName = music.Artist.User.userFullName
+        }).ToList();
+
+        /*var music = musics.FirstOrDefault(m => m.artistId == artistId);
+        return music != null ? ConvertToDto(music) : null;*/
     }
 
     public async Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId)

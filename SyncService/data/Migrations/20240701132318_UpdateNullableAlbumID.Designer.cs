@@ -12,8 +12,8 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240625132040_updatemusic")]
-    partial class updatemusic
+    [Migration("20240701132318_UpdateNullableAlbumID")]
+    partial class UpdateNullableAlbumID
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "98e22b09-d91a-4e56-a001-d24d79095a1f",
+                            Id = "355be83f-9b5f-444c-b4b8-e7218512e149",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "d95f722e-d0c8-4679-8bf0-0b4dc965b2e1",
+                            Id = "190167a1-7b2a-47a4-a383-e7960b712b76",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "43e2e300-96f9-4b51-8d32-410921bc6cb5",
+                            Id = "300ebf51-dbdb-4e53-95dd-d7ed4c3108e5",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });

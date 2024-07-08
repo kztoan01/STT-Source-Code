@@ -11,4 +11,5 @@ public interface IArtistRepository
     Task<List<MusicResponseDTO>> GetAllArtistMusicsAsync(Guid artistId);
     Task<ArtistDTO> GetArtistDTOById(Guid id);
     Task<Artist> GetArtistByUserId(Guid userId);
+    Task<Artist> CreateArtist(Artist artist);
 }

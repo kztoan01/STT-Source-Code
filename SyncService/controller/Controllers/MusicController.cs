@@ -37,6 +37,8 @@ public class MusicController : ControllerBase
         var musicModel = music.ToMusicFromCreate();
         var elasticModel = musicModel.ToElasticFromMusic();
         await _elasticService.CreateDocumentAsync(elasticModel);
+        var artist = await _artistService.GetArtistByUserIdAsync(music.artistId);
+        musicModel.artistId = artist.Id;
         var newMusic = await _musicService.UploadMusicAsync(musicModel, music.fileMusic, music.fileImage);
         return Ok(newMusic);
     }
@@ -59,10 +61,12 @@ public class MusicController : ControllerBase
     }
 
 
-    [HttpPost("getMusicByArtistId/{artistId:Guid}")]
+    [HttpPost("getMusicByArtistId/{userId:Guid}")]
     [Authorize]
-    public async Task<MusicDTO> GetMusicByArtistId([FromRoute] Guid artistId)
+    public async Task<List<MusicDTO>> GetMusicByArtistId([FromRoute] Guid userId)
     {
+        var artist = await _artistService.GetArtistByUserIdAsync(userId);
+        var artistId = artist.Id;
         return await _musicService.GetMusicByArtistIdAsync(artistId);
     }
 

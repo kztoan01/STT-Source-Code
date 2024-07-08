@@ -66,7 +66,8 @@ public class ApplicationDBContext : IdentityDbContext<User>
             .HasOne(m => m.Album)
             .WithMany(a => a.Musics)
             .HasForeignKey(m => m.albumId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
 
         modelBuilder.Entity<Music>()
             .HasOne(m => m.Artist)

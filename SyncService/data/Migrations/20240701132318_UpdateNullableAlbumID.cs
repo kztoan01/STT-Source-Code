@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class UpdateNullableAlbumID : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -275,7 +275,7 @@ namespace data.Migrations
                     musicPlays = table.Column<int>(type: "int", nullable: false),
                     musicDuration = table.Column<double>(type: "float", nullable: false),
                     releaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    albumId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    albumId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     artistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     genreId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -374,9 +374,9 @@ namespace data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "152eef24-c23a-4d3e-8705-36c47672b21d", null, "Artist", "ARTIST" },
-                    { "224a37b3-4130-453b-8687-f32ccd397f78", null, "Admin", "ADMIN" },
-                    { "7fc3669e-521d-43d4-ad67-1fac47a84c2e", null, "User", "USER" }
+                    { "190167a1-7b2a-47a4-a383-e7960b712b76", null, "User", "USER" },
+                    { "300ebf51-dbdb-4e53-95dd-d7ed4c3108e5", null, "Artist", "ARTIST" },
+                    { "355be83f-9b5f-444c-b4b8-e7218512e149", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
