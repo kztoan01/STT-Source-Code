@@ -6,7 +6,7 @@ namespace service.Service.Interfaces;
 
 public interface IAlbumService
 {
-    Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName);
+    Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName, QueryObject queryObject);
     Task<List<AlbumResponseDTO>> getAllAlbumsAsync(QueryObject query);
     Task<AlbumResponseDTO> GetAlbumDetail(Guid albumId);
     Task<Album> GetMostListenAlbum();
@@ -15,5 +15,5 @@ public interface IAlbumService
     Task<Album> GetAlbumByIdAsync(Guid albumId);
     Task<Album> EditAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId, Guid albumId);
 
-    Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId);
+    Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId, QueryObject queryObject);
 }

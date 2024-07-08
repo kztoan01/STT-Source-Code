@@ -96,6 +96,16 @@ public class ApplicationDBContext : IdentityDbContext<User>
             .WithMany(a => a.Followers)
             .HasForeignKey(f => f.artistId);
 
+        modelBuilder.Entity<MusicHistory>()
+             .HasOne(f => f.User)
+             .WithMany(u => u.MusicHistories)
+             .HasForeignKey(f => f.UserId)
+             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<MusicHistory>()
+            .HasOne(f => f.Music)
+            .WithMany(a => a.MusicHistories)
+            .HasForeignKey(f => f.MusicId);
 
         var roles = new List<IdentityRole>
         {

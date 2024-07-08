@@ -45,7 +45,8 @@ public class ArtistRepository : IArtistRepository
             Albums = artist.Albums.Select(a => new AlbumDTO
             {
                 Id = a.Id,
-                albumTitle = a.albumTitle
+                albumTitle = a.albumTitle,
+                albumDescription = a.albumDescription
             }).ToList(),
             ViralMusics = artist.Musics.Select(m => new MusicDTO
             {

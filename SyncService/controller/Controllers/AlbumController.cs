@@ -1,5 +1,6 @@
 ﻿using core.Dtos.Album;
 using core.Models;
+using core.Objects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -27,12 +28,12 @@ public class AlbumController : ControllerBase
 
     [HttpGet("getAlbumsByGenreName/{genreName}")]
     //[Authorize]
-    public async Task<IActionResult> GetAlbumByGenreName([FromRoute] string genreName)
+    public async Task<IActionResult> GetAlbumByGenreName([FromRoute] string genreName, [FromQuery] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var albums = await _albumService.getAlbumByGenreNameAsync(genreName);
+        var albums = await _albumService.getAlbumByGenreNameAsync(genreName, queryObject);
 
         if (albums == null)
             return NotFound();
@@ -42,12 +43,12 @@ public class AlbumController : ControllerBase
 
     [HttpGet("getAllArtistAlbums/{artistId}")]
     //[Authorized]
-    public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId)
+    public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId, [FromQuery] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var albums = await _albumService.GetAllArtistAlbumsAsync(artistId);
+        var albums = await _albumService.GetAllArtistAlbumsAsync(artistId, queryObject);
 
 
         if (albums == null)
@@ -105,14 +106,14 @@ public class AlbumController : ControllerBase
     }
 
 
-    [HttpGet("getAllAlbums")]
+    [HttpPost("getAllAlbums")]
     //[Authorize]
-    public async Task<IActionResult> GetAllAlbums()
+    public async Task<IActionResult> GetAllAlbums([FromQuery] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var albums = await _albumService.getAllAlbumsAsync(null);
+        var albums = await _albumService.getAllAlbumsAsync(queryObject);
 
         if (albums == null)
             return NotFound();

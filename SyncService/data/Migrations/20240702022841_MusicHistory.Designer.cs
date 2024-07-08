@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using data.Data;
 
@@ -11,9 +12,11 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240702022841_MusicHistory")]
+    partial class MusicHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "355be83f-9b5f-444c-b4b8-e7218512e149",
+                            Id = "ffedc1fd-9a1f-464f-a059-e27b62101c69",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "190167a1-7b2a-47a4-a383-e7960b712b76",
+                            Id = "0cde3ea4-069e-411f-b916-615664497daa",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "300ebf51-dbdb-4e53-95dd-d7ed4c3108e5",
+                            Id = "496aecd8-7fc6-4941-9669-3748c2fd25a1",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -346,7 +349,10 @@ namespace data.Migrations
                     b.Property<Guid>("MusicId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserId")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId1")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -354,7 +360,7 @@ namespace data.Migrations
 
                     b.HasIndex("MusicId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId1");
 
                     b.ToTable("MusicHistory");
                 });
@@ -657,8 +663,8 @@ namespace data.Migrations
 
                     b.HasOne("core.Models.User", "User")
                         .WithMany("MusicHistories")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Music");

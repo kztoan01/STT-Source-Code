@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using data.Data;
 
@@ -11,9 +12,11 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240702031626_MusicHistory3")]
+    partial class MusicHistory3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "355be83f-9b5f-444c-b4b8-e7218512e149",
+                            Id = "cea9761e-7c59-4540-93c5-e66777a79a77",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "190167a1-7b2a-47a4-a383-e7960b712b76",
+                            Id = "3a6eb5a3-cdc1-49a4-b3b2-3633c7f6a63d",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "300ebf51-dbdb-4e53-95dd-d7ed4c3108e5",
+                            Id = "71d24a82-8bb9-4b5f-afb1-1f2e48296964",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
