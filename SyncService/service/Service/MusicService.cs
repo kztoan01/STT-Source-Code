@@ -151,13 +151,21 @@ public class MusicService : IMusicService
             await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
         }
 
-        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+        /*var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
         {
             BucketName = _bucketName,
             Key = filePath,
             Expires = DateTime.UtcNow.AddMinutes(30)
+        });*/
+
+        var aclResponse = await _s3Client.PutACLAsync(new PutACLRequest
+        {
+            BucketName = _bucketName,
+            Key = filePath,
+            CannedACL = S3CannedACL.PublicRead
         });
 
+        var url = $"https://{_bucketName}.s3.amazonaws.com/{filePath}";
         return url;
     }
 
