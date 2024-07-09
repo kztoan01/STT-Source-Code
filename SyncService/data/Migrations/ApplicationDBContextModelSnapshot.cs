@@ -51,19 +51,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "cea9761e-7c59-4540-93c5-e66777a79a77",
+                            Id = "53f65a89-1c44-4a52-aaae-d293a17da871",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "3a6eb5a3-cdc1-49a4-b3b2-3633c7f6a63d",
+                            Id = "f2ab1617-3fac-4c8d-9556-808a84ab59f0",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "71d24a82-8bb9-4b5f-afb1-1f2e48296964",
+                            Id = "fcdcde38-4778-4982-8fca-829d2f93b229",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -199,7 +199,7 @@ namespace data.Migrations
 
                     b.HasIndex("artistId");
 
-                    b.ToTable("Albums");
+                    b.ToTable("Albums", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Artist", b =>
@@ -221,7 +221,7 @@ namespace data.Migrations
                     b.HasIndex("userId")
                         .IsUnique();
 
-                    b.ToTable("Artists");
+                    b.ToTable("Artists", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Collaboration", b =>
@@ -247,7 +247,7 @@ namespace data.Migrations
 
                     b.HasIndex("MusicId");
 
-                    b.ToTable("Collaborations");
+                    b.ToTable("Collaborations", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Follower", b =>
@@ -284,7 +284,7 @@ namespace data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Music", b =>
@@ -293,7 +293,7 @@ namespace data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("albumId")
+                    b.Property<Guid?>("albumId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("artistId")
@@ -331,7 +331,7 @@ namespace data.Migrations
 
                     b.HasIndex("genreId");
 
-                    b.ToTable("Musics");
+                    b.ToTable("Musics", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.MusicHistory", b =>
@@ -356,7 +356,7 @@ namespace data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("MusicHistory");
+                    b.ToTable("MusicHistories", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.MusicListen", b =>
@@ -378,7 +378,7 @@ namespace data.Migrations
 
                     b.HasIndex("MusicId");
 
-                    b.ToTable("MusicListens");
+                    b.ToTable("MusicListens", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Playlist", b =>
@@ -413,7 +413,7 @@ namespace data.Migrations
 
                     b.HasIndex("userId");
 
-                    b.ToTable("Playlists");
+                    b.ToTable("Playlists", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.PlaylistMusic", b =>
@@ -434,7 +434,7 @@ namespace data.Migrations
 
                     b.HasIndex("musicId");
 
-                    b.ToTable("PlaylistMusics");
+                    b.ToTable("PlaylistMusics", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.User", b =>
@@ -626,8 +626,7 @@ namespace data.Migrations
                     b.HasOne("core.Models.Album", "Album")
                         .WithMany("Musics")
                         .HasForeignKey("albumId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")

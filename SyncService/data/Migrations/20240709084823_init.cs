@@ -275,7 +275,7 @@ namespace data.Migrations
                     musicPlays = table.Column<int>(type: "int", nullable: false),
                     musicDuration = table.Column<double>(type: "float", nullable: false),
                     releaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    albumId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    albumId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     artistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     genreId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -317,6 +317,32 @@ namespace data.Migrations
                     table.PrimaryKey("PK_Collaborations", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Collaborations_Musics_MusicId",
+                        column: x => x.MusicId,
+                        principalTable: "Musics",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MusicHistories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MusicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ListenTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MusicHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MusicHistories_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MusicHistories_Musics_MusicId",
                         column: x => x.MusicId,
                         principalTable: "Musics",
                         principalColumn: "Id",
@@ -374,9 +400,9 @@ namespace data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "152eef24-c23a-4d3e-8705-36c47672b21d", null, "Artist", "ARTIST" },
-                    { "224a37b3-4130-453b-8687-f32ccd397f78", null, "Admin", "ADMIN" },
-                    { "7fc3669e-521d-43d4-ad67-1fac47a84c2e", null, "User", "USER" }
+                    { "53f65a89-1c44-4a52-aaae-d293a17da871", null, "Admin", "ADMIN" },
+                    { "f2ab1617-3fac-4c8d-9556-808a84ab59f0", null, "User", "USER" },
+                    { "fcdcde38-4778-4982-8fca-829d2f93b229", null, "Artist", "ARTIST" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -440,6 +466,16 @@ namespace data.Migrations
                 column: "artistId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MusicHistories_MusicId",
+                table: "MusicHistories",
+                column: "MusicId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MusicHistories_UserId",
+                table: "MusicHistories",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MusicListens_MusicId",
                 table: "MusicListens",
                 column: "MusicId");
@@ -493,6 +529,9 @@ namespace data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Follower");
+
+            migrationBuilder.DropTable(
+                name: "MusicHistories");
 
             migrationBuilder.DropTable(
                 name: "MusicListens");

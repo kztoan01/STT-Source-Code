@@ -17,22 +17,22 @@ namespace service.Service
         private readonly IAmazonS3 _s3Client;
         private readonly string _bucketName = "sync-music-storage";
 
-        public MusicService(IMusicRepository musicRepository, IAmazonS3 s3Client,IUserRepository userRepository)
+        public MusicService(IMusicRepository musicRepository, IAmazonS3 s3Client, IUserRepository userRepository)
         {
             _musicRepository = musicRepository;
             _s3Client = s3Client;
             _userRepository = userRepository;
         }
 
-    public async Task<MusicDTO> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
-    {
-        var imageUrl = await UploadFileAsync(fileImage, music.Id, "image");
-        var musicUrl = await UploadFileAsync(fileMusic, music.Id, "music");
+        public async Task<MusicDTO> UploadMusicAsync(Music music, IFormFile fileMusic, IFormFile fileImage)
+        {
+            var imageUrl = await UploadFileAsync(fileImage, music.Id, "image");
+            var musicUrl = await UploadFileAsync(fileMusic, music.Id, "music");
 
-        music.musicPicture = imageUrl;
-        music.musicUrl = musicUrl;
+            music.musicPicture = imageUrl;
+            music.musicUrl = musicUrl;
 
-        var createdMusic = await _musicRepository.CreateMusicAsync(music);
+            var createdMusic = await _musicRepository.CreateMusicAsync(music);
 
             return ConvertToDto(createdMusic);
         }
@@ -42,10 +42,10 @@ namespace service.Service
 
             List<MusicHistory> musicHistorys = user.MusicHistories.Where(mh => mh.UserId.Equals(userId)).ToList();
 
-            List<MusicDTO> result = new List<MusicDTO>();   
-            foreach(var musicHistory in musicHistorys)
+            List<MusicDTO> result = new List<MusicDTO>();
+            foreach (var musicHistory in musicHistorys)
             {
-                var music = ConvertToDto( await _musicRepository.GetMusicByIdAsync(musicHistory.MusicId));
+                var music = ConvertToDto(await _musicRepository.GetMusicByIdAsync(musicHistory.MusicId));
                 result.Add(music);
             }
             return result;
@@ -54,26 +54,26 @@ namespace service.Service
 
 
 
-    public async Task<List<MusicDTO>> GetAllMusicAsync()
-    {
-        var musics = await _musicRepository.GetAllMusicAsync();
-        return musics.Select(x => ConvertToDto(x)).ToList();
-    }
+        public async Task<List<MusicDTO>> GetAllMusicAsync()
+        {
+            var musics = await _musicRepository.GetAllMusicAsync();
+            return musics.Select(x => ConvertToDto(x)).ToList();
+        }
 
-    public async Task<MusicDTO?> GetMusicByIdAsync(Guid id)
-    {
-        var music = await _musicRepository.GetMusicByIdAsync(id);
-        return music != null ? ConvertToDto(music) : null;
-    }
+        public async Task<MusicDTO?> GetMusicByIdAsync(Guid id)
+        {
+            var music = await _musicRepository.GetMusicByIdAsync(id);
+            return music != null ? ConvertToDto(music) : null;
+        }
 
-    public async Task<MusicDTO?> GetMusicByArtistIdAsync(Guid artistId)
-    {
-        var musics = await _musicRepository.GetAllMusicAsync();
-        var music = musics.FirstOrDefault(m => m.artistId == artistId);
-        return music != null ? ConvertToDto(music) : null;
-    }
+        public async Task<MusicDTO?> GetMusicByArtistIdAsync(Guid artistId)
+        {
+            var musics = await _musicRepository.GetAllMusicAsync();
+            var music = musics.FirstOrDefault(m => m.artistId == artistId);
+            return music != null ? ConvertToDto(music) : null;
+        }
 
-        public async Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId,string userId)
+        public async Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId, string userId)
         {
             var music = await _musicRepository.GetMusicByIdAsync(musicId);
             if (music == null)
@@ -84,11 +84,11 @@ namespace service.Service
 
             music.musicPlays++;
 
-        var today = DateTime.UtcNow.Date;
+            var today = DateTime.UtcNow.Date;
 
             var musicListen = music.MusicListens?.Find(ml => ml.ListenDate.Date == today);
 
-           
+
 
 
             if (musicListen == null)
@@ -121,94 +121,95 @@ namespace service.Service
                 };
                 if (music.MusicHistories == null)
                 {
-                    music.MusicHistories= new List<MusicHistory>();
+                    music.MusicHistories = new List<MusicHistory>();
                 }
                 music.MusicHistories.Add(newMusicHistory);
             }
             else
             {
-                musicHistory.ListenTime = DateTime.Now; 
+                musicHistory.ListenTime = DateTime.Now;
             }
 
-        await _musicRepository.UpdateMusicAsync(musicId, music);
+            await _musicRepository.UpdateMusicAsync(musicId, music);
 
-        return "Listen time added.";
-    }
-
-
-    public async Task<int> ListenTimeOnThisDayAsync(Guid musicId)
-    {
-        return await GetListenCountAsync(musicId, DateTime.UtcNow.Date, DateTime.UtcNow.Date);
-    }
-
-    public async Task<int> ListenTimeOnThisMonthAsync(Guid musicId)
-    {
-        var firstDayOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-        return await GetListenCountAsync(musicId, firstDayOfMonth, DateTime.UtcNow);
-    }
-
-    public async Task<int> ListenTimeOnThisYearAsync(Guid musicId)
-    {
-        var firstDayOfYear = new DateTime(DateTime.UtcNow.Year, 1, 1);
-        return await GetListenCountAsync(musicId, firstDayOfYear, DateTime.UtcNow);
-    }
-
-    public async Task<bool> DeleteMusicByIdAsync(Guid musicId)
-    {
-        return await _musicRepository.DeleteMusicAsync(musicId);
-    }
-
-    public async Task<Music> GetMusicByMusicIdAsync(Guid musicId)
-    {
-        return await _musicRepository.GetMusicByIdAsync(musicId);
-    }
-
-    private async Task<int> GetListenCountAsync(Guid musicId, DateTime startDate, DateTime endDate)
-    {
-        var listenCount = await _musicRepository.GetListenCountAsync(musicId, startDate, endDate);
-        return listenCount;
-    }
-
-    private async Task<string> UploadFileAsync(IFormFile file, Guid musicId, string fileType)
-    {
-        var fileTransferUtility = new TransferUtility(_s3Client);
-        var fileExtension = Path.GetExtension(file.FileName);
-        var filePath = $"{fileType}/{Guid.NewGuid()}{fileExtension}";
-
-        using (var stream = file.OpenReadStream())
-        {
-            await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
+            return "Listen time added.";
         }
 
-        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+
+        public async Task<int> ListenTimeOnThisDayAsync(Guid musicId)
         {
-            BucketName = _bucketName,
-            Key = filePath,
-            Expires = DateTime.UtcNow.AddMinutes(30)
-        });
+            return await GetListenCountAsync(musicId, DateTime.UtcNow.Date, DateTime.UtcNow.Date);
+        }
 
-        return url;
-    }
-
-
-    private MusicDTO ConvertToDto(Music music)
-    {
-        return new MusicDTO
+        public async Task<int> ListenTimeOnThisMonthAsync(Guid musicId)
         {
-            Id = music.Id,
-            genreName = music.Genre.genreName,
-            musicDuration = music.musicDuration,
-            musicPicture = music.musicPicture,
-            musicPlays = music.musicPlays,
-            musicTitle = music.musicTitle,
-            musicUrl = music.musicUrl,
-            releaseDate = music.releaseDate,
-            AlbumDTO = new AlbumDTO
+            var firstDayOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            return await GetListenCountAsync(musicId, firstDayOfMonth, DateTime.UtcNow);
+        }
+
+        public async Task<int> ListenTimeOnThisYearAsync(Guid musicId)
+        {
+            var firstDayOfYear = new DateTime(DateTime.UtcNow.Year, 1, 1);
+            return await GetListenCountAsync(musicId, firstDayOfYear, DateTime.UtcNow);
+        }
+
+        public async Task<bool> DeleteMusicByIdAsync(Guid musicId)
+        {
+            return await _musicRepository.DeleteMusicAsync(musicId);
+        }
+
+        public async Task<Music> GetMusicByMusicIdAsync(Guid musicId)
+        {
+            return await _musicRepository.GetMusicByIdAsync(musicId);
+        }
+
+        private async Task<int> GetListenCountAsync(Guid musicId, DateTime startDate, DateTime endDate)
+        {
+            var listenCount = await _musicRepository.GetListenCountAsync(musicId, startDate, endDate);
+            return listenCount;
+        }
+
+        private async Task<string> UploadFileAsync(IFormFile file, Guid musicId, string fileType)
+        {
+            var fileTransferUtility = new TransferUtility(_s3Client);
+            var fileExtension = Path.GetExtension(file.FileName);
+            var filePath = $"{fileType}/{Guid.NewGuid()}{fileExtension}";
+
+            using (var stream = file.OpenReadStream())
             {
-                Id = music.Album.Id,
-                albumTitle = music.Album.albumTitle
-            },
-            artistName = music.Artist.User.userFullName
-        };
+                await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
+            }
+
+            var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+            {
+                BucketName = _bucketName,
+                Key = filePath,
+                Expires = DateTime.UtcNow.AddMinutes(30)
+            });
+
+            return url;
+        }
+
+
+        private MusicDTO ConvertToDto(Music music)
+        {
+            return new MusicDTO
+            {
+                Id = music.Id,
+                genreName = music.Genre.genreName,
+                musicDuration = music.musicDuration,
+                musicPicture = music.musicPicture,
+                musicPlays = music.musicPlays,
+                musicTitle = music.musicTitle,
+                musicUrl = music.musicUrl,
+                releaseDate = music.releaseDate,
+                AlbumDTO = new AlbumDTO
+                {
+                    Id = music.Album.Id,
+                    albumTitle = music.Album.albumTitle
+                },
+                artistName = music.Artist.User.userFullName
+            };
+        }
     }
 }

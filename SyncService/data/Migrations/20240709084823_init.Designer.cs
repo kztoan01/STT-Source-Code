@@ -12,8 +12,8 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240625132040_updatemusic")]
-    partial class updatemusic
+    [Migration("20240709084823_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "98e22b09-d91a-4e56-a001-d24d79095a1f",
+                            Id = "53f65a89-1c44-4a52-aaae-d293a17da871",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "d95f722e-d0c8-4679-8bf0-0b4dc965b2e1",
+                            Id = "f2ab1617-3fac-4c8d-9556-808a84ab59f0",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "43e2e300-96f9-4b51-8d32-410921bc6cb5",
+                            Id = "fcdcde38-4778-4982-8fca-829d2f93b229",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -202,7 +202,7 @@ namespace data.Migrations
 
                     b.HasIndex("artistId");
 
-                    b.ToTable("Albums");
+                    b.ToTable("Albums", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Artist", b =>
@@ -224,7 +224,7 @@ namespace data.Migrations
                     b.HasIndex("userId")
                         .IsUnique();
 
-                    b.ToTable("Artists");
+                    b.ToTable("Artists", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Collaboration", b =>
@@ -250,7 +250,7 @@ namespace data.Migrations
 
                     b.HasIndex("MusicId");
 
-                    b.ToTable("Collaborations");
+                    b.ToTable("Collaborations", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Follower", b =>
@@ -287,7 +287,7 @@ namespace data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Music", b =>
@@ -334,7 +334,32 @@ namespace data.Migrations
 
                     b.HasIndex("genreId");
 
-                    b.ToTable("Musics");
+                    b.ToTable("Musics", (string)null);
+                });
+
+            modelBuilder.Entity("core.Models.MusicHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ListenTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("MusicId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MusicId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MusicHistories", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.MusicListen", b =>
@@ -356,7 +381,7 @@ namespace data.Migrations
 
                     b.HasIndex("MusicId");
 
-                    b.ToTable("MusicListens");
+                    b.ToTable("MusicListens", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.Playlist", b =>
@@ -391,7 +416,7 @@ namespace data.Migrations
 
                     b.HasIndex("userId");
 
-                    b.ToTable("Playlists");
+                    b.ToTable("Playlists", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.PlaylistMusic", b =>
@@ -412,7 +437,7 @@ namespace data.Migrations
 
                     b.HasIndex("musicId");
 
-                    b.ToTable("PlaylistMusics");
+                    b.ToTable("PlaylistMusics", (string)null);
                 });
 
             modelBuilder.Entity("core.Models.User", b =>
@@ -625,6 +650,25 @@ namespace data.Migrations
                     b.Navigation("Genre");
                 });
 
+            modelBuilder.Entity("core.Models.MusicHistory", b =>
+                {
+                    b.HasOne("core.Models.Music", "Music")
+                        .WithMany("MusicHistories")
+                        .HasForeignKey("MusicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("core.Models.User", "User")
+                        .WithMany("MusicHistories")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Music");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("core.Models.MusicListen", b =>
                 {
                     b.HasOne("core.Models.Music", "Music")
@@ -687,6 +731,8 @@ namespace data.Migrations
 
             modelBuilder.Entity("core.Models.Music", b =>
                 {
+                    b.Navigation("MusicHistories");
+
                     b.Navigation("MusicListens");
 
                     b.Navigation("collaborations");
@@ -705,6 +751,8 @@ namespace data.Migrations
                         .IsRequired();
 
                     b.Navigation("Followers");
+
+                    b.Navigation("MusicHistories");
 
                     b.Navigation("Playlists");
                 });

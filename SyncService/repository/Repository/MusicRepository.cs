@@ -70,10 +70,13 @@ public class MusicRepository : IMusicRepository
     public async Task<bool> DeleteMusicAsync(Guid id)
     {
         var music = await _context.Musics.FindAsync(id);
+
+        var musicHistories = _context.MusicHistories.Where(mh => mh.MusicId == id);
         if (music == null)
             return false;
 
         _context.Musics.Remove(music);
+        _context.MusicHistories.RemoveRange(musicHistories);
         await _context.SaveChangesAsync();
         return true;
     }
