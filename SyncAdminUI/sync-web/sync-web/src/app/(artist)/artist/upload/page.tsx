@@ -1,164 +1,28 @@
 "use client"
-import Link from 'next/link'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
-import { Switch } from '@headlessui/react'
-import axios from 'axios'
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react'
-import { Fragment, useRef } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
-import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
-import NavBar from '@/components/DashboardNav'
-import logo from "../../../../../public/logo.jpg"
-import Image from 'next/image'
+import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import Image from "next/image";
+import { Metadata } from "next";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import NavBar from "@/components/DashboardNav";
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment, useEffect, useRef } from 'react'
+import { ChangeEvent, FormEvent, useState } from "react";
+import { CheckCircleIcon, ExclamationTriangleIcon, CodeBracketIcon } from '@heroicons/react/24/outline'
+import { getCookie, setCookie, deleteCookie, hasCookie } from 'cookies-next';
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import axiosInstance from "@/helpers/axiosInstance";
 
-export default function Upload() {
+interface MyJwtPayload extends JwtPayload {
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': string;
+}
 
-    // const [failopen, setFailOpen] = useState(false)
-    // const [message, setMessage] = useState()
-    // const [detailmessage, setDetailMessage] = useState()
-    // const [category, setCategory] = useState("1")
-    // const [language, setLanguage] = useState("English")
-    // const [level, setLevel] = useState("Beginner")
-    // const [price, setPrice] = useState("")
-    // const [coupon, setCoupon] = useState("")
-    // const [lo2, setLo2] = useState("")
-    // const [lo1, setLo1] = useState("")
-    // const [lo3, setLo3] = useState("")
-    // const [lo4, setLo4] = useState("")
-    // const [sec1, setSec1] = useState("")
-    // const [sec2, setSec2] = useState("")
-    // const [sec3, setSec3] = useState("")
-    // const [sec4, setSec4] = useState("")
-    // const [sec5, setSec5] = useState("")
-    // const [sec6, setSec6] = useState("")
-    // async function handleSubmit(e) {
-    //     e.preventDefault()
-    //     if (price > 0) {
-    //         if (thisInstructor.isPremium == 0) {
-    //             setMessage("Please complete the premium instructor application in order to set a price for your course.")
-    //             setDetailMessage("You can set your course price as soon as your linked payment method is approved.")
-    //             setFailOpen(true)
-    //         } else {
-    //             try {
-    //                 await axios.post("https://arthubplatform1.azurewebsites.net/course/addCourse", {
-    //                     accountId: thisInstructor.id,
-    //                     status: 0,
-    //                     isApproved: 0,
-    //                     iPassed: 0,
-    //                     coupon: coupon,
-    //                     price: price,
-    //                     language: language,
-    //                     level: level,
-    //                     introduction: introduction,
-    //                     description: convertedContent,
-    //                     name: name,
-    //                     sections: [
-    //                         {
-    //                             name: sec1,
-    //                             accountId: thisInstructor.id
-    //                         },
-    //                         {
-    //                             name: sec2,
-    //                             accountId: thisInstructor.id
-    //                         },
-    //                         {
-    //                             name: sec3,
-    //                             accountId: thisInstructor.id
-    //                         },
-    //                         {
-    //                             name: sec4,
-    //                             accountId: thisInstructor.id
-    //                         },
-    //                         {
-    //                             name: sec5,
-    //                             accountId: thisInstructor.id
-    //                         },
-    //                         {
-    //                             name: sec6,
-    //                             accountId: thisInstructor.id
-    //                         }
+interface Genre {
+    id: string;
+    genreName: string;
+    genreDescription: string;
+}
 
-    //                     ],
-    //                     learningObjective: {
-    //                         one: lo1,
-    //                         two: lo2,
-    //                         three: lo3,
-    //                         four: lo4
-    //                     },
-    //                     categories: [
-    //                         {
-    //                             categoryId: category
-    //                         }
-    //                     ]
-    //                 });
-    //                 setOpen(true)
-
-    //             } catch (err) {
-    //                 alert(err);
-    //             }
-    //         }
-    //     } else {
-    //         try {
-    //             await axios.post("https://arthubplatform1.azurewebsites.net/course/addCourse", {
-    //                 accountId: thisInstructor.id,
-    //                 status: 0,
-    //                 isApproved: 0,
-    //                 iPassed: 0,
-    //                 coupon: coupon,
-    //                 price: price,
-    //                 language: language,
-    //                 level: level,
-    //                 introduction: introduction,
-    //                 description: convertedContent,
-    //                 name: name,
-    //                 sections: [
-    //                     {
-    //                         name: sec1,
-    //                         accountId: thisInstructor.id
-    //                     },
-    //                     {
-    //                         name: sec2,
-    //                         accountId: thisInstructor.id
-    //                     },
-    //                     {
-    //                         name: sec3,
-    //                         accountId: thisInstructor.id
-    //                     },
-    //                     {
-    //                         name: sec4,
-    //                         accountId: thisInstructor.id
-    //                     },
-    //                     {
-    //                         name: sec5,
-    //                         accountId: thisInstructor.id
-    //                     },
-    //                     {
-    //                         name: sec6,
-    //                         accountId: thisInstructor.id
-    //                     }
-
-    //                 ],
-    //                 learningObjective: {
-    //                     one: lo1,
-    //                     two: lo2,
-    //                     three: lo3,
-    //                     four: lo4
-    //                 },
-    //                 categories: [
-    //                     {
-    //                         categoryId: category
-    //                     }
-    //                 ]
-    //             });
-    //             setOpen(true)
-
-    //         } catch (err) {
-    //             alert(err);
-    //         }
-    //     }
-
-    // }
-    const [agreed, setAgreed] = useState(false)
+const Upload = () => {
 
     const [image, setImage] = useState<File | null>(null);
 
@@ -169,9 +33,22 @@ export default function Upload() {
     const [genre, setGenre] = useState<string>('');
 
     const [message, setMessage] = useState<string>('');
+
+    const [preview, setPreview] = useState<string | null>(null);
+
+    const [loading, setLoading] = useState(false)
+
+    const cancelButtonRef = useRef(null)
+
+    const [genres, setGenres] = useState<Genre[]>([]);
+
+    const [selectedGenre, setSelectedGenre] = useState<string>('');
+
     const handleImage = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setImage(e.target.files[0]);
+        const file = e.target.files?.[0];
+        if (file) {
+            setImage(file);
+            setPreview(URL.createObjectURL(file));
         }
     }
     const handleMusic = (e: ChangeEvent<HTMLInputElement>) => {
@@ -180,8 +57,32 @@ export default function Upload() {
         }
     }
 
+    const [artistId, setArtistId] = useState<string>('');
+    useEffect(() => {
+        const token = getCookie('token');
+        console.log('Token:', token);
+
+        if (typeof token === 'string') {
+            try {
+                const decoded = jwtDecode<MyJwtPayload>(token);
+                console.log('Decoded Token:', decoded);
+
+                const id = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+                setArtistId(id);
+            } catch (error) {
+                console.error('Failed to decode token:', error);
+            }
+        } else {
+            setArtistId('null'); // If token is not a string, set artistId to null
+        }
+    }, []);
+
+
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        console.log("begin");
+
         if (!image) {
             setMessage('Please select an image file');
             return;
@@ -190,32 +91,53 @@ export default function Upload() {
             setMessage('Please select an audio file');
             return;
         }
+
         const formData = new FormData();
         formData.append('fileMusic', music);
         formData.append('fileImage', image);
         formData.append('musicTitle', title);
         formData.append('musicPlays', "0");
         formData.append('musicDuration', "3.14");
-        formData.append('albumId', "50da04ac-5f52-41d6-b11f-c85514270d2b");
-        formData.append('artistId', "23cd5a02-6d0b-4153-a36d-fc4c16f44fc6");
-        formData.append('genreId', "4c4df975-2874-4b63-bb64-d8c12cf65fee");
-        try {
-            const response = await fetch('https://localhost:7023/music-service/api/Music/add', {
-                method: 'POST',
-                body: formData,
-            });
+        formData.append('albumId', "AC45A20F-10A3-48DA-A987-08DC9F580B43");
+        formData.append('artistId', artistId);
+        formData.append('genreId', genre);
 
-            if (response.ok) {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.post('/music-service/api/Music/add', formData);
+            console.log(response);
+
+            if (response.status === 200) {
+                setLoading(false);
                 setMessage('File uploaded successfully');
             } else {
+                setLoading(false);
                 setMessage('Failed to upload file');
             }
         } catch (error) {
+            setLoading(false);
             console.error('Error uploading file:', error);
             setMessage('An error occurred while uploading the file');
+        } finally {
+            setLoading(false);
+            console.log("end");
         }
     };
 
+
+
+    useEffect(() => {
+        const getGenres = async () => {
+            const genreData = await axiosInstance.get(`/music-service/api/Genre`);
+            setGenres(genreData.data.$values); 
+        };
+
+        getGenres();
+    }, []);
+
+    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedGenre(event.target.value);
+    };
     return (
         <div className="border-t border-slate-200 lg:relative lg:mb-28 lg:ml-112 lg:border-t-0 xl:ml-120">
             <NavBar />
@@ -342,176 +264,301 @@ export default function Upload() {
                 <rect width="100%" height="100%" fill="url(#:S1:-gradient)" mask="url(#:S1:-mask)" opacity="0.25">
                 </rect>
             </svg>
-            <div className="mx-auto max-w-2xl text-center mt-10">
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Upload new music</h2>
-                <p className="mt-2 text-lg leading-8 text-gray-600">
-                    Tell us a little bit about your song.
-                </p>
-            </div>
-            <form action="#" method="POST" className="mx-auto max-w-xl mt-6" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-                    <div className="sm:col-span-3">
-                        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-1 xl:gap-x-8">
-                            <div className="relative">
-                                <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
-                                    <Image
-                                        src={logo}
-                                        alt=""
-                                        className="h-full w-full object-cover object-center lg:h-full lg:w-full"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex text-sm leading-6 text-gray-600"> <label htmlFor="file-upload2"
-                                className="relative cursor-pointer rounded-md bg-white font-semibold text-purple-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-purple-600 focus-within:ring-offset-2 hover:text-purple-500">
-                                <span>Upload music</span>
-                                <input id="file-upload2" name="file-upload2" type="file" accept="audio/*" className="sr-only" onChange={handleMusic} />
-                            </label>
-                                <p className="pl-1">or drag and drop</p>
-
+            <div className="relative">
+                <div className="pb-12 pt-16 sm:pb-4 lg:pt-12">
+                    <div className="lg:px-8">
+                        <div className="lg:max-w-4xl">
+                            <div className="mx-auto px-4 sm:px-6 md:max-w-2xl md:px-4 lg:px-0">
+                                <h1 className="text-2xl font-bold leading-7 text-slate-900">Upload</h1>
                             </div>
                         </div>
                     </div>
-                    <div className="sm:col-span-2">
-                        <label htmlFor="first-name" className="block text-sm font-semibold leading-6 text-gray-900">
-                            Title
-                        </label>
-                        <div className="mt-2.5">
-                            <input
-                                type="text"
-                                name="first-name"
-                                id="first-name"
-                                autoComplete="given-name"
-                                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6"
-                                onChange={(e) => {
-                                    setTitle(e.target.value);
-                                }}
-                            />
-                        </div>
-                    </div>
-                    <div className="sm:col-span-2">
-                        <label htmlFor="company" className="block text-sm font-semibold leading-6 text-gray-900">
-                            Addtional Tags
-                        </label>
-                        <div className="mt-2.5">
-                            <input
-                                type="text"
-                                name="company"
-                                id="company"
-                                autoComplete="organization"
-                                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6" />
+                    <div className="divide-y divide-slate-100 sm:mt-4 lg:mt-8 lg:border-t lg:border-slate-100">
+                        <div className="mx-auto max-w-270 mt-20">
+                            <div className="grid grid-cols-5 gap-8">
 
-                        </div>
-                    </div>
-                    <div className="sm:col-span-2">
-                        <label htmlFor="company" className="block text-sm font-semibold leading-6 text-gray-900">
-                            Description
-                        </label>
-                        <div className="mt-2.5">
-                            <textarea
-                                name="Description"
-                                id="Description"
-                                autoComplete="organization"
-                                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:text-sm sm:leading-6" />
+                                <div className="col-span-5 xl:col-span-3">
+                                    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                                        <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                                            <h3 className="font-medium text-black dark:text-white">
+                                                Information
+                                            </h3>
+                                        </div>
+                                        <div className="p-7">
+                                            <div className="mb-5.5 flex flex-col gap-5.5 sm:flex-row">
+                                                <div className="w-full sm:w-1/2">
+                                                    <label
+                                                        className="mb-3 block text-sm font-medium text-black dark:text-white"
+                                                        htmlFor="title"
+                                                    >
+                                                        Title
+                                                    </label>
+                                                    <div className="relative">
 
-                        </div>
-                    </div>
-                    <div className="sm:col-span-3">
-                        <label htmlFor="genre" className="block text-sm font-medium leading-6 text-gray-900">Genre</label>
-                        <div className="mt-2">
-                            <select onChange={(e) => {
-                                    setGenre(e.target.value);
-                                }} id="genre" name="genre" autoComplete="genre-name" className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-purple-600 sm:max-w-xs sm:text-sm sm:leading-6">
-                                <option value={"Pop"}>Pop</option>
-                                <option value={"Rock"}>Rock</option>
-                                <option value={"Hip Hop/Rap"}>Hip Hop/Rap</option>
-                                <option value={"R&B/Soul"}>R&B/Soul</option>
-                                <option value={"Country"}>Country</option>
-                                <option value={"Electronic/Dance"}>Electronic/Dance</option>
-                                <option value={"Jazz"}>Jazz</option>
-                                <option value={"Blues"}>Blues</option>
-                                <option value={"Reggae"}>Reggae</option>
-                                <option value={"Latin"}>Latin</option>
-                                <option value={"K-Pop"}>K-Pop</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="sm:col-span-3">
-                        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-1 xl:gap-x-8">
-                            <div className="relative">
-                                <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
-                                    <Image
-                                        src={logo}
-                                        alt=""
-                                        className="h-full w-full object-cover object-center lg:h-full lg:w-full"
-                                    />
-                                </div>
+                                                        <input
+                                                            className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                                            type="text"
+                                                            name="title"
+                                                            id="title"
+                                                            placeholder="Title of your song"
+                                                            onChange={(e) => {
+                                                                setTitle(e.target.value);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
 
-                                <div className="mt-4 flex justify-between">
-                                    <div>
-                                        <h3 className="text-sm font-medium text-gray-700">
-                                            <a href="">
-                                                <span aria-hidden="true" className="absolute inset-0" />
-                                                {title}
-                                            </a>
-                                        </h3>
-                                        <p className="mt-1 text-sm text-gray-500">Artist: 21 Savage</p>
+                                                <div className="w-full sm:w-1/2">
+                                                    <label
+                                                        className="mb-3 block text-sm font-medium text-black dark:text-white"
+                                                        htmlFor="tag"
+                                                    >
+                                                        Addtional Tags
+                                                    </label>
+                                                    <input
+                                                        className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                                        type="text"
+                                                        name="tag"
+                                                        id="tag"
+                                                        placeholder="Tags"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-5.5">
+                                                <label
+                                                    className="mb-3 block text-sm font-medium text-black dark:text-white"
+                                                    htmlFor="emailAddress"
+                                                >
+                                                    Genre
+                                                </label>
+                                                <div className="relative">
+                                                    <select onChange={(e) => {
+                                                        setGenre(e.target.value);
+                                                    }} id="genre" name="genre" autoComplete="genre-name" className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary">
+                                                         {genres.map((genre) => (
+                                                            <option key={genre.id} value={genre.id}>{genre.genreName}</option>
+                                                         ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-5.5">
+                                                <label
+                                                    className="mb-3 block text-sm font-medium text-black dark:text-white"
+                                                    htmlFor="Caption"
+                                                >
+                                                    Caption
+                                                </label>
+                                                <input
+                                                    className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                                    type="text"
+                                                    name="Caption"
+                                                    id="Caption"
+                                                    placeholder="Add a caption to your song"
+                                                />
+                                            </div>
+
+                                            <div className="mb-5.5">
+                                                <label
+                                                    className="mb-3 block text-sm font-medium text-black dark:text-white"
+                                                    htmlFor="Username"
+                                                >
+                                                    Description
+                                                </label>
+                                                <div className="relative">
+                                                    <textarea
+                                                        className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                                        name="bio"
+                                                        id="bio"
+                                                        rows={6}
+                                                        placeholder="Describe your song"
+
+                                                    ></textarea>
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
-                                    <p className="text-sm text-gray-900">{genre}</p>
                                 </div>
-                            </div>
-                            <div className="flex text-sm leading-6 text-gray-600"> <label htmlFor="file-upload1"
-                                className="relative cursor-pointer rounded-md bg-white font-semibold text-purple-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-purple-600 focus-within:ring-offset-2 hover:text-purple-500">
-                                <span>Upload image</span>
-                                <input id="file-upload1" name="file-upload1" type="file" className="sr-only"  onChange={handleImage}/>
-                            </label>
-                                <p className="pl-1">or drag and drop</p>
+                                <div className="col-span-5 xl:col-span-2">
+                                    <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+                                        <div className="border-b border-stroke px-7 py-4 dark:border-strokedark">
+                                            <h3 className="font-medium text-black dark:text-white">
+                                                Your Song
+                                            </h3>
+                                        </div>
+                                        <div className="p-7">
+
+                                            <div className="mb-4 flex items-center gap-3">
+                                                <div className="h-14 w-14 rounded-full">
+                                                    {preview ? (
+                                                        <Image
+                                                            src={preview}
+                                                            width={55}
+                                                            height={55}
+                                                            alt="User"
+                                                            className="rounded-full"
+                                                        />
+                                                    ) : (
+                                                        <Image
+                                                            src={'/images/user/user-06.png'}
+                                                            width={55}
+                                                            height={55}
+                                                            alt="User"
+                                                            className="rounded-full"
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <span className="mb-1.5 text-black dark:text-white">
+                                                        Edit image
+                                                    </span>
+                                                    <span className="flex gap-2.5">
+                                                        <label className="text-sm hover:text-primary text-purple-500 cursor-pointer">
+                                                            Upload image
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                onChange={handleImage}
+                                                                className="hidden"
+                                                            />
+                                                        </label>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                id="FileUpload"
+                                                className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded border border-dashed border-primary bg-gray px-4 py-4 dark:bg-meta-4 sm:py-7.5"
+                                            >
+                                                <input
+                                                    type="file"
+                                                    accept="audio/*"
+                                                    className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
+                                                    onChange={handleMusic}
+                                                />
+                                                <div className="flex flex-col items-center justify-center space-y-3">
+                                                    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+                                                        <svg
+                                                            width="16"
+                                                            height="16"
+                                                            viewBox="0 0 16 16"
+                                                            fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                        >
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                clipRule="evenodd"
+                                                                d="M1.99967 9.33337C2.36786 9.33337 2.66634 9.63185 2.66634 10V12.6667C2.66634 12.8435 2.73658 13.0131 2.8616 13.1381C2.98663 13.2631 3.1562 13.3334 3.33301 13.3334H12.6663C12.8431 13.3334 13.0127 13.2631 13.1377 13.1381C13.2628 13.0131 13.333 12.8435 13.333 12.6667V10C13.333 9.63185 13.6315 9.33337 13.9997 9.33337C14.3679 9.33337 14.6663 9.63185 14.6663 10V12.6667C14.6663 13.1971 14.4556 13.7058 14.0806 14.0809C13.7055 14.456 13.1968 14.6667 12.6663 14.6667H3.33301C2.80257 14.6667 2.29387 14.456 1.91879 14.0809C1.54372 13.7058 1.33301 13.1971 1.33301 12.6667V10C1.33301 9.63185 1.63148 9.33337 1.99967 9.33337Z"
+                                                                fill="#3C50E0"
+                                                            />
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                clipRule="evenodd"
+                                                                d="M7.5286 1.52864C7.78894 1.26829 8.21106 1.26829 8.4714 1.52864L11.8047 4.86197C12.0651 5.12232 12.0651 5.54443 11.8047 5.80478C11.5444 6.06513 11.1223 6.06513 10.8619 5.80478L8 2.94285L5.13807 5.80478C4.87772 6.06513 4.45561 6.06513 4.19526 5.80478C3.93491 5.54443 3.93491 5.12232 4.19526 4.86197L7.5286 1.52864Z"
+                                                                fill="#3C50E0"
+                                                            />
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                clipRule="evenodd"
+                                                                d="M7.99967 1.33337C8.36786 1.33337 8.66634 1.63185 8.66634 2.00004V10C8.66634 10.3682 8.36786 10.6667 7.99967 10.6667C7.63148 10.6667 7.33301 10.3682 7.33301 10V2.00004C7.33301 1.63185 7.63148 1.33337 7.99967 1.33337Z"
+                                                                fill="#3C50E0"
+                                                            />
+                                                        </svg>
+                                                    </span>
+                                                    <p className="text-black">
+                                                        <span className="text-black">Click to upload</span> or
+                                                        drag and drop
+                                                    </p>
+                                                    <p className="mt-1.5 text-black">WAV, MP3, AAC or HLS</p>
+                                                    <p className="text-black">(max, 10mb)</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-end gap-4.5">
+                                                <button
+                                                    className="flex justify-center rounded border border-stroke px-6 py-2 font-medium text-black hover:shadow-1 dark:border-strokedark dark:text-white"
+                                                    type="submit"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        setLoading(true)
+                                                        handleSubmit(e)
+                                                    }}
+                                                    className="flex justify-center rounded lg:bg-purple-600 px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+                                                    type="submit"
+                                                >
+                                                    Upload
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                             </div>
-                            {/* <button
-                        
-                        type="button"
-                        className="mt-10 flex w-1/3 items-center justify-center rounded-md border border-transparent lg:bg-purple-600 px-8 py-3 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                    >
-                        Save Course Main Image
-                    </button> */}
                         </div>
                     </div>
-
-                    <Switch.Group as="div" className="flex gap-x-4 sm:col-span-2">
-                        <div className="flex h-6 items-center">
-                            <Switch
-                                checked={agreed}
-                                onChange={setAgreed}
-                                className='bg-purple-600 flex w-8 flex-none cursor-pointer rounded-full p-px ring-1 ring-inset ring-gray-900/5 transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600'
-                            >
-                                <span className="sr-only">Agree to policies</span>
-                                <span
-                                    aria-hidden="true"
-                                    className='translate-x-3.5 h-4 w-4 transform rounded-full bg-white shadow-sm ring-1 ring-gray-900/5 transition duration-200 ease-in-out'
-
-                                />
-                            </Switch>
-                        </div>
-                        <Switch.Label className="text-sm leading-6 text-gray-600">
-                            By selecting this, you agree to our{' '}
-                            <a href="#" className="font-semibold text-purple-600">
-                                privacy&nbsp;policy
-                            </a>
-                            .
-                        </Switch.Label>
-                    </Switch.Group>
                 </div>
-                <div className="mt-10">
-                    <h1>{message}</h1>
-                    <button
-
-                        type="submit"
-                        className="block w-full rounded-md lg:bg-purple-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+            </div>
+            <Transition show={loading} as={Fragment}>
+                <Dialog
+                    as="div"
+                    className="relative z-10"
+                    initialFocus={cancelButtonRef}
+                    onClose={() => { }}
+                >
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
                     >
-                        Upload Music
-                    </button>
-                </div>
-            </form>
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            >
+                                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                    <div className="bg-purple-100 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                        <div className="sm:flex sm:items-start">
+                                            <div className="bg-white mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                                                <CodeBracketIcon className="h-6 w-6 text-purple-600" aria-hidden="true" />
+                                            </div>
+                                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                                <h3 className="text-black font-semibold leading-6 text-gray-900">
+                                                    Loading ...
+                                                </h3>
+                                                <div className="mt-2">
+                                                    <p className="text-sm text-black">
+                                                        Your request is being processed. Please wait a moment.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
         </div>
-    )
-}
+    );
+};
+
+export default Upload;

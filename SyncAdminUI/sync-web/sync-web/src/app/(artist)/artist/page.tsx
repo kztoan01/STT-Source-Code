@@ -1,6 +1,156 @@
+"use client"
 import NavBar from "@/components/DashboardNav";
+import axiosInstance from "@/helpers/axiosInstance";
+import { Fragment, useEffect, useState, useRef } from "react";
+import { getCookie, setCookie, deleteCookie, hasCookie } from 'cookies-next';
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import { Dialog, Transition } from '@headlessui/react';
+import { CheckCircleIcon, ExclamationTriangleIcon, CodeBracketIcon } from '@heroicons/react/24/outline'
+interface Music {
+    id: string;
+    musicTitle: string;
+    musicUrl: string;
+    musicPicture: string;
+    musicPlays: number;
+    musicDuration: number;
+    genreName: string;
+    artistName: string;
+}
+interface MyJwtPayload extends JwtPayload {
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': string;
+}
 
 export default function Music() {
+    const [musicList, setMusicList] = useState<Music[]>([]);
+    const [artistId, setArtistId] = useState<string>('');
+    const cancelButtonRef = useRef(null)
+    const [open, setOpen] = useState(false)
+    const [alerts, setAlert] = useState(false);
+    const fetchArtistIdAndMusic = async () => {
+        const token = getCookie('token');
+        console.log('Token:', token);
+
+        if (typeof token === 'string') {
+            try {
+                const decoded = jwtDecode<MyJwtPayload>(token);
+                console.log('Decoded Token:', decoded);
+
+                const id = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+                setArtistId(id);
+                console.log('Id:', id);
+                console.log('Artist Id:', artistId);
+                const response = await axiosInstance.post(`/music-service/api/Music/getMusicByArtistId/${id}`);
+                setMusicList(response.data.$values);
+            } catch (error) {
+                console.error('Failed to decode token or fetch music:', error);
+            }
+        } else {
+            setArtistId('null');
+        }
+    };
+
+    useEffect(() => {
+        fetchArtistIdAndMusic();
+    }, []);
+
+    //player
+    const [musicId, setMusicId] = useState<string>('');
+    const [title, setTitle] = useState<string>('');
+    const [source, setSource] = useState<string>('');
+    const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+
+    useEffect(() => {
+
+        const newAudio = new Audio(source);
+        setAudio(newAudio);
+
+        return () => {
+            if (audio) {
+                audio.pause();
+                audio.src = '';
+                setAudio(null);
+            }
+        };
+    }, [source]);
+
+    useEffect(() => {
+        if (!audio) return;
+
+        const updateCurrentTime = () => {
+            setCurrentTime(audio.currentTime);
+        };
+
+        const updateDuration = () => {
+            setDuration(audio.duration);
+        };
+
+        audio.addEventListener('timeupdate', updateCurrentTime);
+        audio.addEventListener('durationchange', updateDuration);
+
+        return () => {
+            audio.removeEventListener('timeupdate', updateCurrentTime);
+            audio.removeEventListener('durationchange', updateDuration);
+        };
+    }, [audio]);
+
+    const togglePlay = () => {
+        if (!audio) return;
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play();
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    const formatTime = (time: number): string => {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
+
+    const handleTimeSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!audio) return;
+        const time = Number(e.target.value);
+        audio.currentTime = time;
+        setCurrentTime(time);
+    };
+    const skipForward = () => {
+        if (!audio) return;
+        audio.currentTime += 10;
+        setCurrentTime(audio.currentTime);
+    };
+
+    const skipBackward = () => {
+        if (!audio) return;
+        audio.currentTime -= 10;
+        setCurrentTime(audio.currentTime);
+    };
+
+    const handleDelete = async () => {
+
+        try {
+            const response = await axiosInstance.delete(`/music-service/api/Music/deleteMusic/${musicId}`);
+            console.log(response);
+
+            if (response.status === 200) {
+                setOpen(false)
+                setAlert(true);
+                fetchArtistIdAndMusic();
+            } else {
+                setOpen(false)
+                alert('Failed to upload file');
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+        } finally {
+            console.log("end");
+        }
+    };
+
     return (
         <>
             <main className="border-t border-slate-200 lg:relative lg:mb-28 lg:ml-112 lg:border-t-0 xl:ml-120">
@@ -127,7 +277,7 @@ export default function Music() {
                     </defs>
                     <rect width="100%" height="100%" fill="url(#:S1:-gradient)" mask="url(#:S1:-mask)" opacity="0.25">
                     </rect>
-                </svg> 
+                </svg>
                 <div className="relative">
                     <div className="pb-12 pt-16 sm:pb-4 lg:pt-12">
                         <div className="lg:px-8">
@@ -138,39 +288,57 @@ export default function Music() {
                             </div>
                         </div>
                         <div className="divide-y divide-slate-100 sm:mt-4 lg:mt-8 lg:border-t lg:border-slate-100">
-                            <article aria-labelledby="episode-5-title" className="py-10 sm:py-12">
-                                <div className="lg:px-8">
-                                    <div className="lg:max-w-4xl">
-                                        <div className="mx-auto px-4 sm:px-6 md:max-w-2xl md:px-4 lg:px-0">
-                                            <div className="flex flex-col items-start">
-                                                <h2 id="episode-5-title" className="mt-2 text-lg font-bold text-slate-900"><a
-                                                    href="/5">5: Bill Lumbergh</a></h2><time
-                                                        dateTime="2022-02-24T00:00:00.000Z"
-                                                        className="order-first font-mono text-sm leading-7 text-slate-500">February
-                                                    24, 2022</time>
-                                                <p className="mt-1 text-base leading-7 text-slate-700">He’s going to need you to
-                                                    go ahead and come in on Saturday, but there’s a lot more to the story
-                                                    than you think.</p>
-                                                <div className="mt-4 flex items-center gap-4"><button type="button"
-                                                    aria-label="Play episode 5: Bill Lumbergh"
-                                                    className="flex items-center gap-x-3 text-sm font-bold leading-6 text-pink-500 hover:text-pink-700 active:text-pink-900"><svg
-                                                        aria-hidden="true" viewBox="0 0 10 10"
-                                                        className="h-2.5 w-2.5 fill-current">
-                                                        <path
-                                                            d="M8.25 4.567a.5.5 0 0 1 0 .866l-7.5 4.33A.5.5 0 0 1 0 9.33V.67A.5.5 0 0 1 .75.237l7.5 4.33Z">
-                                                        </path>
-                                                    </svg><span aria-hidden="true">Listen</span></button><span
-                                                        aria-hidden="true"
-                                                        className="text-sm font-bold text-slate-400">/</span><a
-                                                            className="flex items-center text-sm font-bold leading-6 text-pink-500 hover:text-pink-700 active:text-pink-900"
-                                                            aria-label="Show notes for episode 5: Bill Lumbergh" href="/5">Show
-                                                        notes</a></div>
+                            {musicList.map((music) => (
+                                <article key={music.id} aria-labelledby="episode-5-title" className="sm:py-6">
+                                    <div className="lg:px-8">
+                                        <div className="lg:max-w-4xl">
+                                            <div className="mx-auto px-4 sm:px-6 md:max-w-2xl md:px-4 lg:px-0 mb-4 flex items-center gap-10">
+                                                <div className="h-14 w-14 rounded-full">
+                                                    <img
+                                                        src={music.musicPicture} alt={music.musicTitle}
+                                                        width={55}
+                                                        height={55}
+                                                        className="rounded-full"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col items-start">
+
+                                                    <h2 id="episode-5-title" className="mt-2 text-lg font-bold text-slate-900"><a
+                                                        href="/5">{music.musicTitle}</a></h2><time
+                                                            dateTime="2022-02-24T00:00:00.000Z"
+                                                            className="order-first font-mono text-sm leading-7 text-slate-500">February
+                                                        24, 2022</time>
+                                                    <p className="mt-1 text-base leading-7 text-slate-700"><strong>Artist: </strong>{music.artistName}</p>
+                                                    <p className="mt-1 text-base leading-7 text-slate-700"><strong>Genre: </strong>{music.genreName}</p>
+                                                    <div className="mt-4 flex items-center gap-4"><button type="button"
+                                                        onClick={() => {
+                                                            setTitle(music.musicTitle)
+                                                            setSource(music.musicUrl)
+                                                        }}
+                                                        aria-label="Play episode 5: Bill Lumbergh"
+                                                        className="flex items-center gap-x-3 text-sm font-bold leading-6 text-pink-500 hover:text-pink-700 active:text-pink-900"><svg
+                                                            aria-hidden="true" viewBox="0 0 10 10"
+                                                            className="h-2.5 w-2.5 fill-current">
+                                                            <path
+                                                                d="M8.25 4.567a.5.5 0 0 1 0 .866l-7.5 4.33A.5.5 0 0 1 0 9.33V.67A.5.5 0 0 1 .75.237l7.5 4.33Z">
+                                                            </path>
+                                                        </svg><span aria-hidden="true">Listen</span></button><span
+                                                            aria-hidden="true"
+                                                            className="text-sm font-bold text-slate-400">/</span><button type="button"
+                                                                onClick={() => {
+                                                                     setMusicId(music.id)
+                                                                     setOpen(true)
+                                                                    //setAlert(true)
+                                                                }}
+                                                                className="flex items-center text-sm font-bold leading-6 text-pink-500 hover:text-pink-700 active:text-pink-900"
+                                                                aria-label="Show notes for episode 5: Bill Lumbergh">Delete song</button></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </article>
-                            <article aria-labelledby="episode-4-title" className="py-10 sm:py-12">
+                                </article>
+                            ))}
+                            {/* <article aria-labelledby="episode-4-title" className="py-10 sm:py-12">
                                 <div className="lg:px-8">
                                     <div className="lg:max-w-4xl">
                                         <div className="mx-auto px-4 sm:px-6 md:max-w-2xl md:px-4 lg:px-0">
@@ -203,7 +371,7 @@ export default function Music() {
                                     </div>
                                 </div>
                             </article>
-                            <article aria-labelledby="episode-3-title" className="py-10 sm:py-12">
+                             <article aria-labelledby="episode-3-title" className="py-10 sm:py-12">
                                 <div className="lg:px-8">
                                     <div className="lg:max-w-4xl">
                                         <div className="mx-auto px-4 sm:px-6 md:max-w-2xl md:px-4 lg:px-0">
@@ -300,7 +468,7 @@ export default function Music() {
                                         </div>
                                     </div>
                                 </div>
-                            </article>
+                            </article>  */}
                         </div>
                     </div>
                 </div>
@@ -342,6 +510,7 @@ export default function Music() {
                 <div
                     className="flex items-center gap-6 bg-white/90 px-4 py-4 shadow shadow-slate-200/80 ring-1 ring-slate-900/5 backdrop-blur-sm md:px-6">
                     <div className="hidden md:block"><button type="button"
+                        onClick={togglePlay}
                         className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-slate-700 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-offset-2 md:h-14 md:w-14"
                         aria-label="Play">
                         <div className="absolute -inset-3 md:hidden"></div><svg viewBox="0 0 36 36" aria-hidden="true"
@@ -353,9 +522,10 @@ export default function Music() {
                     </button></div>
                     <div className="mb-[env(safe-area-inset-bottom)] flex flex-1 flex-col gap-3 overflow-hidden p-1"><a
                         className="truncate text-center text-black text-sm font-bold leading-6 md:text-left" title="1: Skeletor"
-                        href="/1">1: Skeletor</a>
+                        href="/1">{title ? title : "Title"}</a>
                         <div className="flex justify-between gap-6">
                             <div className="flex items-center md:hidden"><button type="button"
+                                onClick={skipBackward}
                                 className="group relative rounded-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 md:order-none"
                                 aria-label="Mute">
                                 <div className="absolute -inset-4 md:hidden"></div><svg aria-hidden="true"
@@ -370,6 +540,7 @@ export default function Music() {
                                 </svg>
                             </button></div>
                             <div className="flex flex-none items-center gap-4"><button type="button"
+                                onClick={skipBackward}
                                 className="group relative rounded-full focus:outline-none" aria-label="Rewind 10 seconds">
                                 <div className="absolute -inset-4 -right-2 md:hidden"></div><svg aria-hidden="true"
                                     viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"
@@ -385,6 +556,7 @@ export default function Music() {
                                 </svg>
                             </button>
                                 <div className="md:hidden"><button type="button"
+                                    onClick={skipForward}
                                     className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-slate-700 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-offset-2 md:h-14 md:w-14"
                                     aria-label="Play">
                                     <div className="absolute -inset-3 md:hidden"></div><svg viewBox="0 0 36 36"
@@ -395,6 +567,7 @@ export default function Music() {
                                         </path>
                                     </svg>
                                 </button></div><button type="button"
+                                    onClick={skipForward}
                                     className="group relative rounded-full focus:outline-none"
                                     aria-label="Fast-forward 10 seconds">
                                     <div className="absolute -inset-4 -left-2 md:hidden"></div><svg aria-hidden="true"
@@ -414,51 +587,27 @@ export default function Music() {
                             <div role="group" id="react-aria8752326642-:r0:" aria-labelledby="react-aria8752326642-:r1:"
                                 className="absolute inset-x-0 bottom-full flex flex-auto touch-none items-center gap-6 md:relative">
                                 <label className="sr-only" id="react-aria8752326642-:r1:">Current time</label>
-                                <div className="relative w-full bg-slate-100 md:rounded-full" style={{ position: 'relative', touchAction: 'none' }}>
-                                    <div className="h-2 md:rounded-l-xl md:rounded-r-md bg-slate-700" style={{ width: 'calc(10.9375% - 0.25rem)' }}></div>
-                                    <div className="absolute top-1/2 -translate-x-1/2" style={{ left: '10.9375%' }}>
-                                        <div
-                                            className="h-4 rounded-full w-1 bg-slate-700"
-                                            style={{ position: 'absolute', transform: 'translate(-50%, -50%)', touchAction: 'none', left: '10.9375%' }}
-                                        >
-                                            <div
-                                                style={{
-                                                    border: 0,
-                                                    clip: 'rect(0px, 0px, 0px, 0px)',
-                                                    clipPath: 'inset(50%)',
-                                                    height: '1px',
-                                                    margin: '-1px',
-                                                    overflow: 'hidden',
-                                                    padding: 0,
-                                                    position: 'absolute',
-                                                    width: '1px',
-                                                    whiteSpace: 'nowrap',
-                                                }}
-                                            >
-                                                <input
-                                                    //tabIndex="0"
-                                                    id="react-aria8752326642-:r1:-0"
-                                                    aria-labelledby="react-aria8752326642-:r1:"
-                                                    min="0"
-                                                    max="64"
-                                                    step="1"
-                                                    aria-orientation="horizontal"
-                                                    aria-valuetext="0 hours, 0 minutes, 7 seconds"
-                                                    aria-describedby=""
-                                                    aria-details=""
-                                                    type="range"
-                                                    value="7"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div className="relative w-full md:rounded-full pt-2" style={{ position: 'relative', touchAction: 'none' }}>
+
+                                    <input
+                                        className="relative w-full md:rounded-full"
+                                        style={{
+                                            backgroundColor: "red",
+                                        }}
+                                        type="range"
+                                        min={0}
+                                        max={duration}
+                                        value={currentTime}
+                                        onChange={handleTimeSeek}
+                                    />
+
                                 </div>
 
                                 <div className="hidden items-center gap-2 md:flex"><output htmlFor="react-aria8752326642-:r1:-0"
                                     aria-live="off"
-                                    className="hidden rounded-md px-1 py-0.5 font-mono text-sm leading-6 md:block text-slate-500">00:07</output><span
+                                    className="hidden rounded-md px-1 py-0.5 font-mono text-sm leading-6 md:block text-slate-500">{formatTime(currentTime)}</output><span
                                         className="text-sm leading-6 text-slate-300" aria-hidden="true">/</span><span
-                                            className="hidden rounded-md px-1 py-0.5 font-mono text-sm leading-6 text-slate-500 md:block">01:04</span>
+                                            className="hidden rounded-md px-1 py-0.5 font-mono text-sm leading-6 text-slate-500 md:block">{formatTime(duration)}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
@@ -496,6 +645,122 @@ export default function Music() {
                     </div>
                 </div>
             </div>
+            <Transition.Root show={open} as={Fragment}>
+                <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={setOpen}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            >
+                                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                    <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                        <div className="sm:flex sm:items-start">
+                                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                                <ExclamationTriangleIcon className="h-6 w-6 text-red" aria-hidden="true" />
+                                            </div>
+                                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                                <Dialog.Title as="h3" className="text-black font-semibold leading-6 text-gray-900">
+                                                    Are you sure you want to delete this song?
+                                                </Dialog.Title>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                        <button
+                                            type="button"
+                                            className="inline-flex w-full justify-center rounded-md lg:bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 sm:ml-3 sm:w-auto"
+                                            onClick={handleDelete}
+                                        >
+                                            Delele
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="text-black mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                                            onClick={() => setOpen(false)}
+                                            ref={cancelButtonRef}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition.Root>
+            <Transition.Root show={alerts} as={Fragment}>
+                <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={setAlert}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            >
+                                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                    <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                        <div className="sm:flex sm:items-start">
+                                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                                                <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
+                                            </div>
+                                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                                <Dialog.Title as="h3" className="text-black font-semibold leading-6 text-gray-900">
+                                                    Delete music successfully!
+                                                </Dialog.Title>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                        <button
+                                            type="button"
+                                            className="inline-flex w-full justify-center rounded-md lg:bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 sm:ml-3 sm:w-auto"
+                                            onClick={() => {
+                                                setAlert(false)
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition.Root>
         </>
     );
 }

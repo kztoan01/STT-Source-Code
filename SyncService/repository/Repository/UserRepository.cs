@@ -27,4 +27,3 @@ public class UserRepository : IUserRepository
                  .FirstOrDefaultAsync(u => u.Id.Equals(userId));
         }
     }
-}

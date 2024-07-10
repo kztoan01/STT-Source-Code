@@ -1,6 +1,5 @@
 using core.Models;
 
-namespace repository.Repository.Interfaces;
 
 namespace repository.Repository.Interfaces
 {
@@ -14,8 +13,5 @@ namespace repository.Repository.Interfaces
         Task<int> GetListenCountAsync(Guid musicId, DateTime startDate, DateTime endDate);
         Task<List<Music>> GetMusicByAlbumIdAsync(Guid albumId);
         Task<List<PlaylistMusic>> GetMusicInPlaylistByPlaylsitIdAsync(Guid playlistId);
-
-
-
     }
 }
