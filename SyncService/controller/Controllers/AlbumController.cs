@@ -106,7 +106,7 @@ public class AlbumController : ControllerBase
     }
 
 
-    [HttpPost("getAllAlbums")]
+    [HttpGet("getAllAlbums")]
     //[Authorize]
     public async Task<IActionResult> GetAllAlbums([FromQuery] QueryObject queryObject)
     {

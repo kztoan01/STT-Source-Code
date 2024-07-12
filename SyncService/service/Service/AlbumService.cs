@@ -52,25 +52,29 @@ public class AlbumService : IAlbumService
     {
         var albums = await _albumRepository.GetAllArtistAlbumsAsync(artistId);
 
-        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            albums = albums.Where(a => a.albumTitle.Contains(query.Symbol, StringComparison.OrdinalIgnoreCase)).ToList();
+            albums = albums.Where(a => a.albumTitle.Contains(query.Name, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        if (!string.IsNullOrWhiteSpace(query.SortBy) && query.SortBy.Equals("date", StringComparison.OrdinalIgnoreCase))
         {
-            albums = query.SortBy.Equals("Title", StringComparison.OrdinalIgnoreCase)
-                ? query.IsDecsending
-                    ? albums.OrderByDescending(a => a.albumTitle).ToList()
-                    : albums.OrderBy(a => a.albumTitle).ToList()
-                : albums;
+            albums = query.IsDecsending
+                ? albums.OrderByDescending(a => a.releaseDate).ToList()
+                : albums.OrderBy(a => a.releaseDate).ToList();
         }
+        else
+        {
+            albums = query.IsDecsending
+                ? albums.OrderByDescending(a => a.albumTitle).ToList()
+                : albums.OrderBy(a => a.albumTitle).ToList();
+        }
+
 
         var skipNumber = (query.PageNumber - 1) * query.PageSize;
         var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();
 
         var albumResponseDTOs = new List<AlbumResponseDTO>();
-
         foreach (var album in paginatedAlbums)
         {
             var albumResponseDTO = new AlbumResponseDTO
@@ -82,9 +86,7 @@ public class AlbumService : IAlbumService
                 musics = new List<MusicDTO>()
             };
 
-            var musicsList = album.musics;
-
-            foreach (var music in musicsList)
+            foreach (var music in album.musics)
             {
                 var musicDTO = new MusicDTO
                 {
@@ -106,37 +108,46 @@ public class AlbumService : IAlbumService
 
                 albumResponseDTO.musics.Add(musicDTO);
             }
+
             var artistAlbum = await _albumRepository.GetAlbumById(album.Id);
             var artistDTO = await _artistRepository.GetArtistDTOById(artistAlbum.artistId);
             albumResponseDTO.artist = artistDTO;
+
             albumResponseDTOs.Add(albumResponseDTO);
         }
 
         return albumResponseDTOs;
-
     }
+
     public async Task<List<AlbumResponseDTO>> getAlbumByGenreNameAsync(string genreName, QueryObject query)
     {
-        var albums =  await _albumRepository.getAlbumByGenreNameAsync(genreName);
-        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        var albums = await _albumRepository.getAlbumByGenreNameAsync(genreName);
+
+        if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            albums = albums.Where(a => a.albumTitle.Contains(query.Symbol, StringComparison.OrdinalIgnoreCase)).ToList();
+            albums = albums.Where(a => a.albumTitle.Contains(query.Name, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        if (!string.IsNullOrWhiteSpace(query.SortBy))
+
+        if (!string.IsNullOrWhiteSpace(query.SortBy) && query.SortBy.Equals("date", StringComparison.OrdinalIgnoreCase))
         {
-            albums = query.SortBy.Equals("Title", StringComparison.OrdinalIgnoreCase)
-                ? query.IsDecsending
-                    ? albums.OrderByDescending(a => a.albumTitle).ToList()
-                    : albums.OrderBy(a => a.albumTitle).ToList()
-                : albums;
+            albums = query.IsDecsending
+                ? albums.OrderByDescending(a => a.releaseDate).ToList()
+                : albums.OrderBy(a => a.releaseDate).ToList();
         }
+        else
+        {
+            albums = query.IsDecsending
+                ? albums.OrderByDescending(a => a.albumTitle).ToList()
+                : albums.OrderBy(a => a.albumTitle).ToList();
+        }
+
+
 
         var skipNumber = (query.PageNumber - 1) * query.PageSize;
         var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();
 
         var albumResponseDTOs = new List<AlbumResponseDTO>();
-
         foreach (var album in paginatedAlbums)
         {
             var albumResponseDTO = new AlbumResponseDTO
@@ -148,9 +159,7 @@ public class AlbumService : IAlbumService
                 musics = new List<MusicDTO>()
             };
 
-            var musicsList = album.musics;
-
-            foreach (var music in musicsList)
+            foreach (var music in album.musics)
             {
                 var musicDTO = new MusicDTO
                 {
@@ -172,14 +181,17 @@ public class AlbumService : IAlbumService
 
                 albumResponseDTO.musics.Add(musicDTO);
             }
+
             var artistAlbum = await _albumRepository.GetAlbumById(album.Id);
             var artistDTO = await _artistRepository.GetArtistDTOById(artistAlbum.artistId);
             albumResponseDTO.artist = artistDTO;
+
             albumResponseDTOs.Add(albumResponseDTO);
         }
 
         return albumResponseDTOs;
     }
+
 
     public async Task<Album> GetAlbumByIdAsync(Guid albumId)
     {
@@ -195,19 +207,24 @@ public class AlbumService : IAlbumService
     {
         var albums = await _albumRepository.getAllAlbumsAsync();
 
-        if (!string.IsNullOrWhiteSpace(query.Symbol))
+        if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            albums = albums.Where(a => a.albumTitle.Contains(query.Symbol, StringComparison.OrdinalIgnoreCase)).ToList();
+            albums = albums.Where(a => a.albumTitle.Contains(query.Name, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
-        if (!string.IsNullOrWhiteSpace(query.SortBy))
+        if (!string.IsNullOrWhiteSpace(query.SortBy) && query.SortBy.Equals("date", StringComparison.OrdinalIgnoreCase))
         {
-            albums = query.SortBy.Equals("Title", StringComparison.OrdinalIgnoreCase)
-                ? query.IsDecsending
-                    ? albums.OrderByDescending(a => a.albumTitle).ToList()
-                    : albums.OrderBy(a => a.albumTitle).ToList()
-                : albums;
+            albums = query.IsDecsending
+                ? albums.OrderByDescending(a => a.releaseDate).ToList()
+                : albums.OrderBy(a => a.releaseDate).ToList();
         }
+        else
+        {
+            albums = query.IsDecsending
+                ? albums.OrderByDescending(a => a.albumTitle).ToList()
+                : albums.OrderBy(a => a.albumTitle).ToList();
+        }
+
 
         var skipNumber = (query.PageNumber - 1) * query.PageSize;
         var paginatedAlbums = albums.Skip(skipNumber).Take(query.PageSize).ToList();

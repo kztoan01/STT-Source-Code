@@ -105,11 +105,11 @@ public class AccountController : ControllerBase
         if (!checkUserPassword) return Unauthorized("Wrong Password");
 
         var getUserRole = await _userManager.GetRolesAsync(getUser);
-        var userSession = new UserSession(getUser.Id, getUser.UserName, getUser.Email, getUserRole.First());
+        var userSession = new UserSession(getUser.Id, getUser.userFullName, getUser.Email, getUserRole.First());
         return Ok(
             new LoginSuccessDTO
             {
-                UserName = getUser.UserName,
+                UserName = getUser.userFullName,
                 Email = getUser.Email,
                 //Token = _tokenService.CreateToken(getUser)
                 Token = _tokenService.GenerateToken(userSession)

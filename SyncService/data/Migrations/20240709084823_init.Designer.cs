@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using data.Data;
 
@@ -11,9 +12,11 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240709084823_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a21653f4-c04c-4d65-a1c5-48c96db44e56",
+                            Id = "53f65a89-1c44-4a52-aaae-d293a17da871",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ca31ce87-7b20-4943-9f2e-8c71d478a983",
+                            Id = "f2ab1617-3fac-4c8d-9556-808a84ab59f0",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "2452456e-e879-4aba-97af-d82118958d14",
+                            Id = "fcdcde38-4778-4982-8fca-829d2f93b229",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -627,7 +630,6 @@ namespace data.Migrations
                         .WithMany("Musics")
                         .HasForeignKey("albumId")
                         .OnDelete(DeleteBehavior.Restrict);
-
 
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")

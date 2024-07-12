@@ -1,9 +1,7 @@
 using core.Models;
 
-
-namespace repository.Repository.Interfaces
-{
-    public interface IMusicRepository
+namespace repository.Repository.Interfaces;
+public interface IMusicRepository
     {
         Task<Music> CreateMusicAsync(Music music);
         Task<Music?> GetMusicByIdAsync(Guid id);
@@ -14,4 +12,3 @@ namespace repository.Repository.Interfaces
         Task<List<Music>> GetMusicByAlbumIdAsync(Guid albumId);
         Task<List<PlaylistMusic>> GetMusicInPlaylistByPlaylsitIdAsync(Guid playlistId);
     }
-}
