@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
@@ -13,36 +14,31 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using repository.Repository;
 using repository.Repository.Interfaces;
+using service.Hub.iml;
 using service.Service;
 using service.Service.Interfaces;
-using System.Globalization;
-using service.Hub.iml;
 using Swashbuckle.AspNetCore.Filters;
-using controller.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Elasticsearch configuration
 var cloudId = builder.Configuration["Elastic:CloudId"];
 var apiKey = builder.Configuration["Elastic:ApiKey"];
-var settings = new ElasticsearchClientSettings(
-    cloudId!,
-    new ApiKey(apiKey!)).DefaultIndex("syncmusic");
-// var settings = new ElasticsearchClientSettings(new Uri("https://192.168.1.7:9200"))
-//     .CertificateFingerprint("44564D41433B8E121BAA3BC9455A0ED7DA3CE2D7E499629796C1F18D0C65BF7A")
-//     .Authentication(new BasicAuthentication("elastic", "changeme"))
-//     .DefaultIndex("testhehe");
+var settings = new ElasticsearchClientSettings(cloudId, new ApiKey(apiKey)).DefaultIndex("syncmusic");
 var clientElastic = new ElasticsearchClient(settings);
 builder.Services.AddSingleton(clientElastic);
-// TODO: add scope sau
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    // Ch? c?u hình HTTP
+    serverOptions.ListenAnyIP(5016);
+});
 builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<ElasticMusicDTO>>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
@@ -55,55 +51,12 @@ builder.Services.AddCors(options =>
         });
 });
 
-
 builder.Services.AddControllers()
-    .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
+    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
-//AWS Configuration
+// AWS Configuration
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
-
-builder.Services.AddSwaggerGen();
-var dbServer = Environment.GetEnvironmentVariable("LOCALDB");
-var dbPass = Environment.GetEnvironmentVariable("PASSDB");
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    .Replace("{LOCALDB}", dbServer)
-    .Replace("{PASSDB}", dbPass);
-builder.Services.AddDbContext<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); });
-
-//authentication plugin
-
-builder.Services.AddIdentity<User, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 12;
-}).AddEntityFrameworkStores<ApplicationDBContext>();
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme =
-        options.DefaultChallengeScheme =
-            options.DefaultForbidScheme =
-                options.DefaultScheme =
-                    options.DefaultSignInScheme =
-                        options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
-        )
-    };
-});
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -113,11 +66,43 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey
     });
-
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddHttpContextAccessor();
+// Database connection
+var dbServer = Environment.GetEnvironmentVariable("LOCALDB");
+var dbPass = Environment.GetEnvironmentVariable("PASSDB");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    .Replace("{LOCALDB}", dbServer)
+    .Replace("{PASSDB}", dbPass);
+builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
+
+// Authentication and Authorization
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 12;
+}).AddEntityFrameworkStores<ApplicationDBContext>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["JWT:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["JWT:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
+            )
+        };
+    });
+
+// DI Services
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
@@ -132,24 +117,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IGenreService, GenreService>();
-//CORS
-
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder.WithOrigins("http://127.0.0.1:5500")
-                .AllowAnyHeader()
-                .WithMethods("GET", "POST")
-                .AllowCredentials();
-        });
-});
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -157,17 +130,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<RoomHub>("/roomhub");
-
-app.MapHub<SignalRServer>("/SignalRServer");
-
 
 app.Run();
