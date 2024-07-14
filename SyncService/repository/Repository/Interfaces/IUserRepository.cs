@@ -1,4 +1,5 @@
-﻿using core.Models;
+﻿using core.Dtos.User;
+using core.Models;
 
 namespace repository.Repository.Interfaces
 {
@@ -7,5 +8,7 @@ namespace repository.Repository.Interfaces
         Task<User> GetUserIncludeArtist(Guid userId);
 
         Task<User> GetUserById(string userId);
+
+        Task<List<UserDTO>> GetAllUser();
     }
 }
