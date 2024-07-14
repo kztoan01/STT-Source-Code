@@ -16,6 +16,7 @@ using repository.Repository.Interfaces;
 using service.Service;
 using service.Service.Interfaces;
 using System.Globalization;
+using service.Hub.iml;
 using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +40,19 @@ builder.Services.AddSingleton(clientElastic);
 builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<ElasticMusicDTO>>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        b =>
+        {
+            b.WithOrigins("http://localhost:5500")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials();
+        });
+});
 
 
 builder.Services.AddControllers()
@@ -142,12 +156,12 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors("SyncWeb");
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<RoomHub>("/roomhub");
 
 
 

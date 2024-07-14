@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-    public partial class MusicHistory : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -324,7 +324,7 @@ namespace data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MusicHistory",
+                name: "MusicHistories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -334,15 +334,15 @@ namespace data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MusicHistory", x => x.Id);
+                    table.PrimaryKey("PK_MusicHistories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MusicHistory_AspNetUsers_UserId",
+                        name: "FK_MusicHistories_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MusicHistory_Musics_MusicId",
+                        name: "FK_MusicHistories_Musics_MusicId",
                         column: x => x.MusicId,
                         principalTable: "Musics",
                         principalColumn: "Id",
@@ -400,9 +400,9 @@ namespace data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "2452456e-e879-4aba-97af-d82118958d14", null, "Artist", "ARTIST" },
-                    { "a21653f4-c04c-4d65-a1c5-48c96db44e56", null, "Admin", "ADMIN" },
-                    { "ca31ce87-7b20-4943-9f2e-8c71d478a983", null, "User", "USER" }
+                    { "6424d950-2701-4847-a081-0237152b9900", null, "Artist", "ARTIST" },
+                    { "a24acd76-9e46-4781-ba76-dc04383fb049", null, "User", "USER" },
+                    { "c62930cc-3c1c-456a-9f43-1c702c884f54", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -466,13 +466,13 @@ namespace data.Migrations
                 column: "artistId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MusicHistory_MusicId",
-                table: "MusicHistory",
+                name: "IX_MusicHistories_MusicId",
+                table: "MusicHistories",
                 column: "MusicId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MusicHistory_UserId",
-                table: "MusicHistory",
+                name: "IX_MusicHistories_UserId",
+                table: "MusicHistories",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -531,7 +531,7 @@ namespace data.Migrations
                 name: "Follower");
 
             migrationBuilder.DropTable(
-                name: "MusicHistory");
+                name: "MusicHistories");
 
             migrationBuilder.DropTable(
                 name: "MusicListens");

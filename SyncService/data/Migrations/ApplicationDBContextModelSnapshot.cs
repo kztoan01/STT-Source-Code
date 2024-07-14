@@ -51,19 +51,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a21653f4-c04c-4d65-a1c5-48c96db44e56",
+                            Id = "c62930cc-3c1c-456a-9f43-1c702c884f54",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ca31ce87-7b20-4943-9f2e-8c71d478a983",
+                            Id = "a24acd76-9e46-4781-ba76-dc04383fb049",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "2452456e-e879-4aba-97af-d82118958d14",
+                            Id = "6424d950-2701-4847-a081-0237152b9900",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -627,7 +627,6 @@ namespace data.Migrations
                         .WithMany("Musics")
                         .HasForeignKey("albumId")
                         .OnDelete(DeleteBehavior.Restrict);
-
 
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")
