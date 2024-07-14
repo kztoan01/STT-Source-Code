@@ -40,7 +40,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        b =>
+        {
+            b.WithOrigins("http://127.0.0.1:5500")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials();
+        });
+});
 
 
 builder.Services.AddControllers()
