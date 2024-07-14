@@ -7,6 +7,7 @@ using core.Dtos.Music;
 using core.Models;
 using core.Objects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 using repository.Repository;
 using repository.Repository.Interfaces;
 using service.Service.Interfaces;
@@ -38,7 +39,7 @@ public class AlbumService : IAlbumService
             albumTitle = albumDTO.albumTitle,
             artistId = artistId,
             albumDescription = albumDTO.albumDescription,
-            releaseDate = albumDTO.releaseDate,
+            releaseDate = DateTime.Now,
             ImageUrl = imageUrl
         };
         return await _albumRepository.CreateAlbumAsync(album);
@@ -64,13 +65,23 @@ public class AlbumService : IAlbumService
 
     public async Task<Album> EditAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId, Guid albumId)
     {
-        var album = _albumRepository.GetAlbumById(albumId);
+        var album = await _albumRepository.GetAlbumById(albumId);
         if (album == null) return null;
-        album.Result.albumTitle = albumDTO.albumTitle;
-        album.Result.albumDescription = albumDTO.albumDescription;
-        album.Result.releaseDate = albumDTO.releaseDate;
-
-        return await _albumRepository.EditAlbumAsync(album.Result);
+        if (!albumDTO.albumTitle.IsNullOrEmpty())
+        {
+            album.albumTitle = albumDTO.albumTitle;
+        }
+        if (!albumDTO.albumDescription.IsNullOrEmpty())
+        {
+            album.albumDescription = albumDTO.albumDescription;
+        }
+            album.releaseDate = DateTime.Now;
+        if(albumDTO.ImageFile != null || albumDTO.ImageFile.Length !=0)
+        {
+            var imageUrl = await UploadFileAsync(albumDTO.ImageFile);
+            album.ImageUrl = imageUrl;
+        }
+        return await _albumRepository.EditAlbumAsync(album);
     }
     public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId, QueryObject query)
     {

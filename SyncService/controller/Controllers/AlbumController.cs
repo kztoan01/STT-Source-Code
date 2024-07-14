@@ -90,7 +90,7 @@ public class AlbumController : ControllerBase
 
         if (artist == null || artist.Id == Guid.Empty) return Forbid("Only artists can update albums.");
         var updateAlbum = await _albumService.EditAlbumAsync(albumDTO, artist.Id, albumId);
-        return Ok("Album deleted successfully");
+        return Ok("Album updated successfully");
     }
 
 

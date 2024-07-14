@@ -9,7 +9,7 @@ namespace core.Dtos.Artist
 {
     public class ArtistImageDTO
     {
-        public Guid id { get; set; }
+        public string description {  get; set; }
         public IFormFile image { get; set; }
     }
 }
