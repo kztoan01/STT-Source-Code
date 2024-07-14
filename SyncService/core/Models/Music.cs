@@ -16,12 +16,13 @@ public class Music
     public Guid genreId { get; set; }
     public Genre Genre { get; set; }
 
-
     public List<PlaylistMusic> playlistMusics { get; set; } = new();
 
     public List<MusicHistory> MusicHistories { get; set; } = new();
 
     public List<MusicListen> MusicListens { get; set; } = new();
+
+    public List<RoomPlaylist> RoomPlaylists { get; set; } = new();
 
     public List<Collaboration> collaborations { get; set; } = new();
 }

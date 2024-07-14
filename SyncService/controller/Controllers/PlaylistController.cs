@@ -23,9 +23,9 @@ public class PlaylistController : ControllerBase
         _playlistService = playlistService;
     }
 
-    [HttpPost("getUserPlaylist")]
+    [HttpGet("getUserPlaylist")]
     [Authorize]
-    public async Task<IActionResult> GetUserPlaylist(QueryObject queryObject)
+    public async Task<IActionResult> GetUserPlaylist([FromRoute] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -55,7 +55,7 @@ public class PlaylistController : ControllerBase
         return Ok(playlist);
     }
 
-    [HttpPost("getPlaylistByGenreName")]
+    [HttpGet("getPlaylistByGenreName")]
     [Authorize]
     public async Task<IActionResult> GetPlaylistsByGenreName(string genreName, QueryObject queryObject)
     {

@@ -17,6 +17,7 @@ using service.Service;
 using service.Service.Interfaces;
 using System.Globalization;
 using Swashbuckle.AspNetCore.Filters;
+using controller.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
@@ -39,6 +40,7 @@ builder.Services.AddSingleton(clientElastic);
 builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<ElasticMusicDTO>>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR();
 
 
 builder.Services.AddControllers()
@@ -103,7 +105,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
@@ -116,16 +117,22 @@ builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 //CORS
 
-builder.Services.AddCors(options => {
-    options.AddPolicy("SyncWeb", policyBuilder => {
-        policyBuilder.WithOrigins("http://localhost:3000");
-        policyBuilder.AllowAnyHeader();
-        policyBuilder.AllowAnyMethod();
-        policyBuilder.AllowCredentials();
-    });
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins("http://127.0.0.1:5500")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials();
+        });
 });
 
 var app = builder.Build();
@@ -141,13 +148,14 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors("SyncWeb");
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHub<SignalRServer>("/SignalRServer");
 
 
 app.Run();

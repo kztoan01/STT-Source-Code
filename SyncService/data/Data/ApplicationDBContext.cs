@@ -21,6 +21,10 @@ namespace data.Data
         public DbSet<MusicHistory> MusicHistories { get; set; }
 
         public DbSet<Collaboration> Collaborations { get; set; }
+        public DbSet<RoomPlaylist> RoomPlaylists { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+
+        public DbSet<Participant> Participants { get; set; }
         public DbSet<PlaylistMusic> PlaylistMusics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,7 +41,8 @@ namespace data.Data
             modelBuilder.Entity<MusicHistory>().ToTable("MusicHistories");
             modelBuilder.Entity<Collaboration>().ToTable("Collaborations");
             modelBuilder.Entity<PlaylistMusic>().ToTable("PlaylistMusics");
-
+            modelBuilder.Entity<Room>().ToTable("Rooms");
+            modelBuilder.Entity<Participant>().ToTable("Participants");
             modelBuilder.Entity<IdentityUserRole<string>>().HasKey(r => new { r.UserId, r.RoleId });
             modelBuilder.Entity<IdentityUserClaim<string>>().HasKey(c => c.Id);
             modelBuilder.Entity<IdentityUserLogin<string>>().HasKey(l => new { l.LoginProvider, l.ProviderKey });
@@ -48,9 +53,17 @@ namespace data.Data
                 .WithOne(a => a.User)
                 .HasForeignKey<Artist>(a => a.userId);
 
+            modelBuilder.Entity<User>()
+            .HasOne(u => u.Room)
+            .WithOne(a => a.User)
+            .HasForeignKey<Room>(a => a.HostId);
+
             modelBuilder.Entity<PlaylistMusic>()
                 .HasKey(pm => new { pm.playlistId, pm.musicId });
-
+            modelBuilder.Entity<RoomPlaylist>()
+                .HasKey(pm => new { pm.RoomId, pm.MusicId });
+            modelBuilder.Entity<Participant>()
+               .HasKey(pm => new { pm.RoomId, pm.UserId });
             modelBuilder.Entity<PlaylistMusic>()
                 .HasOne(pm => pm.Playlist)
                 .WithMany(p => p.playlistMusics)
@@ -106,10 +119,36 @@ namespace data.Data
                 .HasForeignKey(f => f.userId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<RoomPlaylist>()
+    .HasOne(f => f.Room)
+    .WithMany(u => u.RoomPlaylists)
+    .HasForeignKey(f => f.RoomId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<RoomPlaylist>()
+    .HasOne(f => f.Music)
+    .WithMany(u => u.RoomPlaylists)
+    .HasForeignKey(f => f.MusicId)
+    .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Follower>()
                 .HasOne(f => f.Artist)
                 .WithMany(a => a.Followers)
                 .HasForeignKey(f => f.artistId);
+
+            modelBuilder.Entity<Participant>()
+    .HasOne(p => p.User)
+    .WithMany(u => u.Participants)
+    .HasForeignKey(p => p.UserId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<Participant>()
+    .HasOne(p => p.Room)
+    .WithMany(u => u.Participants)
+    .HasForeignKey(p => p.RoomId)
+    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<MusicHistory>()
                 .HasOne(f => f.User)

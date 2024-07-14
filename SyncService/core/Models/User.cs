@@ -15,6 +15,8 @@ public class User : IdentityUser
     public List<MusicHistory> MusicHistories  { get; set; } = new();
     public Artist Artist { get; set; }
 
+    public Room Room { get; set; } 
+    public List<Participant> Participants { get; set; } = new();
     //public AccountDetail AccountDetail { get; set; }
 
 }
