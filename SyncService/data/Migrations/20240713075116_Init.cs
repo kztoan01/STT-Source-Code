@@ -8,11 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:SyncService/data/Migrations/20240713075116_Init.cs
     public partial class Init : Migration
-========
-    public partial class Initial : Migration
->>>>>>>> e4abb76990483c9b78b6511cc8069cf28f02b7f1:SyncService/data/Migrations/20240713101850_Initial.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -475,15 +471,9 @@ namespace data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-<<<<<<<< HEAD:SyncService/data/Migrations/20240713075116_Init.cs
                     { "86bb010e-1e59-415f-8927-a1c1bef8492e", null, "Admin", "ADMIN" },
                     { "9be217b0-52c0-49ba-a34b-165c5c52c40a", null, "Artist", "ARTIST" },
                     { "f2d77292-cd72-4431-b930-f8f120339e46", null, "User", "USER" }
-========
-                    { "6424d950-2701-4847-a081-0237152b9900", null, "Artist", "ARTIST" },
-                    { "a24acd76-9e46-4781-ba76-dc04383fb049", null, "User", "USER" },
-                    { "c62930cc-3c1c-456a-9f43-1c702c884f54", null, "Admin", "ADMIN" }
->>>>>>>> e4abb76990483c9b78b6511cc8069cf28f02b7f1:SyncService/data/Migrations/20240713101850_Initial.cs
                 });
 
             migrationBuilder.CreateIndex(

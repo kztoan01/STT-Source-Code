@@ -18,6 +18,7 @@ using service.Service.Interfaces;
 using System.Globalization;
 using service.Hub.iml;
 using Swashbuckle.AspNetCore.Filters;
+using controller.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
@@ -117,7 +118,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
@@ -134,14 +134,18 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 //CORS
 
-// builder.Services.AddCors(options => {
-//     options.AddPolicy("SyncWeb", policyBuilder => {
-//         policyBuilder.WithOrigins("http://localhost:3000");
-//         policyBuilder.AllowAnyHeader();
-//         policyBuilder.AllowAnyMethod();
-//         policyBuilder.AllowCredentials();
-//     });
-// });
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins("http://127.0.0.1:5500")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials();
+        });
+});
 
 var app = builder.Build();
 
@@ -163,6 +167,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<RoomHub>("/roomhub");
 
+app.MapHub<SignalRServer>("/SignalRServer");
 
 
 app.Run();
