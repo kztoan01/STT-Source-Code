@@ -2,13 +2,14 @@ using core.Dtos.Album;
 using core.Dtos.Playlist;
 using core.Models;
 using core.Objects;
+using Microsoft.AspNetCore.Http;
 
 namespace service.Service.Interfaces;
 
 public interface IPlaylistService
 {
     Task<PlaylistDTO> GetPlaylistByIdAsync(Guid id);
-    Task<Playlist> CreatePlaylistAsync(Playlist playlist);
+    Task<Playlist> CreatePlaylistAsync(Playlist playlist, IFormFile image);
     Task<Playlist?> UpdatePlaylistAsync(Guid id, Playlist playlistModel);
     Task<Playlist?> DeletePlaylistAsync(Guid id);
     Task<List<PlaylistDTO>> GetUserPlaylistsAsync(string userId, QueryObject query);

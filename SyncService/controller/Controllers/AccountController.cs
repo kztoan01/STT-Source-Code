@@ -51,6 +51,7 @@ public class AccountController : ControllerBase
                     var newArtist = await _artistService.CreateArtist(new Artist
                     {
                         userId = user.Id,
+                        ImageUrl = ""
                     });
                     if (roleResult.Succeeded)
                         return Ok(

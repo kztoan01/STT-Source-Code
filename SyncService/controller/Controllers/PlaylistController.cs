@@ -72,7 +72,7 @@ public class PlaylistController : ControllerBase
 
     [HttpPost("createPlaylist")]
     [Authorize]
-    public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistDTO playlist)
+    public async Task<IActionResult> CreatePlaylist([FromForm] CreatePlaylistDTO playlist)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -81,7 +81,7 @@ public class PlaylistController : ControllerBase
         if (user != null)
         {
             var playlistModel = playlist.ToPlaylistFromCreate(user.Id);
-            await _playlistService.CreatePlaylistAsync(playlistModel);
+            await _playlistService.CreatePlaylistAsync(playlistModel, playlist.playlistPicture);
             return CreatedAtAction(nameof(GetPlaylistById), new { id = playlistModel.Id }, playlistModel);
         }
 
