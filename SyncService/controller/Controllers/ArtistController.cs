@@ -25,22 +25,23 @@ public class ArtistController : ControllerBase
     {
         return await _artistService.GetArtistDTOById(id);
     }
+
     [HttpPut("uploadArtistImage")]
-    public async Task<IActionResult> UpdateArtistImage([FromForm] Guid id, [FromForm] IFormFile image)
+    public async Task<IActionResult> UpdateArtistImage([FromForm] ArtistImageDTO artistImage)
     {
-        if (image == null || image.Length == 0)
+        if (artistImage.image == null || artistImage.image.Length == 0)
         {
             return BadRequest("Image is not valid.");
         }
 
-        var result = await _artistService.UpdateArtistImageAsync(id, image);
+        var result = await _artistService.UpdateArtistImageAsync(artistImage);
 
         if (result)
         {
             return Ok("Image updated successfully.");
         }
 
-        return StatusCode(500, "An error occurred while updating the image.");
+        return StatusCode(404, "Id not found");
     }
 
 

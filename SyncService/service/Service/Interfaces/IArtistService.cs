@@ -8,7 +8,7 @@ namespace service.Service.Interfaces;
 public interface IArtistService
 {
     Task<List<MusicResponseDTO>> GetAllArtistMusicsAsync(Guid artistId);
-    Task<bool> UpdateArtistImageAsync(Guid artistId, IFormFile image);
+    Task<bool> UpdateArtistImageAsync(ArtistImageDTO artistImage);
     Task<ArtistDTO> GetArtistDTOById(Guid id);
     Task<Artist> GetArtistByUserIdAsync(Guid userId);
     Task<Artist> CreateArtist(Artist artist);

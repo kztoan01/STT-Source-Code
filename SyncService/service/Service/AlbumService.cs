@@ -17,14 +17,16 @@ public class AlbumService : IAlbumService
 {
     private readonly IAlbumRepository _albumRepository;
     private readonly IArtistRepository _artistRepository;
+    private readonly IMusicRepository _musicRepository;
     private readonly IAmazonS3 _s3Client;
     private readonly string _bucketName = "sync-music-storage";
 
-    public AlbumService(IAlbumRepository albumRepository, IArtistRepository artistRepository, IAmazonS3 amazonS3)
+    public AlbumService(IAlbumRepository albumRepository, IArtistRepository artistRepository, IAmazonS3 amazonS3, IMusicRepository musicRepository)
     {
         _albumRepository = albumRepository;
         _artistRepository = artistRepository;
         _s3Client = amazonS3;
+        _musicRepository = musicRepository;
     }
 
     public async Task<Album> CreateAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId)
@@ -44,8 +46,21 @@ public class AlbumService : IAlbumService
 
     public async Task<bool> DeleteAlbumAsync(Guid albumId)
     {
+        var album = await _albumRepository.GetAlbumById(albumId);
+        if (album == null)
+        {
+            return false;
+        }
+
+       
+        foreach (var music in album.Musics.ToList())  
+        {
+            await _musicRepository.DeleteMusicAsync(music.Id);
+        }
+
         return await _albumRepository.DeleteAlbumAsync(albumId);
     }
+
 
     public async Task<Album> EditAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId, Guid albumId)
     {
@@ -92,6 +107,7 @@ public class AlbumService : IAlbumService
                 albumTitle = album.albumTitle,
                 albumDescription = album.albumDescription,
                 releaseDate = album.releaseDate,
+                AlbumPicture = album.AlbumPicture,
                 musics = new List<MusicDTO>()
             };
 
@@ -165,6 +181,7 @@ public class AlbumService : IAlbumService
                 albumTitle = album.albumTitle,
                 albumDescription = album.albumDescription,
                 releaseDate = album.releaseDate,
+                AlbumPicture = album.AlbumPicture,
                 musics = new List<MusicDTO>()
             };
 
@@ -248,6 +265,7 @@ public class AlbumService : IAlbumService
                 albumTitle = album.albumTitle,
                 albumDescription = album.albumDescription,
                 releaseDate = album.releaseDate,
+                AlbumPicture = album.AlbumPicture,
                 musics = new List<MusicDTO>()
             };
 

@@ -31,7 +31,7 @@ public class PlaylistService : IPlaylistService
     public async Task<Playlist> CreatePlaylistAsync(Playlist playlist, IFormFile image)
     {
         var imageUrl = await UploadFileAsync(image);
-        playlist.ImageUrl = imageUrl;
+        playlist.playlistPicture = imageUrl;
         return await _playlistRepository.CreatePlaylistAsync(playlist);
     }
 

@@ -81,7 +81,7 @@ public class PlaylistController : ControllerBase
         if (user != null)
         {
             var playlistModel = playlist.ToPlaylistFromCreate(user.Id);
-            await _playlistService.CreatePlaylistAsync(playlistModel, playlist.Image);
+            await _playlistService.CreatePlaylistAsync(playlistModel, playlist.playlistPicture);
             return CreatedAtAction(nameof(GetPlaylistById), new { id = playlistModel.Id }, playlistModel);
         }
 

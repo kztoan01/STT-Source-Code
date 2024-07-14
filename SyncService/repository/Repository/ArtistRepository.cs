@@ -94,11 +94,10 @@ public class ArtistRepository : IArtistRepository
         return artist;
     }
 
-    public async Task<bool> UpdateArtistAsync(Artist artist)
+    public async Task<bool> updateArtist(Artist artist)
     {
         _context.Artists.Update(artist);
         await _context.SaveChangesAsync();
         return true;
     }
-
 }

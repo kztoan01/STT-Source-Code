@@ -10,6 +10,5 @@ public class CreatePlaylistDTO
     public string playlistName { get; set; } = string.Empty;
 
     public string playlistDescription { get; set; } = string.Empty;
-    public string playlistPicture { get; set; } = string.Empty;
-    public IFormFile Image { get; set; }
+    public IFormFile playlistPicture { get; set; }
 }

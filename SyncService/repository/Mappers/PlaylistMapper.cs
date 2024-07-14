@@ -25,8 +25,8 @@ public static class PlaylistMapper
         {
             playlistName = playlistDTO.playlistName,
             playlistDescription = playlistDTO.playlistDescription,
-            playlistPicture = playlistDTO.playlistPicture,
-            userId = userId
+            userId = userId,
+            
         };
     }
 }

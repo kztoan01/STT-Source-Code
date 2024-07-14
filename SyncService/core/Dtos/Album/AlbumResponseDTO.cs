@@ -13,4 +13,5 @@ public class AlbumResponseDTO
 
     public ArtistDTO? artist { get; set; }
     public List<MusicDTO> musics { get; set; }
+    public string AlbumPicture { get; set; }
 }

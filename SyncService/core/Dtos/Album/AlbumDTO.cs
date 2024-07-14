@@ -6,4 +6,5 @@ public class AlbumDTO
     public string albumTitle { get; set; }
     public string albumDescription { get; set; } = string.Empty;
     public DateTime releaseDate { get; set; }
+    public string imageUrl { get; set; }
 }

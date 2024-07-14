@@ -61,7 +61,8 @@ public class AlbumRepository : IAlbumRepository
             Id = album.Id,
             albumTitle = album.albumTitle,
             releaseDate = album.releaseDate,
-            albumDescription = album.albumDescription
+            albumDescription = album.albumDescription,
+            imageUrl = album.ImageUrl
         }).ToList();
 
         return albumDTOs;
@@ -125,7 +126,8 @@ public class AlbumRepository : IAlbumRepository
                 albumTitle = music.Album.albumTitle,
                 albumDescription = music.Album.albumDescription,
                 releaseDate = music.Album.releaseDate,
-                Id = (Guid)music.albumId
+                Id = (Guid)music.albumId,
+                imageUrl = music.Album.ImageUrl
             };
             var musicDTO = new MusicDTO
             {
@@ -150,7 +152,9 @@ public class AlbumRepository : IAlbumRepository
             releaseDate = album.releaseDate,
             albumDescription = album.albumDescription,
             artist = artistDTO.Result,
-            musics = listMusic
+            musics = listMusic,
+            AlbumPicture = album.ImageUrl,
+            
         };
         return albumDTO;
     }

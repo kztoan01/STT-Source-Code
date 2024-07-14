@@ -43,14 +43,14 @@ public class ArtistService : IArtistService
         return await _artistRepository.CreateArtist(artist);
     }
 
-    public async Task<bool> UpdateArtistImageAsync(Guid artistId, IFormFile image)
+    public async Task<bool> UpdateArtistImageAsync(ArtistImageDTO artistImage)
     {
-        var artist = await _artistRepository.GetArtistByUserId(artistId);
+        var artist = await _artistRepository.GetArtistByUserId(artistImage.id);
         if (artist == null)
         {
             return false;
         }
-        var artistImageUrl = UploadFileAsync(image);
+        var artistImageUrl = UploadFileAsync(artistImage.image);
         artist.ImageUrl = artistImageUrl.Result;
         return await _artistRepository.updateArtist(artist);
     }

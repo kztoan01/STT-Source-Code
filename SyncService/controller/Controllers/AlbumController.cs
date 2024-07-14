@@ -79,7 +79,7 @@ public class AlbumController : ControllerBase
 
     [HttpPut("updateAlbum/{albumId:guid}")]
     [Authorize]
-    public async Task<IActionResult> DeleteAlbum([FromBody] CreateAlbumDTO albumDTO, [FromRoute] Guid albumId)
+    public async Task<IActionResult> DeleteAlbum([FromForm] CreateAlbumDTO albumDTO, [FromRoute] Guid albumId)
     {
         var album = await _albumService.GetAlbumByIdAsync(albumId);
         if (album == null) return NotFound("Album not found");
@@ -102,7 +102,11 @@ public class AlbumController : ControllerBase
         if (album == null) return NotFound("Album not found");
 
         var deletedAlbum = await _albumService.DeleteAlbumAsync(albumId);
-        return Ok("Album deleted successfully");
+        if (deletedAlbum)
+        {
+            return Ok("Album deleted successfully");
+        }
+        return StatusCode(500, "An error occurred while deleting the album");
     }
 
 
