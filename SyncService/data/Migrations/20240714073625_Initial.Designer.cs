@@ -12,8 +12,8 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240714005043_init")]
-    partial class init
+    [Migration("20240714073625_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "53d98016-8cf1-4ce7-8cf8-74ef626b55ef",
+                            Id = "1f9d6d86-0318-48da-87b4-77a541209c88",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "0a31521c-d70d-42a1-a132-190ef2ab837f",
+                            Id = "a4a855a0-7c2f-4f70-8bd4-3edf5353115a",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "c265bb4d-0166-4617-9abf-4d7a88cb3d71",
+                            Id = "80cdeef6-018a-4280-8144-220fd846c25f",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -392,15 +392,29 @@ namespace data.Migrations
                     b.ToTable("MusicListens", (string)null);
                 });
 
+            modelBuilder.Entity("core.Models.Participant", b =>
+                {
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("JoinTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RoomId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Participants", (string)null);
+                });
+
             modelBuilder.Entity("core.Models.Playlist", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("createdDate")
                         .HasColumnType("datetime2");
@@ -450,6 +464,54 @@ namespace data.Migrations
                     b.HasIndex("musicId");
 
                     b.ToTable("PlaylistMusics", (string)null);
+                });
+
+            modelBuilder.Entity("core.Models.Room", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HostId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HostId")
+                        .IsUnique();
+
+                    b.ToTable("Rooms", (string)null);
+                });
+
+            modelBuilder.Entity("core.Models.RoomPlaylist", b =>
+                {
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MusicId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AddTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RoomId", "MusicId");
+
+                    b.HasIndex("MusicId");
+
+                    b.ToTable("RoomPlaylists");
                 });
 
             modelBuilder.Entity("core.Models.User", b =>
@@ -692,6 +754,25 @@ namespace data.Migrations
                     b.Navigation("Music");
                 });
 
+            modelBuilder.Entity("core.Models.Participant", b =>
+                {
+                    b.HasOne("core.Models.Room", "Room")
+                        .WithMany("Participants")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("core.Models.User", "User")
+                        .WithMany("Participants")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("core.Models.Playlist", b =>
                 {
                     b.HasOne("core.Models.User", "User")
@@ -722,6 +803,36 @@ namespace data.Migrations
                     b.Navigation("Playlist");
                 });
 
+            modelBuilder.Entity("core.Models.Room", b =>
+                {
+                    b.HasOne("core.Models.User", "User")
+                        .WithOne("Room")
+                        .HasForeignKey("core.Models.Room", "HostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("core.Models.RoomPlaylist", b =>
+                {
+                    b.HasOne("core.Models.Music", "Music")
+                        .WithMany("RoomPlaylists")
+                        .HasForeignKey("MusicId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("core.Models.Room", "Room")
+                        .WithMany("RoomPlaylists")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Music");
+
+                    b.Navigation("Room");
+                });
+
             modelBuilder.Entity("core.Models.Album", b =>
                 {
                     b.Navigation("Musics");
@@ -747,6 +858,8 @@ namespace data.Migrations
 
                     b.Navigation("MusicListens");
 
+                    b.Navigation("RoomPlaylists");
+
                     b.Navigation("collaborations");
 
                     b.Navigation("playlistMusics");
@@ -755,6 +868,13 @@ namespace data.Migrations
             modelBuilder.Entity("core.Models.Playlist", b =>
                 {
                     b.Navigation("playlistMusics");
+                });
+
+            modelBuilder.Entity("core.Models.Room", b =>
+                {
+                    b.Navigation("Participants");
+
+                    b.Navigation("RoomPlaylists");
                 });
 
             modelBuilder.Entity("core.Models.User", b =>
@@ -766,7 +886,12 @@ namespace data.Migrations
 
                     b.Navigation("MusicHistories");
 
+                    b.Navigation("Participants");
+
                     b.Navigation("Playlists");
+
+                    b.Navigation("Room")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

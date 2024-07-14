@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -206,8 +206,7 @@ namespace data.Migrations
                     playlistPicture = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     createdDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     updatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    userId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    userId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -215,6 +214,27 @@ namespace data.Migrations
                     table.ForeignKey(
                         name: "FK_Playlists_AspNetUsers_userId",
                         column: x => x.userId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HostId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_AspNetUsers_HostId",
+                        column: x => x.HostId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -263,6 +283,31 @@ namespace data.Migrations
                         name: "FK_Follower_AspNetUsers_userId",
                         column: x => x.userId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Participants",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    JoinTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Participants", x => new { x.RoomId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_Participants_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Participants_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -398,14 +443,39 @@ namespace data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RoomPlaylists",
+                columns: table => new
+                {
+                    MusicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AddTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoomPlaylists", x => new { x.RoomId, x.MusicId });
+                    table.ForeignKey(
+                        name: "FK_RoomPlaylists_Musics_MusicId",
+                        column: x => x.MusicId,
+                        principalTable: "Musics",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_RoomPlaylists_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "0a31521c-d70d-42a1-a132-190ef2ab837f", null, "User", "USER" },
-                    { "53d98016-8cf1-4ce7-8cf8-74ef626b55ef", null, "Admin", "ADMIN" },
-                    { "c265bb4d-0166-4617-9abf-4d7a88cb3d71", null, "Artist", "ARTIST" }
+                    { "1f9d6d86-0318-48da-87b4-77a541209c88", null, "Admin", "ADMIN" },
+                    { "80cdeef6-018a-4280-8144-220fd846c25f", null, "Artist", "ARTIST" },
+                    { "a4a855a0-7c2f-4f70-8bd4-3edf5353115a", null, "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -499,6 +569,11 @@ namespace data.Migrations
                 column: "genreId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Participants_UserId",
+                table: "Participants",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlaylistMusics_musicId",
                 table: "PlaylistMusics",
                 column: "musicId");
@@ -507,6 +582,17 @@ namespace data.Migrations
                 name: "IX_Playlists_userId",
                 table: "Playlists",
                 column: "userId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomPlaylists_MusicId",
+                table: "RoomPlaylists",
+                column: "MusicId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_HostId",
+                table: "Rooms",
+                column: "HostId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -540,16 +626,25 @@ namespace data.Migrations
                 name: "MusicListens");
 
             migrationBuilder.DropTable(
+                name: "Participants");
+
+            migrationBuilder.DropTable(
                 name: "PlaylistMusics");
+
+            migrationBuilder.DropTable(
+                name: "RoomPlaylists");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Playlists");
+
+            migrationBuilder.DropTable(
                 name: "Musics");
 
             migrationBuilder.DropTable(
-                name: "Playlists");
+                name: "Rooms");
 
             migrationBuilder.DropTable(
                 name: "Albums");

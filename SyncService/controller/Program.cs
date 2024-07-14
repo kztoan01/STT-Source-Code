@@ -30,11 +30,7 @@ var apiKey = builder.Configuration["Elastic:ApiKey"];
 var settings = new ElasticsearchClientSettings(cloudId, new ApiKey(apiKey)).DefaultIndex("syncmusic");
 var clientElastic = new ElasticsearchClient(settings);
 builder.Services.AddSingleton(clientElastic);
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    // Ch? c?u h�nh HTTP
-    serverOptions.ListenAnyIP(5016);
-});
+
 builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<ElasticMusicDTO>>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -80,11 +76,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
 
 //authentication plugin
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    // Chỉ cấu hình HTTP
-    serverOptions.ListenAnyIP(5016);
-});
+
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
