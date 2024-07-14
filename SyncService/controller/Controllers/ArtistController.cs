@@ -25,6 +25,24 @@ public class ArtistController : ControllerBase
     {
         return await _artistService.GetArtistDTOById(id);
     }
+    [HttpPut("uploadArtistImage")]
+    public async Task<IActionResult> UpdateArtistImage([FromForm] Guid id, [FromForm] IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+        {
+            return BadRequest("Image is not valid.");
+        }
+
+        var result = await _artistService.UpdateArtistImageAsync(id, image);
+
+        if (result)
+        {
+            return Ok("Image updated successfully.");
+        }
+
+        return StatusCode(500, "An error occurred while updating the image.");
+    }
+
 
     [HttpGet("getAllArtistMusics/{artistId}")]
     //[Authorized]

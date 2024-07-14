@@ -51,19 +51,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a21653f4-c04c-4d65-a1c5-48c96db44e56",
+                            Id = "53d98016-8cf1-4ce7-8cf8-74ef626b55ef",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ca31ce87-7b20-4943-9f2e-8c71d478a983",
+                            Id = "0a31521c-d70d-42a1-a132-190ef2ab837f",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "2452456e-e879-4aba-97af-d82118958d14",
+                            Id = "c265bb4d-0166-4617-9abf-4d7a88cb3d71",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -181,6 +181,10 @@ namespace data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("albumDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -207,6 +211,10 @@ namespace data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("artistDescription")
                         .IsRequired()
@@ -386,6 +394,10 @@ namespace data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("createdDate")
                         .HasColumnType("datetime2");
@@ -627,7 +639,6 @@ namespace data.Migrations
                         .WithMany("Musics")
                         .HasForeignKey("albumId")
                         .OnDelete(DeleteBehavior.Restrict);
-
 
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")

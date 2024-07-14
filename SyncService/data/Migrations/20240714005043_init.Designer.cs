@@ -12,7 +12,7 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240709084823_init")]
+    [Migration("20240714005043_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -54,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "53f65a89-1c44-4a52-aaae-d293a17da871",
+                            Id = "53d98016-8cf1-4ce7-8cf8-74ef626b55ef",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "f2ab1617-3fac-4c8d-9556-808a84ab59f0",
+                            Id = "0a31521c-d70d-42a1-a132-190ef2ab837f",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "fcdcde38-4778-4982-8fca-829d2f93b229",
+                            Id = "c265bb4d-0166-4617-9abf-4d7a88cb3d71",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -184,6 +184,10 @@ namespace data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("albumDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -210,6 +214,10 @@ namespace data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("artistDescription")
                         .IsRequired()
@@ -389,6 +397,10 @@ namespace data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("createdDate")
                         .HasColumnType("datetime2");

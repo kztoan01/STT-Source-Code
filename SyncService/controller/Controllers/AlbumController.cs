@@ -59,7 +59,7 @@ public class AlbumController : ControllerBase
 
     [HttpPost("createAlbum")]
     [Authorize]
-    public async Task<IActionResult> CreateAlbum([FromBody] CreateAlbumDTO album)
+    public async Task<IActionResult> CreateAlbum([FromForm] CreateAlbumDTO album)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -69,7 +69,7 @@ public class AlbumController : ControllerBase
 
         var artist = await _artistService.GetArtistByUserIdAsync(Guid.Parse(user.Id));
 
-        if (artist == null || artist == null || artist.Id == Guid.Empty)
+        if (artist == null || artist.Id == Guid.Empty)
             return Forbid("Only artists can create albums.");
 
         await _albumService.CreateAlbumAsync(album, artist.Id);

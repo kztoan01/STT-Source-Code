@@ -11,4 +11,5 @@ public class Playlist
     public string userId { get; set; }
     public User User { get; set; }
     public List<PlaylistMusic> playlistMusics { get; set; } = new();
+    public string ImageUrl { get; set; }
 }

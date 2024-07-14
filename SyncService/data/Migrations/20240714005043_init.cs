@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-    public partial class MusicHistory : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -97,7 +97,8 @@ namespace data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     userId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    artistDescription = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    artistDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -205,7 +206,8 @@ namespace data.Migrations
                     playlistPicture = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     createdDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     updatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    userId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    userId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -226,7 +228,8 @@ namespace data.Migrations
                     albumTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     albumDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     releaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    artistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    artistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -324,7 +327,7 @@ namespace data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MusicHistory",
+                name: "MusicHistories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -334,15 +337,15 @@ namespace data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MusicHistory", x => x.Id);
+                    table.PrimaryKey("PK_MusicHistories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MusicHistory_AspNetUsers_UserId",
+                        name: "FK_MusicHistories_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MusicHistory_Musics_MusicId",
+                        name: "FK_MusicHistories_Musics_MusicId",
                         column: x => x.MusicId,
                         principalTable: "Musics",
                         principalColumn: "Id",
@@ -400,9 +403,9 @@ namespace data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "2452456e-e879-4aba-97af-d82118958d14", null, "Artist", "ARTIST" },
-                    { "a21653f4-c04c-4d65-a1c5-48c96db44e56", null, "Admin", "ADMIN" },
-                    { "ca31ce87-7b20-4943-9f2e-8c71d478a983", null, "User", "USER" }
+                    { "0a31521c-d70d-42a1-a132-190ef2ab837f", null, "User", "USER" },
+                    { "53d98016-8cf1-4ce7-8cf8-74ef626b55ef", null, "Admin", "ADMIN" },
+                    { "c265bb4d-0166-4617-9abf-4d7a88cb3d71", null, "Artist", "ARTIST" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -466,13 +469,13 @@ namespace data.Migrations
                 column: "artistId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MusicHistory_MusicId",
-                table: "MusicHistory",
+                name: "IX_MusicHistories_MusicId",
+                table: "MusicHistories",
                 column: "MusicId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MusicHistory_UserId",
-                table: "MusicHistory",
+                name: "IX_MusicHistories_UserId",
+                table: "MusicHistories",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -531,7 +534,7 @@ namespace data.Migrations
                 name: "Follower");
 
             migrationBuilder.DropTable(
-                name: "MusicHistory");
+                name: "MusicHistories");
 
             migrationBuilder.DropTable(
                 name: "MusicListens");
