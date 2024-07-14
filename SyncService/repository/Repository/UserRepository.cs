@@ -23,7 +23,6 @@ public class UserRepository : IUserRepository
         public async Task<User> GetUserById(string userId)
         {
             return await _context.Users
-                 .Include(u => u.MusicHistories)
                  .FirstOrDefaultAsync(u => u.Id.Equals(userId));
         }
     }

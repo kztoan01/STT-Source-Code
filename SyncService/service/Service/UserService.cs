@@ -19,4 +19,11 @@ public class UserService : IUserService
         if (user == null) return null;
         return user;
     }
+
+    public async Task<User> GetUserByIdAsync(string userId)
+    {
+        var user = await _userRepo.GetUserById(userId);
+        if (user == null) return null;
+        return user;
+    }
 }

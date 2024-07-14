@@ -30,17 +30,22 @@ var apiKey = builder.Configuration["Elastic:ApiKey"];
 var settings = new ElasticsearchClientSettings(cloudId, new ApiKey(apiKey)).DefaultIndex("syncmusic");
 var clientElastic = new ElasticsearchClient(settings);
 builder.Services.AddSingleton(clientElastic);
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    // Ch? c?u h�nh HTTP
-    serverOptions.ListenAnyIP(5016);
-});
 builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<ElasticMusicDTO>>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins("http://127.0.0.1:5500")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials();
+        });
+});
 
 
 builder.Services.AddControllers()
@@ -68,13 +73,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     .Replace("{LOCALDB}", dbServer)
     .Replace("{PASSDB}", dbPass);
 builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
-
-//authentication plugin
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    // Chỉ cấu hình HTTP
-    serverOptions.ListenAnyIP(5016);
-});
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -134,6 +132,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<RoomHub>("/roomhub");
-
-app.MapHub<SignalRServer>("/SignalRServer");
 app.Run();
