@@ -1,7 +1,8 @@
-using controller.Hubs;
 using core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using service.Hub;
+using service.Hub.iml;
 using service.Service.Interfaces;
 
 namespace controller.Controllers
@@ -30,12 +31,12 @@ namespace controller.Controllers
             return Ok(room);
         }
 
-    [HttpPost("joinroom")]
-    public async Task<IActionResult> JoinRoom([FromBody]string groupName,string userName)
-    {
-        await _hubContext.Clients.Group(groupName).AlertToRoom(userName);
-        return Ok();
-    }
+        [HttpPost("joinroom")]
+        public async Task<IActionResult> JoinRoom([FromBody]string groupName,string userName)
+        {
+            await _hubContext.Clients.Group(groupName).AlertToRoom(userName);
+            return Ok();
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAllRooms()
@@ -76,7 +77,6 @@ namespace controller.Controllers
             try
             {
                 await _roomService.JoinRoomAsync(userId, roomId, code);
-                await _hubContext.Clients.Group(roomId.ToString()).SendAsync("UserJoined", userId);
                 return Ok();
             }
             catch (Exception ex)
@@ -89,7 +89,6 @@ namespace controller.Controllers
         public async Task<IActionResult> RemoveUserOutOfRoom(Guid roomId, [FromQuery] string userId)
         {
             await _roomService.RemoveUserOutOfRoomAsync(userId, roomId);
-            await _hubContext.Clients.Group(roomId.ToString()).SendAsync("UserLeft", userId);
             return Ok();
         }
 
@@ -97,7 +96,6 @@ namespace controller.Controllers
         public async Task<IActionResult> AddMusicToRoom(Guid roomId, [FromQuery] Guid musicId)
         {
             await _roomService.AddMusicToRoomAsync(musicId, roomId);
-            await _hubContext.Clients.Group(roomId.ToString()).SendAsync("MusicAdded", musicId);
             return Ok();
         }
 
@@ -105,7 +103,6 @@ namespace controller.Controllers
         public async Task<IActionResult> RemoveMusicOutOfRoom(Guid roomId, [FromQuery] Guid musicId)
         {
             await _roomService.RemoveMusicOutOfRoomAsync(musicId, roomId);
-            await _hubContext.Clients.Group(roomId.ToString()).SendAsync("MusicRemoved", musicId);
             return Ok();
         }
     }

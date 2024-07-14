@@ -43,17 +43,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(
-        b =>
-        {
-            b.WithOrigins("http://localhost:5500")
-                .AllowAnyHeader()
-                .WithMethods("GET", "POST")
-                .AllowCredentials();
-        });
-});
+
 
 
 builder.Services.AddControllers()
@@ -73,7 +63,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); });
 
 //authentication plugin
-
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    // Chỉ cấu hình HTTP
+    serverOptions.ListenAnyIP(5016);
+});
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -168,6 +162,4 @@ app.MapControllers();
 app.MapHub<RoomHub>("/roomhub");
 
 app.MapHub<SignalRServer>("/SignalRServer");
-
-
 app.Run();
