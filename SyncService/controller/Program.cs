@@ -134,14 +134,14 @@ builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IGenreService, GenreService>();
 //CORS
 
-builder.Services.AddCors(options => {
-    options.AddPolicy("SyncWeb", policyBuilder => {
-        policyBuilder.WithOrigins("http://localhost:3000");
-        policyBuilder.AllowAnyHeader();
-        policyBuilder.AllowAnyMethod();
-        policyBuilder.AllowCredentials();
-    });
-});
+// builder.Services.AddCors(options => {
+//     options.AddPolicy("SyncWeb", policyBuilder => {
+//         policyBuilder.WithOrigins("http://localhost:3000");
+//         policyBuilder.AllowAnyHeader();
+//         policyBuilder.AllowAnyMethod();
+//         policyBuilder.AllowCredentials();
+//     });
+// });
 
 var app = builder.Build();
 
