@@ -1,5 +1,6 @@
 using core.Dtos.Artist;
 using core.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using service.Service.Interfaces;
@@ -26,19 +27,20 @@ public class ArtistController : ControllerBase
         return await _artistService.GetArtistDTOById(id);
     }
 
-    [HttpPut("uploadArtistImage")]
-    public async Task<IActionResult> UpdateArtistImage([FromForm] ArtistImageDTO artistImage)
+    [HttpPut("updateArtistInfor/{userId}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateArtistImage([FromRoute] Guid userId, [FromForm] ArtistImageDTO artistImage)
     {
         if (artistImage.image == null || artistImage.image.Length == 0)
         {
             return BadRequest("Image is not valid.");
         }
 
-        var result = await _artistService.UpdateArtistImageAsync(artistImage);
+        var result = await _artistService.UpdateArtistInforAsync(userId,artistImage);
 
         if (result)
         {
-            return Ok("Image updated successfully.");
+            return Ok("Artist's Information updated successfully.");
         }
 
         return StatusCode(404, "Id not found");
@@ -46,7 +48,7 @@ public class ArtistController : ControllerBase
 
 
     [HttpGet("getAllArtistMusics/{artistId}")]
-    //[Authorized]
+    //[Authorize]
     public async Task<IActionResult> GetAllArtistMusicsAsync([FromRoute] Guid artistId)
     {
         if (!ModelState.IsValid)

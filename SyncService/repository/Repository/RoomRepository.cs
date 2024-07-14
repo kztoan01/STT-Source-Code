@@ -21,10 +21,11 @@ namespace repository.Repository
         public async Task<Room> GetRoomByIdAsync(Guid roomId)
         {
             return await _context.Rooms
-                .Include(r => r.User)
-                .Include(r => r.RoomPlaylists).ThenInclude(rp => rp.Music)
-                .Include(r => r.Participants).ThenInclude(p => p.User)
-                .FirstOrDefaultAsync(r => r.Id == roomId);
+        .Include(r => r.RoomPlaylists)
+            .ThenInclude(rp => rp.Music)
+        .Include(r => r.Participants)
+            .ThenInclude(p => p.User)
+        .FirstOrDefaultAsync(r => r.Id == roomId);
         }
 
         public async Task<IEnumerable<Room>> GetAllRoomsAsync()
