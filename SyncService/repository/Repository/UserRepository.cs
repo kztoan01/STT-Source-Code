@@ -26,5 +26,4 @@ public class UserRepository : IUserRepository
                  .Include(u => u.MusicHistories)
                  .FirstOrDefaultAsync(u => u.Id.Equals(userId));
         }
-}
-
+    }

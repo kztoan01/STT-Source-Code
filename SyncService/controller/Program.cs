@@ -16,6 +16,7 @@ using repository.Repository.Interfaces;
 using service.Service;
 using service.Service.Interfaces;
 using System.Globalization;
+using service.Hub.iml;
 using Swashbuckle.AspNetCore.Filters;
 using controller.Hubs;
 
@@ -41,6 +42,18 @@ builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<Elas
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        b =>
+        {
+            b.WithOrigins("http://localhost:5500")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials();
+        });
+});
 
 
 builder.Services.AddControllers()
@@ -117,9 +130,8 @@ builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 builder.Services.AddScoped<IArtistService, ArtistService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IRoomRepository, RoomRepository>();
-builder.Services.AddScoped<IRoomService, RoomService>();
-
+builder.Services.AddScoped<IGenreRepository, GenreRepository>();
+builder.Services.AddScoped<IGenreService, GenreService>();
 //CORS
 
 
@@ -149,11 +161,11 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseCors();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<RoomHub>("/roomhub");
 
 app.MapHub<SignalRServer>("/SignalRServer");
 

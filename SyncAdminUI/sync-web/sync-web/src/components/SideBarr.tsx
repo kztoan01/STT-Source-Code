@@ -12,7 +12,7 @@ interface SidebarProps {
   children: ReactNode;
 }
 
-const Sidebar: FC<SidebarProps> = ({ children }) => {
+const Sidebarr: FC<SidebarProps> = ({ children }) => {
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -57,4 +57,4 @@ const Sidebar: FC<SidebarProps> = ({ children }) => {
   );
 };
 
-export default Sidebar;
+export default Sidebarr;

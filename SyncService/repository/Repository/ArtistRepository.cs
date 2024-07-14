@@ -86,4 +86,11 @@ public class ArtistRepository : IArtistRepository
     {
         return await _context.Artists.FirstOrDefaultAsync(a => a.userId == userId.ToString());
     }
+
+    public async Task<Artist> CreateArtist(Artist artist)
+    {
+        await _context.Artists.AddAsync(artist);
+        await _context.SaveChangesAsync();
+        return artist;
+    }
 }

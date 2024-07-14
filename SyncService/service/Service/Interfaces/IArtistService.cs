@@ -10,4 +10,5 @@ public interface IArtistService
 
     Task<ArtistDTO> GetArtistDTOById(Guid id);
     Task<Artist> GetArtistByUserIdAsync(Guid userId);
+    Task<Artist> CreateArtist(Artist artist);
 }

@@ -1,4 +1,4 @@
-﻿using controller.Hubs;
+using controller.Hubs;
 using core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -11,9 +11,9 @@ namespace controller.Controllers
     public class RoomController : ControllerBase
     {
         private readonly IRoomService _roomService;
-        private readonly IHubContext<SignalRServer> _hubContext;
+        private readonly IHubContext<RoomHub, IRoomHub> _hubContext;
 
-        public RoomController(IRoomService roomService, IHubContext<SignalRServer> hubContext)
+        public RoomController(IRoomService roomService, IHubContext<RoomHub, IRoomHub> hubContext)
         {
             _roomService = roomService;
             _hubContext = hubContext;
@@ -29,6 +29,13 @@ namespace controller.Controllers
             }
             return Ok(room);
         }
+
+    [HttpPost("joinroom")]
+    public async Task<IActionResult> JoinRoom([FromBody]string groupName,string userName)
+    {
+        await _hubContext.Clients.Group(groupName).AlertToRoom(userName);
+        return Ok();
+    }
 
         [HttpGet]
         public async Task<IActionResult> GetAllRooms()

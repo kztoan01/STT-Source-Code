@@ -25,7 +25,7 @@ public class TokenRepository : ITokenRepository
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Email, user.Email),
-            new(JwtRegisteredClaimNames.GivenName, user.UserName)
+            new(JwtRegisteredClaimNames.GivenName, user.userFullName)
         };
 
         var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);

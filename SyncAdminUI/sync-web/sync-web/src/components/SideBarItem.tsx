@@ -1,7 +1,7 @@
 "use client"
 import { ReactNode, FC } from "react";
 import { useContext } from "react";
-import { SidebarContext } from "./SideBar";
+import { SidebarContext } from "./SideBarr";
 
 interface SidebarItemProps {
   icon: ReactNode;

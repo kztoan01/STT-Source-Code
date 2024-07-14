@@ -18,8 +18,8 @@ export default function NavBar() {
             name: 'Upload'
         },
         {
-            href: '/artist/statistic',
-            name: 'Statistic'
+            href: '/artist/album',
+            name: 'Album'
         },
         {
             href: '/artist/account',

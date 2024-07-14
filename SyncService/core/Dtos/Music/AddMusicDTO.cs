@@ -9,7 +9,7 @@ public class AddMusicDTO
     public string musicTitle { get; set; } = string.Empty;
     public int musicPlays { get; set; }
     public double musicDuration { get; set; }
-    public Guid albumId { get; set; }
+    public Guid? albumId { get; set; }
     public Guid artistId { get; set; }
     public Guid genreId { get; set; }
 }

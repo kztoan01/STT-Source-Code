@@ -11,12 +11,14 @@ namespace controller.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly ITokenService _tokenService;
+    private readonly IArtistService _artistService;
     private readonly UserManager<User> _userManager;
 
-    public AccountController(UserManager<User> userManager, ITokenService tokenService)
+    public AccountController(UserManager<User> userManager, ITokenService tokenService, IArtistService artistService)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _artistService = artistService;
     }
 
     [HttpPost("register")]
@@ -29,29 +31,54 @@ public class AccountController : ControllerBase
 
             var user = new User
             {
-                UserName = registerDTO.Username,
+                UserName = Guid.NewGuid().ToString(),
+                userFullName = registerDTO.Username,
                 Email = registerDTO.Email
             };
 
             var getUserEmail = await _userManager.FindByEmailAsync(registerDTO.Email);
 
-            if (getUserEmail != null) return StatusCode(500, "Email exist");
+            if (getUserEmail != null) return StatusCode(401, "Email exist");
 
             var createdUser = await _userManager.CreateAsync(user, registerDTO.Password);
 
             if (createdUser.Succeeded)
             {
-                var roleResult = await _userManager.AddToRoleAsync(user, "User");
-                if (roleResult.Succeeded)
-                    return Ok(
-                        new NewUserDTO
-                        {
-                            UserName = user.UserName,
-                            Email = user.Email,
-                            Token = _tokenService.CreateToken(user)
-                        }
-                    );
-                return StatusCode(500, roleResult.Errors);
+                if(registerDTO.isArtist == true)
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(user, "Artist");
+                    var userModel = await _userManager.GetUserAsync(User);
+                    var newArtist = await _artistService.CreateArtist(new Artist
+                    {
+                        userId = user.Id,
+                    });
+                    if (roleResult.Succeeded)
+                        return Ok(
+                            new NewUserDTO
+                            {
+                                UserName = user.userFullName,
+                                Email = user.Email,
+                                Token = _tokenService.CreateToken(user)
+                            }
+                        );
+                    return StatusCode(500, roleResult.Errors);
+                }
+                else
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(user, "User");
+                    if (roleResult.Succeeded)
+                        return Ok(
+                            new NewUserDTO
+                            {
+                                UserName = user.userFullName,
+                                Email = user.Email,
+                                Token = _tokenService.CreateToken(user)
+                            }
+                        );
+                    return StatusCode(500, roleResult.Errors);
+                }
+                
+                
             }
 
             return StatusCode(500, createdUser.Errors);
@@ -78,11 +105,11 @@ public class AccountController : ControllerBase
         if (!checkUserPassword) return Unauthorized("Wrong Password");
 
         var getUserRole = await _userManager.GetRolesAsync(getUser);
-        var userSession = new UserSession(getUser.Id, getUser.UserName, getUser.Email, getUserRole.First());
+        var userSession = new UserSession(getUser.Id, getUser.userFullName, getUser.Email, getUserRole.First());
         return Ok(
             new LoginSuccessDTO
             {
-                UserName = getUser.UserName,
+                UserName = getUser.userFullName,
                 Email = getUser.Email,
                 //Token = _tokenService.CreateToken(getUser)
                 Token = _tokenService.GenerateToken(userSession)

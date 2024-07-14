@@ -31,4 +31,9 @@ public class ArtistService : IArtistService
     {
         return await _artistRepository.GetArtistByUserId(userId);
     }
+
+    public async Task<Artist> CreateArtist(Artist artist)
+    {
+        return await _artistRepository.CreateArtist(artist);
+    }
 }
