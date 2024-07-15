@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
@@ -13,49 +14,67 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using repository.Repository;
 using repository.Repository.Interfaces;
+using service.Hub.iml;
 using service.Service;
 using service.Service.Interfaces;
-using System.Globalization;
 using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
+
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Elasticsearch configuration
 var cloudId = builder.Configuration["Elastic:CloudId"];
 var apiKey = builder.Configuration["Elastic:ApiKey"];
-var settings = new ElasticsearchClientSettings(
-    cloudId!,
-    new ApiKey(apiKey!)).DefaultIndex("syncmusic");
-// var settings = new ElasticsearchClientSettings(new Uri("https://192.168.1.7:9200"))
-//     .CertificateFingerprint("44564D41433B8E121BAA3BC9455A0ED7DA3CE2D7E499629796C1F18D0C65BF7A")
-//     .Authentication(new BasicAuthentication("elastic", "changeme"))
-//     .DefaultIndex("testhehe");
+var settings = new ElasticsearchClientSettings(cloudId, new ApiKey(apiKey)).DefaultIndex("syncmusic");
 var clientElastic = new ElasticsearchClient(settings);
 builder.Services.AddSingleton(clientElastic);
-// TODO: add scope sau
+
 builder.Services.AddScoped<IElasticService<ElasticMusicDTO>, ElasticService<ElasticMusicDTO>>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSignalR();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        b =>
+        {
+            b.WithOrigins("http://127.0.0.1:5500")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST")
+                .AllowCredentials();
+        });
+});
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
-
-//AWS Configuration
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+        });
+// AWS Configuration
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
+
+// Database connection
 var dbServer = Environment.GetEnvironmentVariable("LOCALDB");
 var dbPass = Environment.GetEnvironmentVariable("PASSDB");
-
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     .Replace("{LOCALDB}", dbServer)
     .Replace("{PASSDB}", dbPass);
-builder.Services.AddDbContext<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); });
+builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(connectionString));
 
 //authentication plugin
 
@@ -90,20 +109,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
-    });
-
-    options.OperationFilter<SecurityRequirementsOperationFilter>();
-});
-
-builder.Services.AddHttpContextAccessor();
-
+// DI Services
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
@@ -118,20 +124,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<IGenreService, GenreService>();
-//CORS
-
-builder.Services.AddCors(options => {
-    options.AddPolicy("SyncWeb", policyBuilder => {
-        policyBuilder.WithOrigins("http://localhost:3000");
-        policyBuilder.AllowAnyHeader();
-        policyBuilder.AllowAnyMethod();
-        policyBuilder.AllowCredentials();
-    });
-});
-
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -139,16 +137,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
-app.UseCors("SyncWeb");
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-
+app.MapHub<RoomHub>("/roomhub");
 
 app.Run();

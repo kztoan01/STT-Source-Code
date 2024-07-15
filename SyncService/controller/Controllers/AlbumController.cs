@@ -59,7 +59,7 @@ public class AlbumController : ControllerBase
 
     [HttpPost("createAlbum")]
     [Authorize]
-    public async Task<IActionResult> CreateAlbum([FromBody] CreateAlbumDTO album)
+    public async Task<IActionResult> CreateAlbum([FromForm] CreateAlbumDTO album)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -69,7 +69,7 @@ public class AlbumController : ControllerBase
 
         var artist = await _artistService.GetArtistByUserIdAsync(Guid.Parse(user.Id));
 
-        if (artist == null || artist == null || artist.Id == Guid.Empty)
+        if (artist == null || artist.Id == Guid.Empty)
             return Forbid("Only artists can create albums.");
 
         await _albumService.CreateAlbumAsync(album, artist.Id);
@@ -79,7 +79,7 @@ public class AlbumController : ControllerBase
 
     [HttpPut("updateAlbum/{albumId:guid}")]
     [Authorize]
-    public async Task<IActionResult> DeleteAlbum([FromBody] CreateAlbumDTO albumDTO, [FromRoute] Guid albumId)
+    public async Task<IActionResult> DeleteAlbum([FromForm] CreateAlbumDTO albumDTO, [FromRoute] Guid albumId)
     {
         var album = await _albumService.GetAlbumByIdAsync(albumId);
         if (album == null) return NotFound("Album not found");
@@ -90,7 +90,7 @@ public class AlbumController : ControllerBase
 
         if (artist == null || artist.Id == Guid.Empty) return Forbid("Only artists can update albums.");
         var updateAlbum = await _albumService.EditAlbumAsync(albumDTO, artist.Id, albumId);
-        return Ok("Album deleted successfully");
+        return Ok("Album updated successfully");
     }
 
 
@@ -102,7 +102,11 @@ public class AlbumController : ControllerBase
         if (album == null) return NotFound("Album not found");
 
         var deletedAlbum = await _albumService.DeleteAlbumAsync(albumId);
-        return Ok("Album deleted successfully");
+        if (deletedAlbum)
+        {
+            return Ok("Album deleted successfully");
+        }
+        return StatusCode(500, "An error occurred while deleting the album");
     }
 
 

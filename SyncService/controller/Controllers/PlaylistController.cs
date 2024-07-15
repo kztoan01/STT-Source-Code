@@ -23,9 +23,9 @@ public class PlaylistController : ControllerBase
         _playlistService = playlistService;
     }
 
-    [HttpPost("getUserPlaylist")]
+    [HttpGet("getUserPlaylist")]
     [Authorize]
-    public async Task<IActionResult> GetUserPlaylist(QueryObject queryObject)
+    public async Task<IActionResult> GetUserPlaylist([FromRoute] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -55,7 +55,7 @@ public class PlaylistController : ControllerBase
         return Ok(playlist);
     }
 
-    [HttpPost("getPlaylistByGenreName")]
+    [HttpGet("getPlaylistByGenreName")]
     [Authorize]
     public async Task<IActionResult> GetPlaylistsByGenreName(string genreName, QueryObject queryObject)
     {
@@ -72,7 +72,7 @@ public class PlaylistController : ControllerBase
 
     [HttpPost("createPlaylist")]
     [Authorize]
-    public async Task<IActionResult> CreatePlaylist([FromBody] CreatePlaylistDTO playlist)
+    public async Task<IActionResult> CreatePlaylist([FromForm] CreatePlaylistDTO playlist)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -81,7 +81,7 @@ public class PlaylistController : ControllerBase
         if (user != null)
         {
             var playlistModel = playlist.ToPlaylistFromCreate(user.Id);
-            await _playlistService.CreatePlaylistAsync(playlistModel);
+            await _playlistService.CreatePlaylistAsync(playlistModel, playlist.playlistPicture);
             return CreatedAtAction(nameof(GetPlaylistById), new { id = playlistModel.Id }, playlistModel);
         }
 

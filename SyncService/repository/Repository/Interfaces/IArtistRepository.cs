@@ -12,4 +12,8 @@ public interface IArtistRepository
     Task<ArtistDTO> GetArtistDTOById(Guid id);
     Task<Artist> GetArtistByUserId(Guid userId);
     Task<Artist> CreateArtist(Artist artist);
+    Task<bool> updateArtist (Artist artist);
+    Task<List<ArtistDTO>> GetAllArtistDTOs();
+    Task<bool> DeleteArtist(Guid id);
+    
 }

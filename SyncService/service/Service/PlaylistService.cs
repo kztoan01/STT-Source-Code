@@ -1,8 +1,12 @@
+using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 using core.Dtos.Album;
 using core.Dtos.Music;
 using core.Dtos.Playlist;
 using core.Models;
 using core.Objects;
+using Microsoft.AspNetCore.Http;
 using repository.Repository.Interfaces;
 using service.Service.Interfaces;
 
@@ -13,17 +17,21 @@ public class PlaylistService : IPlaylistService
     private readonly IAlbumRepository _albumRepository;
     private readonly IMusicRepository _musicRepository;
     private readonly IPlaylistRepository _playlistRepository;
+    private readonly IAmazonS3 _s3Client;
+    private readonly string _bucketName = "sync-music-storage";
 
-    public PlaylistService(IPlaylistRepository playlistRepository, IMusicRepository musicRepository,
-        IAlbumRepository albumRepository)
+    public PlaylistService(IPlaylistRepository playlistRepository, IMusicRepository musicRepository,IAlbumRepository albumRepository, IAmazonS3 amazonS3)
     {
         _playlistRepository = playlistRepository;
         _musicRepository = musicRepository;
         _albumRepository = albumRepository;
+        _s3Client = amazonS3;
     }
 
-    public async Task<Playlist> CreatePlaylistAsync(Playlist playlist)
+    public async Task<Playlist> CreatePlaylistAsync(Playlist playlist, IFormFile image)
     {
+        var imageUrl = await UploadFileAsync(image);
+        playlist.playlistPicture = imageUrl;
         return await _playlistRepository.CreatePlaylistAsync(playlist);
     }
 
@@ -383,5 +391,26 @@ public class PlaylistService : IPlaylistService
 
         await _playlistRepository.UpdatePlaylistAsync(playlistId, playlist);
         return "Music positions in the playlist have been updated successfully.";
+    }
+
+    private async Task<string> UploadFileAsync(IFormFile file)
+    {
+        var fileTransferUtility = new TransferUtility(_s3Client);
+        var fileExtension = Path.GetExtension(file.FileName);
+        var filePath = $"image/{Guid.NewGuid()}{fileExtension}";
+
+        using (var stream = file.OpenReadStream())
+        {
+            await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
+        }
+
+        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+        {
+            BucketName = _bucketName,
+            Key = filePath,
+            Expires = DateTime.UtcNow.AddMinutes(30)
+        });
+
+        return url;
     }
 }

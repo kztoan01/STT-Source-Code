@@ -51,19 +51,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a21653f4-c04c-4d65-a1c5-48c96db44e56",
+                            Id = "86e4c337-c8ae-47e6-97ca-f11a2aaccb0b",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ca31ce87-7b20-4943-9f2e-8c71d478a983",
+                            Id = "228b6992-79cb-4754-888a-49ecbef84b77",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "2452456e-e879-4aba-97af-d82118958d14",
+                            Id = "096310b3-5468-417e-87f2-8428959bc346",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -181,6 +181,10 @@ namespace data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("albumDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -207,6 +211,10 @@ namespace data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("artistDescription")
                         .IsRequired()
@@ -381,6 +389,24 @@ namespace data.Migrations
                     b.ToTable("MusicListens", (string)null);
                 });
 
+            modelBuilder.Entity("core.Models.Participant", b =>
+                {
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("JoinTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RoomId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Participants", (string)null);
+                });
+
             modelBuilder.Entity("core.Models.Playlist", b =>
                 {
                     b.Property<Guid>("Id")
@@ -435,6 +461,54 @@ namespace data.Migrations
                     b.HasIndex("musicId");
 
                     b.ToTable("PlaylistMusics", (string)null);
+                });
+
+            modelBuilder.Entity("core.Models.Room", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HostId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HostId")
+                        .IsUnique();
+
+                    b.ToTable("Rooms", (string)null);
+                });
+
+            modelBuilder.Entity("core.Models.RoomPlaylist", b =>
+                {
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MusicId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AddTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("RoomId", "MusicId");
+
+                    b.HasIndex("MusicId");
+
+                    b.ToTable("RoomPlaylists");
                 });
 
             modelBuilder.Entity("core.Models.User", b =>
@@ -628,7 +702,6 @@ namespace data.Migrations
                         .HasForeignKey("albumId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-
                     b.HasOne("core.Models.Artist", "Artist")
                         .WithMany("Musics")
                         .HasForeignKey("artistId")
@@ -678,6 +751,25 @@ namespace data.Migrations
                     b.Navigation("Music");
                 });
 
+            modelBuilder.Entity("core.Models.Participant", b =>
+                {
+                    b.HasOne("core.Models.Room", "Room")
+                        .WithMany("Participants")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("core.Models.User", "User")
+                        .WithMany("Participants")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("core.Models.Playlist", b =>
                 {
                     b.HasOne("core.Models.User", "User")
@@ -708,6 +800,36 @@ namespace data.Migrations
                     b.Navigation("Playlist");
                 });
 
+            modelBuilder.Entity("core.Models.Room", b =>
+                {
+                    b.HasOne("core.Models.User", "User")
+                        .WithOne("Room")
+                        .HasForeignKey("core.Models.Room", "HostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("core.Models.RoomPlaylist", b =>
+                {
+                    b.HasOne("core.Models.Music", "Music")
+                        .WithMany("RoomPlaylists")
+                        .HasForeignKey("MusicId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("core.Models.Room", "Room")
+                        .WithMany("RoomPlaylists")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Music");
+
+                    b.Navigation("Room");
+                });
+
             modelBuilder.Entity("core.Models.Album", b =>
                 {
                     b.Navigation("Musics");
@@ -733,6 +855,8 @@ namespace data.Migrations
 
                     b.Navigation("MusicListens");
 
+                    b.Navigation("RoomPlaylists");
+
                     b.Navigation("collaborations");
 
                     b.Navigation("playlistMusics");
@@ -741,6 +865,13 @@ namespace data.Migrations
             modelBuilder.Entity("core.Models.Playlist", b =>
                 {
                     b.Navigation("playlistMusics");
+                });
+
+            modelBuilder.Entity("core.Models.Room", b =>
+                {
+                    b.Navigation("Participants");
+
+                    b.Navigation("RoomPlaylists");
                 });
 
             modelBuilder.Entity("core.Models.User", b =>
@@ -752,7 +883,12 @@ namespace data.Migrations
 
                     b.Navigation("MusicHistories");
 
+                    b.Navigation("Participants");
+
                     b.Navigation("Playlists");
+
+                    b.Navigation("Room")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

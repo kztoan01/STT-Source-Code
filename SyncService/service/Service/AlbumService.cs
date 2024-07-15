@@ -1,8 +1,13 @@
-﻿using core.Dtos.Album;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
+using core.Dtos.Album;
 using core.Dtos.Artist;
 using core.Dtos.Music;
 using core.Models;
 using core.Objects;
+using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 using repository.Repository;
 using repository.Repository.Interfaces;
 using service.Service.Interfaces;
@@ -13,40 +18,70 @@ public class AlbumService : IAlbumService
 {
     private readonly IAlbumRepository _albumRepository;
     private readonly IArtistRepository _artistRepository;
+    private readonly IMusicRepository _musicRepository;
+    private readonly IAmazonS3 _s3Client;
+    private readonly string _bucketName = "sync-music-storage";
 
-    public AlbumService(IAlbumRepository albumRepository, IArtistRepository artistRepository)
+    public AlbumService(IAlbumRepository albumRepository, IArtistRepository artistRepository, IAmazonS3 amazonS3, IMusicRepository musicRepository)
     {
         _albumRepository = albumRepository;
         _artistRepository = artistRepository;
+        _s3Client = amazonS3;
+        _musicRepository = musicRepository;
     }
 
     public async Task<Album> CreateAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId)
     {
+        var imageUrl = await UploadFileAsync(albumDTO.ImageFile);
         var album = new Album
         {
             Id = new Guid(),
             albumTitle = albumDTO.albumTitle,
             artistId = artistId,
             albumDescription = albumDTO.albumDescription,
-            releaseDate = albumDTO.releaseDate
+            releaseDate = DateTime.Now,
+            ImageUrl = imageUrl
         };
         return await _albumRepository.CreateAlbumAsync(album);
     }
 
     public async Task<bool> DeleteAlbumAsync(Guid albumId)
     {
+        var album = await _albumRepository.GetAlbumById(albumId);
+        if (album == null)
+        {
+            return false;
+        }
+
+       
+        foreach (var music in album.Musics.ToList())  
+        {
+            await _musicRepository.DeleteMusicAsync(music.Id);
+        }
+
         return await _albumRepository.DeleteAlbumAsync(albumId);
     }
 
+
     public async Task<Album> EditAlbumAsync(CreateAlbumDTO albumDTO, Guid artistId, Guid albumId)
     {
-        var album = _albumRepository.GetAlbumById(albumId);
+        var album = await _albumRepository.GetAlbumById(albumId);
         if (album == null) return null;
-        album.Result.albumTitle = albumDTO.albumTitle;
-        album.Result.albumDescription = albumDTO.albumDescription;
-        album.Result.releaseDate = albumDTO.releaseDate;
-
-        return await _albumRepository.EditAlbumAsync(album.Result);
+        if (!albumDTO.albumTitle.IsNullOrEmpty())
+        {
+            album.albumTitle = albumDTO.albumTitle;
+        }
+        if (!albumDTO.albumDescription.IsNullOrEmpty())
+        {
+            album.albumDescription = albumDTO.albumDescription;
+        }
+            album.releaseDate = DateTime.Now;
+        if(albumDTO.ImageFile != null || albumDTO.ImageFile.Length !=0)
+        {
+            var imageUrl = await UploadFileAsync(albumDTO.ImageFile);
+            album.ImageUrl = imageUrl;
+        }
+        return await _albumRepository.EditAlbumAsync(album);
     }
     public async Task<List<AlbumResponseDTO>> GetAllArtistAlbumsAsync(Guid artistId, QueryObject query)
     {
@@ -83,6 +118,7 @@ public class AlbumService : IAlbumService
                 albumTitle = album.albumTitle,
                 albumDescription = album.albumDescription,
                 releaseDate = album.releaseDate,
+                AlbumPicture = album.AlbumPicture,
                 musics = new List<MusicDTO>()
             };
 
@@ -156,6 +192,7 @@ public class AlbumService : IAlbumService
                 albumTitle = album.albumTitle,
                 albumDescription = album.albumDescription,
                 releaseDate = album.releaseDate,
+                AlbumPicture = album.AlbumPicture,
                 musics = new List<MusicDTO>()
             };
 
@@ -239,6 +276,7 @@ public class AlbumService : IAlbumService
                 albumTitle = album.albumTitle,
                 albumDescription = album.albumDescription,
                 releaseDate = album.releaseDate,
+                AlbumPicture = album.AlbumPicture,
                 musics = new List<MusicDTO>()
             };
 
@@ -280,5 +318,26 @@ public class AlbumService : IAlbumService
     public async Task<Album> GetMostListenAlbum()
     {
         return await _albumRepository.GetMostListenAlbum();
+    }
+
+    private async Task<string> UploadFileAsync(IFormFile file)
+    {
+        var fileTransferUtility = new TransferUtility(_s3Client);
+        var fileExtension = Path.GetExtension(file.FileName);
+        var filePath = $"image/{Guid.NewGuid()}{fileExtension}";
+
+        using (var stream = file.OpenReadStream())
+        {
+            await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
+        }
+
+        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+        {
+            BucketName = _bucketName,
+            Key = filePath,
+            Expires = DateTime.UtcNow.AddMinutes(30)
+        });
+
+        return url;
     }
 }

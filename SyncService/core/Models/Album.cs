@@ -8,4 +8,5 @@ public class Album
     public DateTime releaseDate { get; set; }
     public Guid artistId { get; set; }
     public List<Music> Musics { get; set; } = new();
+    public string ImageUrl { get; set; }
 }

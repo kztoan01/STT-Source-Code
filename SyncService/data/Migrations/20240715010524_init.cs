@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace data.Migrations
 {
     /// <inheritdoc />
-    public partial class MusicHistory : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -97,7 +97,8 @@ namespace data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     userId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    artistDescription = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    artistDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -219,6 +220,27 @@ namespace data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HostId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rooms_AspNetUsers_HostId",
+                        column: x => x.HostId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Albums",
                 columns: table => new
                 {
@@ -226,7 +248,8 @@ namespace data.Migrations
                     albumTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     albumDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     releaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    artistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    artistId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -260,6 +283,31 @@ namespace data.Migrations
                         name: "FK_Follower_AspNetUsers_userId",
                         column: x => x.userId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Participants",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    JoinTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Participants", x => new { x.RoomId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_Participants_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Participants_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -324,7 +372,7 @@ namespace data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MusicHistory",
+                name: "MusicHistories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -334,15 +382,15 @@ namespace data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MusicHistory", x => x.Id);
+                    table.PrimaryKey("PK_MusicHistories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MusicHistory_AspNetUsers_UserId",
+                        name: "FK_MusicHistories_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_MusicHistory_Musics_MusicId",
+                        name: "FK_MusicHistories_Musics_MusicId",
                         column: x => x.MusicId,
                         principalTable: "Musics",
                         principalColumn: "Id",
@@ -395,14 +443,39 @@ namespace data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RoomPlaylists",
+                columns: table => new
+                {
+                    MusicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AddTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoomPlaylists", x => new { x.RoomId, x.MusicId });
+                    table.ForeignKey(
+                        name: "FK_RoomPlaylists_Musics_MusicId",
+                        column: x => x.MusicId,
+                        principalTable: "Musics",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_RoomPlaylists_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "2452456e-e879-4aba-97af-d82118958d14", null, "Artist", "ARTIST" },
-                    { "a21653f4-c04c-4d65-a1c5-48c96db44e56", null, "Admin", "ADMIN" },
-                    { "ca31ce87-7b20-4943-9f2e-8c71d478a983", null, "User", "USER" }
+                    { "096310b3-5468-417e-87f2-8428959bc346", null, "Artist", "ARTIST" },
+                    { "228b6992-79cb-4754-888a-49ecbef84b77", null, "User", "USER" },
+                    { "86e4c337-c8ae-47e6-97ca-f11a2aaccb0b", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -466,13 +539,13 @@ namespace data.Migrations
                 column: "artistId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MusicHistory_MusicId",
-                table: "MusicHistory",
+                name: "IX_MusicHistories_MusicId",
+                table: "MusicHistories",
                 column: "MusicId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MusicHistory_UserId",
-                table: "MusicHistory",
+                name: "IX_MusicHistories_UserId",
+                table: "MusicHistories",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -496,6 +569,11 @@ namespace data.Migrations
                 column: "genreId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Participants_UserId",
+                table: "Participants",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlaylistMusics_musicId",
                 table: "PlaylistMusics",
                 column: "musicId");
@@ -504,6 +582,17 @@ namespace data.Migrations
                 name: "IX_Playlists_userId",
                 table: "Playlists",
                 column: "userId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomPlaylists_MusicId",
+                table: "RoomPlaylists",
+                column: "MusicId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rooms_HostId",
+                table: "Rooms",
+                column: "HostId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -531,22 +620,31 @@ namespace data.Migrations
                 name: "Follower");
 
             migrationBuilder.DropTable(
-                name: "MusicHistory");
+                name: "MusicHistories");
 
             migrationBuilder.DropTable(
                 name: "MusicListens");
 
             migrationBuilder.DropTable(
+                name: "Participants");
+
+            migrationBuilder.DropTable(
                 name: "PlaylistMusics");
+
+            migrationBuilder.DropTable(
+                name: "RoomPlaylists");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Playlists");
+
+            migrationBuilder.DropTable(
                 name: "Musics");
 
             migrationBuilder.DropTable(
-                name: "Playlists");
+                name: "Rooms");
 
             migrationBuilder.DropTable(
                 name: "Albums");

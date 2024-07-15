@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-
+using Microsoft.AspNetCore.Http;
 namespace core.Dtos.Playlist;
 
 public class CreatePlaylistDTO
@@ -10,5 +10,5 @@ public class CreatePlaylistDTO
     public string playlistName { get; set; } = string.Empty;
 
     public string playlistDescription { get; set; } = string.Empty;
-    public string playlistPicture { get; set; } = string.Empty;
+    public IFormFile playlistPicture { get; set; }
 }
