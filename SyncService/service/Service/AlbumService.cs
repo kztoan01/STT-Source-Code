@@ -271,7 +271,7 @@ public class AlbumService : IAlbumService
             albumResponseDTO.artist = artistDTO;
             albumResponseDTOs.Add(albumResponseDTO);
         }
-
+        //return albums;
         return albumResponseDTOs;
     }
 

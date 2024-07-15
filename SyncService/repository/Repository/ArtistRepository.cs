@@ -39,7 +39,7 @@ public class ArtistRepository : IArtistRepository
         {
             Id = artist.Id,
             userId = artist.userId,
-            AristName = artist.User.UserName,
+            ArtistName = artist.User.userFullName,
             artistDescription = artist.artistDescription,
             NumberOfFollower = artist.Followers.Count,
             Albums = artist.Albums.Select(a => new AlbumDTO

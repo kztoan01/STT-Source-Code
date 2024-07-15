@@ -115,7 +115,7 @@ public class AlbumRepository : IAlbumRepository
                   .ThenInclude(a => a.User)
             .FirstOrDefaultAsync(a => a.Id == albumId);
 
-        var artistDTO = _artistRepository.GetArtistDTOById(album.artistId);
+        var artistDTO = await _artistRepository.GetArtistDTOById(album.artistId);
         List<MusicDTO> listMusic = new List<MusicDTO>();
 
         foreach(var music in album.Musics)
@@ -149,7 +149,7 @@ public class AlbumRepository : IAlbumRepository
             albumTitle = album.albumTitle,
             releaseDate = album.releaseDate,
             albumDescription = album.albumDescription,
-            artist = artistDTO.Result,
+            artist = artistDTO,
             musics = listMusic
         };
         return albumDTO;
@@ -161,8 +161,8 @@ public class AlbumRepository : IAlbumRepository
         List<AlbumResponseDTO> list = new List<AlbumResponseDTO>();
         foreach(var album in albumList)
         {
-            var albumRes = GetAlbumDetails(album.Id);
-            list.Add(albumRes.Result);
+            var albumRes = await GetAlbumDetails(album.Id);
+            list.Add(albumRes);
         }
         return list;
     }

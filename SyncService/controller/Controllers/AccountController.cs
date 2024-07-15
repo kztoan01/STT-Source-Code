@@ -114,13 +114,13 @@ public class AccountController : ControllerBase
                 //Token = _tokenService.CreateToken(getUser)
                 Token = _tokenService.GenerateToken(userSession)
             }
-        );
+        );  
 
         //var getUserRole = await _userManager.GetRolesAsync(getUser);
         /*
         var getUserRole = await userManager.GetRolesAsync(getUser);
         var userSession = new UserSession(getUser.Id, getUser.Name, getUser.Email, getUserRole.First());
-        string token = GenerateToken(userSession);
+        string token = GenerateToken(userSession); 
         return new LoginResponse(true, token!, "Login completed");
         */
     }
