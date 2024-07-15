@@ -10,8 +10,6 @@ namespace core.Dtos.Room
     {
         public  string code {  get; set; }
 
-        public string userId { get; set; }
-
         public string roomId { get; set; }
     }
 }

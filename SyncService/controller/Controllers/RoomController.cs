@@ -32,6 +32,7 @@ namespace controller.Controllers
             _musicService = musicService;
         }
         [HttpGet("{roomId}")]
+        [Authorize]
         public async Task<IActionResult> GetRoomById(Guid roomId)
         {
             var room = await _roomService.GetRoomByIdAsync(roomId);
@@ -54,6 +55,7 @@ namespace controller.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllRooms()
         {
             var rooms = await _roomService.GetAllRoomsAsync();
@@ -61,15 +63,17 @@ namespace controller.Controllers
         }
 
         [HttpPost("AddRoom")]
+        [Authorize]
         public async Task<IActionResult> AddRoom([FromBody] AddRoomDTO addRoomDTO)
         {
-
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound("User not found");
             Room room = new Room
             {
                 Code = GenerateUniqueCode(), 
                 Image = addRoomDTO.Image,
                 Name = addRoomDTO.Name,
-                HostId = addRoomDTO.HostId,
+                HostId = user.Id,
             };
 
             await _roomService.AddRoomAsync(room);
@@ -83,6 +87,7 @@ namespace controller.Controllers
 
 
         [HttpPut("{roomId}")]
+        [Authorize]
         public async Task<IActionResult> UpdateRoom(Guid roomId, [FromBody] Room room)
         {
             if (roomId != room.Id)
@@ -102,12 +107,14 @@ namespace controller.Controllers
         }
 
         [HttpPost("join")]
+        [Authorize]
         public async Task<IActionResult> JoinRoom([FromBody] JoinRoomDTO joinRoomDTO )
         {
             try
             {
-                User user = await _userService.GetUserByIdAsync(joinRoomDTO.userId);
-                await _roomService.JoinRoomAsync(joinRoomDTO.userId,Guid.Parse(joinRoomDTO.roomId),joinRoomDTO.code);
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return NotFound("User not found");
+                await _roomService.JoinRoomAsync(user.Id,Guid.Parse(joinRoomDTO.roomId),joinRoomDTO.code);
                 await _hubContext.Clients.Group(joinRoomDTO.roomId).AlertToRoom(joinRoomDTO.roomId,user.UserName);
                 await _hubContext.Clients.Group(joinRoomDTO.roomId).UpdateParticipantsList();
                 Room room = await _roomService.GetRoomByIdAsync(Guid.Parse(joinRoomDTO.roomId));
@@ -120,16 +127,19 @@ namespace controller.Controllers
         }
 
         [HttpPost("leave")]
+        [Authorize]
         public async Task<IActionResult> RemoveUserOutOfRoom([FromBody] LeaveRoomDTO leaveRoomDTO  )
         {
-            User user = await _userService.GetUserByIdAsync(leaveRoomDTO.userId);
-            await _roomService.RemoveUserOutOfRoomAsync(leaveRoomDTO.userId, Guid.Parse(leaveRoomDTO.roomId));
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound("User not found");
+            await _roomService.RemoveUserOutOfRoomAsync(user.Id, Guid.Parse(leaveRoomDTO.roomId));
             await _hubContext.Clients.Group(leaveRoomDTO.roomId).OnLeaveRoom(leaveRoomDTO.roomId, user.UserName);
             await _hubContext.Clients.Group(leaveRoomDTO.roomId).UpdateParticipantsList();
             return Ok();
         }
 
         [HttpPost("music/add")]
+        [Authorize]
         public async Task<IActionResult> AddMusicToRoom(AddRoomMusicDTO addRoomMusicDTO)
         {
             Music music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(addRoomMusicDTO.musicId));
@@ -140,6 +150,7 @@ namespace controller.Controllers
         }
 
         [HttpPost("music/remove")]
+        [Authorize]
         public async Task<IActionResult> RemoveMusicOutOfRoom(RemoveRoomMusicDTO removeRoomMusicDTO)
         {
             Music music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(removeRoomMusicDTO.musicId));
