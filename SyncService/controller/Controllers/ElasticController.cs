@@ -14,6 +14,7 @@ public class ElasticController : ControllerBase
     {
         _elasticService = elasticService;
     }
+
     [HttpPost("InsertMusicElastic")]
     public async Task<IActionResult> InsertElastic([FromBody] ElasticMusicDTO music)
     {

@@ -10,8 +10,8 @@ namespace controller.Controllers;
 [ApiController]
 public class AccountController : ControllerBase
 {
-    private readonly ITokenService _tokenService;
     private readonly IArtistService _artistService;
+    private readonly ITokenService _tokenService;
     private readonly UserManager<User> _userManager;
 
     public AccountController(UserManager<User> userManager, ITokenService tokenService, IArtistService artistService)
@@ -44,7 +44,7 @@ public class AccountController : ControllerBase
 
             if (createdUser.Succeeded)
             {
-                if(registerDTO.isArtist == true)
+                if (registerDTO.isArtist == true)
                 {
                     var roleResult = await _userManager.AddToRoleAsync(user, "Artist");
                     var userModel = await _userManager.GetUserAsync(User);
@@ -78,8 +78,6 @@ public class AccountController : ControllerBase
                         );
                     return StatusCode(500, roleResult.Errors);
                 }
-                
-                
             }
 
             return StatusCode(500, createdUser.Errors);
@@ -115,13 +113,13 @@ public class AccountController : ControllerBase
                 //Token = _tokenService.CreateToken(getUser)
                 Token = _tokenService.GenerateToken(userSession)
             }
-        );  
+        );
 
         //var getUserRole = await _userManager.GetRolesAsync(getUser);
         /*
         var getUserRole = await userManager.GetRolesAsync(getUser);
         var userSession = new UserSession(getUser.Id, getUser.Name, getUser.Email, getUserRole.First());
-        string token = GenerateToken(userSession); 
+        string token = GenerateToken(userSession);
         return new LoginResponse(true, token!, "Login completed");
         */
     }

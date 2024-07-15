@@ -12,13 +12,12 @@ public class ArtistRepository : IArtistRepository
 {
     private readonly ApplicationDBContext _context;
 
-    public ArtistRepository(ApplicationDBContext context )
+    public ArtistRepository(ApplicationDBContext context)
     {
         _context = context;
-
     }
 
- 
+
     public async Task<ArtistDTO> GetArtistDTOById(Guid id)
     {
         var artist = await _context.Artists
@@ -115,14 +114,14 @@ public class ArtistRepository : IArtistRepository
             .Include(a => a.Followers)
             .ToListAsync();
         if (artist == null) return null;
-        List<ArtistDTO> listArtistDtOs = new List<ArtistDTO>();
+        var listArtistDtOs = new List<ArtistDTO>();
         foreach (var tmp in artist)
         {
             var artistDTO = new ArtistDTO
             {
                 Id = tmp.Id,
                 userId = tmp.userId,
-                AristName = tmp.User.userFullName,
+                ArtistName = tmp.User.userFullName,
                 artistDescription = tmp.artistDescription,
                 NumberOfFollower = tmp.Followers.Count,
                 Albums = tmp.Albums.Select(a => new AlbumDTO
@@ -142,7 +141,6 @@ public class ArtistRepository : IArtistRepository
                     musicUrl = m.musicUrl,
                     releaseDate = m.releaseDate
                 }).ToList()
-                
             };
             listArtistDtOs.Add(artistDTO);
         }
@@ -157,10 +155,7 @@ public class ArtistRepository : IArtistRepository
             .Include(a => a.Musics)
             .Include(a => a.Followers)
             .FirstOrDefaultAsync(a => a.Id == id);
-        if (artist == null)
-        {
-            return false;
-        }
+        if (artist == null) return false;
 
         // Remove related entities
         _context.Albums.RemoveRange(artist.Albums);

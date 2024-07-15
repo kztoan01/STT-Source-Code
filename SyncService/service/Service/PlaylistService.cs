@@ -15,12 +15,13 @@ namespace service.Service;
 public class PlaylistService : IPlaylistService
 {
     private readonly IAlbumRepository _albumRepository;
+    private readonly string _bucketName = "sync-music-storage";
     private readonly IMusicRepository _musicRepository;
     private readonly IPlaylistRepository _playlistRepository;
     private readonly IAmazonS3 _s3Client;
-    private readonly string _bucketName = "sync-music-storage";
 
-    public PlaylistService(IPlaylistRepository playlistRepository, IMusicRepository musicRepository,IAlbumRepository albumRepository, IAmazonS3 amazonS3)
+    public PlaylistService(IPlaylistRepository playlistRepository, IMusicRepository musicRepository,
+        IAlbumRepository albumRepository, IAmazonS3 amazonS3)
     {
         _playlistRepository = playlistRepository;
         _musicRepository = musicRepository;

@@ -1,5 +1,4 @@
 ﻿using core.Dtos.Album;
-using core.Dtos.Artist;
 using core.Dtos.Music;
 using core.Models;
 using data.Data;
@@ -8,11 +7,10 @@ using repository.Repository.Interfaces;
 
 namespace repository.Repository;
 
-
 public class AlbumRepository : IAlbumRepository
 {
-    private readonly ApplicationDBContext _context;
     private readonly IArtistRepository _artistRepository;
+    private readonly ApplicationDBContext _context;
 
     public AlbumRepository(ApplicationDBContext context, IArtistRepository artistRepository)
     {
@@ -31,15 +29,12 @@ public class AlbumRepository : IAlbumRepository
     {
         var album = await _context.Albums.FirstOrDefaultAsync(a => a.Id == albumId);
 
-        if (album == null)
-        {
-            return false;
-        }
+        if (album == null) return false;
 
         _context.Albums.Remove(album);
         await _context.SaveChangesAsync();
 
-        return true; 
+        return true;
     }
 
     public async Task<Album> EditAlbumAsync(Album album)
@@ -75,20 +70,21 @@ public class AlbumRepository : IAlbumRepository
             .Where(a => a.Musics
                 .Any(m => m.Genre.genreName == genreName))
             .ToList();
-        List<AlbumResponseDTO> albumList = new List<AlbumResponseDTO>();
+        var albumList = new List<AlbumResponseDTO>();
         foreach (var album in listAlbum)
         {
             var albumRes = await GetAlbumDetails(album.Id);
             albumList.Add(albumRes);
-        } 
-         return albumList;
+        }
+
+        return albumList;
     }
 
     public async Task<Album> GetAlbumById(Guid albumId)
     {
         return await _context.Albums
             .Include(a => a.Musics)
-                .ThenInclude(m => m.Artist)
+            .ThenInclude(m => m.Artist)
             .FirstOrDefaultAsync(a => a.Id == albumId);
     }
 
@@ -97,29 +93,30 @@ public class AlbumRepository : IAlbumRepository
         var albumList = await _context.Albums
             .Where(a => a.artistId == artistId)
             .ToListAsync();
-        List<AlbumResponseDTO> result = new List<AlbumResponseDTO>();
+        var result = new List<AlbumResponseDTO>();
         foreach (var album in albumList)
         {
             var albumRes = GetAlbumDetails(album.Id);
             result.Add(albumRes.Result);
         }
+
         return result;
     }
 
     public async Task<AlbumResponseDTO> GetAlbumDetails(Guid albumId)
     {
         var album = await _context.Albums
-            .Include(a =>a.Musics)
-                .ThenInclude(m =>m.Genre)
             .Include(a => a.Musics)
-                .ThenInclude(m => m.Artist)
-                  .ThenInclude(a => a.User)
+            .ThenInclude(m => m.Genre)
+            .Include(a => a.Musics)
+            .ThenInclude(m => m.Artist)
+            .ThenInclude(a => a.User)
             .FirstOrDefaultAsync(a => a.Id == albumId);
 
         var artistDTO = await _artistRepository.GetArtistDTOById(album.artistId);
-        List<MusicDTO> listMusic = new List<MusicDTO>();
+        var listMusic = new List<MusicDTO>();
 
-        foreach(var music in album.Musics)
+        foreach (var music in album.Musics)
         {
             var albumMusic = new AlbumDTO
             {
@@ -144,17 +141,16 @@ public class AlbumRepository : IAlbumRepository
             };
             listMusic.Add(musicDTO);
         }
-      
+
         var albumDTO = new AlbumResponseDTO
         {
             Id = album.Id,
             albumTitle = album.albumTitle,
             releaseDate = album.releaseDate,
             albumDescription = album.albumDescription,
-            artist = artistDTO.Result,
+            artist = artistDTO,
             musics = listMusic,
-            AlbumPicture = album.ImageUrl,
-            
+            AlbumPicture = album.ImageUrl
         };
         return albumDTO;
     }
@@ -162,15 +158,16 @@ public class AlbumRepository : IAlbumRepository
     public async Task<List<AlbumResponseDTO>> getAllAlbumsAsync()
     {
         var albumList = await _context.Albums.ToListAsync();
-        List<AlbumResponseDTO> list = new List<AlbumResponseDTO>();
-        foreach(var album in albumList)
+        var list = new List<AlbumResponseDTO>();
+        foreach (var album in albumList)
         {
             var albumRes = await GetAlbumDetails(album.Id);
             list.Add(albumRes);
         }
+
         return list;
     }
-    
+
 
     public async Task<Album> GetMostListenAlbum()
     {
