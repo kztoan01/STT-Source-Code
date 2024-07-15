@@ -100,4 +100,77 @@ public class ArtistRepository : IArtistRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<ArtistDTO>> GetAllArtistDTOs()
+    {
+        var artist = await _context.Artists
+            .Include(a => a.User)
+            .Include(a => a.Musics)
+            .ThenInclude(m => m.Genre)
+            .Include(a => a.Musics)
+            .ThenInclude(m => m.Album)
+            .Include(a => a.Musics)
+            .ThenInclude(m => m.playlistMusics)
+            .Include(a => a.Albums)
+            .Include(a => a.Followers)
+            .ToListAsync();
+        if (artist == null) return null;
+        List<ArtistDTO> listArtistDtOs = new List<ArtistDTO>();
+        foreach (var tmp in artist)
+        {
+            var artistDTO = new ArtistDTO
+            {
+                Id = tmp.Id,
+                userId = tmp.userId,
+                AristName = tmp.User.userFullName,
+                artistDescription = tmp.artistDescription,
+                NumberOfFollower = tmp.Followers.Count,
+                Albums = tmp.Albums.Select(a => new AlbumDTO
+                {
+                    Id = a.Id,
+                    albumTitle = a.albumTitle,
+                    albumDescription = a.albumDescription
+                }).ToList(),
+                ViralMusics = tmp.Musics.Select(m => new MusicDTO
+                {
+                    Id = m.Id,
+                    genreName = m.Genre.genreName,
+                    musicDuration = m.musicDuration,
+                    musicPicture = m.musicPicture,
+                    musicPlays = m.musicPlays,
+                    musicTitle = m.musicTitle,
+                    musicUrl = m.musicUrl,
+                    releaseDate = m.releaseDate
+                }).ToList()
+                
+            };
+            listArtistDtOs.Add(artistDTO);
+        }
+
+        return listArtistDtOs;
+    }
+
+    public async Task<bool> DeleteArtist(Guid id)
+    {
+        var artist = await _context.Artists
+            .Include(a => a.Albums)
+            .Include(a => a.Musics)
+            .Include(a => a.Followers)
+            .FirstOrDefaultAsync(a => a.Id == id);
+        if (artist == null)
+        {
+            return false;
+        }
+
+        // Remove related entities
+        _context.Albums.RemoveRange(artist.Albums);
+        _context.Musics.RemoveRange(artist.Musics);
+        _context.Followers.RemoveRange(artist.Followers);
+        // Remove the artist
+        _context.Artists.Remove(artist);
+
+        // Save changes to the database
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

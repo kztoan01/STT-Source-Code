@@ -170,6 +170,7 @@ public class AlbumRepository : IAlbumRepository
         }
         return list;
     }
+    
 
     public async Task<Album> GetMostListenAlbum()
     {

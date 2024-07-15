@@ -1,4 +1,5 @@
-﻿using core.Models;
+﻿using core.Dtos.User;
+using core.Models;
 using data.Data;
 using Microsoft.EntityFrameworkCore;
 using repository.Repository.Interfaces;
@@ -25,4 +26,19 @@ public class UserRepository : IUserRepository
             return await _context.Users
                  .FirstOrDefaultAsync(u => u.Id.Equals(userId));
         }
-    }
+
+        public async Task<List<UserDTO>> GetAllUser()
+        {
+            var tmp = await _context.Users
+                .Include(p=>p.Artist)
+                .Include(p=>p.MusicHistories)
+                .Include(p=>p.Followers)
+                .ToListAsync();
+            var result =  new List<UserDTO>();
+            foreach (var VARIABLE in tmp)
+            {
+                result.Add(new UserDTO(VARIABLE));
+            }
+            return result;
+        }
+}
