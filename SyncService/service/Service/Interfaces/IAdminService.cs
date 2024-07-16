@@ -1,7 +1,6 @@
 using core.Dtos.Album;
 using core.Dtos.Artist;
 using core.Dtos.User;
-using core.Models;
 using core.Objects;
 
 namespace service.Service.Interfaces;
@@ -16,5 +15,4 @@ public interface IAdminService
     Task<bool> DeleteMusic(Guid musicId);
     Task DeleteAlbum(Guid albumId);
     Task DeleteUser(Guid userId);
-    
 }

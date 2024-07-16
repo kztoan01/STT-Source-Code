@@ -1,5 +1,3 @@
-
-
 namespace core.Models;
 
 public class Artist

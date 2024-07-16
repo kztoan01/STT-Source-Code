@@ -5,11 +5,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using repository.Mappers;
 using service.Service.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using service.Service;
-using core.Models;
-using Microsoft.AspNetCore.Identity;
-using core.Objects;
 
 namespace controller.Controllers;
 
@@ -102,13 +97,9 @@ public class MusicController : ControllerBase
     public async Task<string> Add1ListenTimeWhenMusicIsListened(Guid musicId)
     {
         var user = await _userManager.GetUserAsync(User);
-        if (user != null)
-        {
-            return await _musicService.Add1ListenTimeWhenMusicIsListenedAsync(musicId, user.Id);
-        }
+        if (user != null) return await _musicService.Add1ListenTimeWhenMusicIsListenedAsync(musicId, user.Id);
 
         return "User not found";
-        
     }
 
     [HttpGet("GetAllMusicHistory")]
@@ -116,10 +107,7 @@ public class MusicController : ControllerBase
     public async Task<List<MusicDTO>> GetAllMusicHistoryByUserIdAsync()
     {
         var user = await _userManager.GetUserAsync(User);
-        if (user != null)
-        {
-            return await _musicService.GetAllMusicHistoryByUserIdAsync(user.Id);
-        }
+        if (user != null) return await _musicService.GetAllMusicHistoryByUserIdAsync(user.Id);
 
         return null;
     }

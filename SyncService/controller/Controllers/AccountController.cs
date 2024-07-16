@@ -10,8 +10,8 @@ namespace controller.Controllers;
 [ApiController]
 public class AccountController : ControllerBase
 {
-    private readonly ITokenService _tokenService;
     private readonly IArtistService _artistService;
+    private readonly ITokenService _tokenService;
     private readonly UserManager<User> _userManager;
 
     public AccountController(UserManager<User> userManager, ITokenService tokenService, IArtistService artistService)
@@ -44,7 +44,7 @@ public class AccountController : ControllerBase
 
             if (createdUser.Succeeded)
             {
-                if(registerDTO.isArtist == true)
+                if (registerDTO.isArtist == true)
                 {
                     var roleResult = await _userManager.AddToRoleAsync(user, "Artist");
                     var userModel = await _userManager.GetUserAsync(User);
@@ -78,8 +78,6 @@ public class AccountController : ControllerBase
                         );
                     return StatusCode(500, roleResult.Errors);
                 }
-                
-                
             }
 
             return StatusCode(500, createdUser.Errors);

@@ -2,7 +2,7 @@ namespace service.Hub;
 
 public interface IRoomHub
 {
-     Task AlertToRoom(string groupName, string username);
+    Task AlertToRoom(string groupName, string username);
     Task MusicStatus(string status);
 
     Task MusicPlaytime(double playtime);
