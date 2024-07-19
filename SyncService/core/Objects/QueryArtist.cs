@@ -4,9 +4,9 @@ namespace core.Objects;
 
 public class QueryArtist
 {
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public bool IsDescending { get; set; }
-    public ArtistSearchByEnum SortBy { get; set; }
-    public string SearchTerm { get; set; }
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    public bool IsDescending { get; set; } = true;
+    public ArtistSearchByEnum SortBy { get; set; } = 0;
+    public string SearchTerm { get; set; } = "";
 }

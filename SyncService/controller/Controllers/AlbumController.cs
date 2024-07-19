@@ -42,7 +42,7 @@ public class AlbumController : ControllerBase
         return Ok(albums);
     }
 
-    [HttpGet("getAllArtistAlbums/{artistId}")]
+    [HttpGet("getAllArtistAlbums/{artistId:Guid}")]
     //[Authorized]
     public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId,
         [FromQuery] QueryObject queryObject)
