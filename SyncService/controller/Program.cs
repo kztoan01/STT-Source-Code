@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
+using controller.Extensions;
 using core.Dtos.Music;
 using core.Models;
 using data.Data;
@@ -135,6 +136,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MigrationDB();
 app.UseRouting();
 app.UseCors();
 app.UseAuthentication();
