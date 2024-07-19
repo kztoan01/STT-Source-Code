@@ -18,10 +18,21 @@ public class RoomService : IRoomService
         return await _roomRepository.GetRoomByIdAsync(roomId);
     }
 
+    public async Task<Room> GetRoomByUserIdAsync(string hostId)
+    {
+        return await _roomRepository.GetRoomByUserIdAsync(hostId);
+    }
+
     public async Task<IEnumerable<Room>> GetAllRoomsAsync()
     {
         return await _roomRepository.GetAllRoomsAsync();
     }
+
+    public async Task<Participant> GetUserInRoomsAsync(Guid roomId,string userId)
+    {
+        return await _roomRepository.GetUserInRoomsAsync(roomId,userId);
+    }
+
 
     public async Task AddRoomAsync(Room room)
     {
@@ -38,9 +49,9 @@ public class RoomService : IRoomService
         await _roomRepository.DeleteRoomAsync(roomId);
     }
 
-    public async Task JoinRoomAsync(string userId, Guid roomId, string code)
+    public async Task<Room> JoinRoomAsync(string userId, string code)
     {
-        await _roomRepository.JoinRoomAsync(userId, roomId, code);
+       return await _roomRepository.JoinRoomAsync(userId, code);
     }
 
     public async Task RemoveUserOutOfRoomAsync(string userId, Guid roomId)
@@ -48,9 +59,9 @@ public class RoomService : IRoomService
         await _roomRepository.RemoveUserOutOfRoomAsync(userId, roomId);
     }
 
-    public async Task AddMusicToRoomAsync(Guid musicId, Guid roomId)
+    public async Task<bool> AddMusicToRoomAsync(Guid musicId, Guid roomId)
     {
-        await _roomRepository.AddMusicToRoomAsync(musicId, roomId);
+        return await _roomRepository.AddMusicToRoomAsync(musicId, roomId);
     }
 
     public async Task RemoveMusicOutOfRoomAsync(Guid musicId, Guid roomId)

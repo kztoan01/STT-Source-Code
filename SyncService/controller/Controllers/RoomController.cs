@@ -65,7 +65,17 @@ public class RoomController : ControllerBase
     public async Task<IActionResult> AddRoom([FromBody] AddRoomDTO addRoomDTO)
     {
         var user = await _userManager.GetUserAsync(User);
-        if (user == null) return NotFound("User not found");
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+
+        Room existedRoom = await _roomService.GetRoomByUserIdAsync(user.Id);
+        if (existedRoom != null)
+        {
+            return BadRequest("One user can create only one room at a time!");
+        }
+
         var room = new Room
         {
             Code = GenerateUniqueCode(),
@@ -109,10 +119,10 @@ public class RoomController : ControllerBase
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound("User not found");
-            await _roomService.JoinRoomAsync(user.Id, Guid.Parse(joinRoomDTO.roomId), joinRoomDTO.code);
-            await _hubContext.Clients.Group(joinRoomDTO.roomId).AlertToRoom(joinRoomDTO.roomId, user.UserName);
-            await _hubContext.Clients.Group(joinRoomDTO.roomId).UpdateParticipantsList();
-            var room = await _roomService.GetRoomByIdAsync(Guid.Parse(joinRoomDTO.roomId));
+            Room room =  await _roomService.JoinRoomAsync(user.Id, joinRoomDTO.code);
+            if(room == null) return BadRequest("Unable to join room.Check your code and retry.");
+            await _hubContext.Clients.Group(room.Id.ToString()).AlertToRoom(room.Id.ToString(), user.UserName);
+            await _hubContext.Clients.Group(room.Id.ToString()).UpdateParticipantsList();
             return Ok(room);
         }
         catch (Exception ex)
@@ -138,9 +148,13 @@ public class RoomController : ControllerBase
     public async Task<IActionResult> AddMusicToRoom(AddRoomMusicDTO addRoomMusicDTO)
     {
         var music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(addRoomMusicDTO.musicId));
-        await _roomService.AddMusicToRoomAsync(music.Id, Guid.Parse(addRoomMusicDTO.roomId));
-        await _hubContext.Clients.Group(addRoomMusicDTO.roomId)
-            .OnAddRoomMusic(addRoomMusicDTO.roomId, music.musicTitle);
+        if (music == null) return BadRequest("This music is currently unavailable!");
+        bool res =  await _roomService.AddMusicToRoomAsync(music.Id, Guid.Parse(addRoomMusicDTO.roomId));
+        if(!res )
+        {
+            return BadRequest("This music is already in the playlist");
+        }
+        await _hubContext.Clients.Group(addRoomMusicDTO.roomId).OnAddRoomMusic(addRoomMusicDTO.roomId, music.musicTitle);
         await _hubContext.Clients.Group(addRoomMusicDTO.roomId).UpdateMusicsList();
         return Ok();
     }
@@ -150,6 +164,7 @@ public class RoomController : ControllerBase
     public async Task<IActionResult> RemoveMusicOutOfRoom(RemoveRoomMusicDTO removeRoomMusicDTO)
     {
         var music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(removeRoomMusicDTO.musicId));
+        if (music == null) return BadRequest("This music is currently unavailable!");
         await _roomService.RemoveMusicOutOfRoomAsync(music.Id, Guid.Parse(removeRoomMusicDTO.roomId));
         await _hubContext.Clients.Group(removeRoomMusicDTO.roomId)
             .OnRemoveRoomMusic(removeRoomMusicDTO.roomId, music.musicTitle);

@@ -1,26 +1,6 @@
+version: '3.8'
+
 services:
-
-
-  # sql-server-2019-container:
-  #   image: mcr.microsoft.com/mssql/server:2019-latest
-  #   hostname: sql-server-2019-container
-  #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - SA_PASSWORD=Phu@123456789
-  #   volumes:
-  #     - syncDBVolumn:/var/opt/mssql
-  #   ports:
-  #     - "1435:1433"
-  #   networks:
-  #     - STT
-  #   healthcheck:
-  #     test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Phu@123456789" -Q "SELECT 1" -b -o /dev/null
-  #     interval: 10s
-  #     timeout: 3s
-  #     retries: 10
-  #     start_period: 10s
-
-
   sync-svc:
     hostname: sync-svc
     networks:
@@ -30,6 +10,8 @@ services:
       dockerfile: ./controller/Dockerfile
     ports:
       - 8080:8080
+    volumes:
+      - ~/.aws:/root/.aws:ro
 networks:
   STT:
     driver: bridge

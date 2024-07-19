@@ -13,7 +13,10 @@ public class RoomRepository : IRoomRepository
     {
         _context = context;
     }
-
+    public async Task<Participant> GetUserInRoomsAsync(Guid roomId, string userId)
+    {
+        return await _context.Participants.FirstOrDefaultAsync(p => p.RoomId == roomId && p.UserId == userId);  
+    }
     public async Task<Room> GetRoomByIdAsync(Guid roomId)
     {
         return await _context.Rooms
@@ -23,6 +26,13 @@ public class RoomRepository : IRoomRepository
             .ThenInclude(p => p.User)
             .FirstOrDefaultAsync(r => r.Id == roomId);
     }
+
+    public async Task<Room> GetRoomByUserIdAsync(string hostId)
+    {
+        return await _context.Rooms
+            .FirstOrDefaultAsync(r => r.HostId == hostId);
+    }
+
 
     public async Task<IEnumerable<Room>> GetAllRoomsAsync()
     {
@@ -55,21 +65,23 @@ public class RoomRepository : IRoomRepository
         }
     }
 
-    public async Task JoinRoomAsync(string userId, Guid roomId, string code)
+    public async Task<Room> JoinRoomAsync(string userId, string code)
     {
-        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId);
-        if (room == null) throw new Exception("Room is not avaialble.");
-
-        if (room.Code != code) throw new Exception("Invalid code.");
+        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Code == code);
+        if (room == null) return null;
+        var isParticipantExisted = await _context.Participants.FirstOrDefaultAsync(p => p.RoomId == room.Id && p.UserId == userId);
+        if (isParticipantExisted != null) return null;
+        if (room.Code != code) return null;
 
         var participant = new Participant
         {
             UserId = userId,
-            RoomId = roomId
+            RoomId = room.Id
         };
 
         await _context.Participants.AddAsync(participant);
         await _context.SaveChangesAsync();
+        return room;
     }
 
     public async Task RemoveUserOutOfRoomAsync(string userId, Guid roomId)
@@ -84,8 +96,12 @@ public class RoomRepository : IRoomRepository
         }
     }
 
-    public async Task AddMusicToRoomAsync(Guid musicId, Guid roomId)
+    public async Task<bool> AddMusicToRoomAsync(Guid musicId, Guid roomId)
     {
+        RoomPlaylist ExistingRoomPlaylist = await _context.RoomPlaylists.FirstOrDefaultAsync(rp => rp.RoomId == roomId && rp.MusicId == musicId);
+        if(ExistingRoomPlaylist != null) {
+            return false;
+        }
         var roomPlaylist = new RoomPlaylist
         {
             MusicId = musicId,
@@ -95,6 +111,7 @@ public class RoomRepository : IRoomRepository
 
         await _context.RoomPlaylists.AddAsync(roomPlaylist);
         await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task RemoveMusicOutOfRoomAsync(Guid musicId, Guid roomId)

@@ -3,6 +3,4 @@
 public class JoinRoomDTO
 {
     public string code { get; set; }
-
-    public string roomId { get; set; }
 }
