@@ -103,7 +103,7 @@ public class ArtistRepository : IArtistRepository
     public async Task<List<ArtistDTO>> GetAllArtistDTOs()
     {
         var artist = await _context.Artists
-            .Include(a => a.User)
+            .Include(a => a.User).ThenInclude(user => user.Followers)
             .Include(a => a.Musics)
             .ThenInclude(m => m.Genre)
             .Include(a => a.Musics)
@@ -111,9 +111,7 @@ public class ArtistRepository : IArtistRepository
             .Include(a => a.Musics)
             .ThenInclude(m => m.playlistMusics)
             .Include(a => a.Albums)
-            .Include(a => a.Followers)
             .ToListAsync();
-        if (artist == null) return null;
         var listArtistDtOs = new List<ArtistDTO>();
         foreach (var tmp in artist)
         {
@@ -123,7 +121,7 @@ public class ArtistRepository : IArtistRepository
                 userId = tmp.userId,
                 ArtistName = tmp.User.userFullName,
                 artistDescription = tmp.artistDescription,
-                NumberOfFollower = tmp.Followers.Count,
+                NumberOfFollower = tmp.User.Followers.Count,
                 Albums = tmp.Albums.Select(a => new AlbumDTO
                 {
                     Id = a.Id,
@@ -160,7 +158,7 @@ public class ArtistRepository : IArtistRepository
         // Remove related entities
         _context.Albums.RemoveRange(artist.Albums);
         _context.Musics.RemoveRange(artist.Musics);
-        _context.Followers.RemoveRange(artist.Followers);
+        _context.Follower.RemoveRange(artist.Followers);
         // Remove the artist
         _context.Artists.Remove(artist);
 
