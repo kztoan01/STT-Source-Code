@@ -11,7 +11,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ~/.aws:/root/.aws:ro
+      - /home/ec2-user/.aws:/root/.aws:ro 
 networks:
   STT:
     driver: bridge
