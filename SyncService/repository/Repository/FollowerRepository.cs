@@ -29,9 +29,9 @@ public class FollowerRepository:IFollowerRepository
 
     public async Task<Follower> DeleteFollower(Guid userId, Guid artistId)
     {
-        Follower follower =(await _context.Follower.Where(f => f.userId.Equals(userId.ToString()) && f.artistId == artistId)
+        Follower follower =(await _context.Followers.Where(f => f.userId.Equals(userId.ToString()) && f.artistId == artistId)
             .FirstOrDefaultAsync())!;
-        _context.Follower.Remove(follower);
+        _context.Followers.Remove(follower);
         return follower;
     }
 }
