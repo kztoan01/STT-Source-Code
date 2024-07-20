@@ -158,7 +158,7 @@ const Album = () => {
     }, [artistId]);
     useEffect(() => {
         const getGenres = async () => {
-            const genreData = await axiosInstance.get(`/music-service/api/Genre`);
+            const genreData = await axiosInstance.get(`/music-service/api/Genre/GetAllGenres`);
             setGenres(genreData.data.$values);
         };
 

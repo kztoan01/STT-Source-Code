@@ -23,7 +23,7 @@ function Login() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5016/music-service/api/Account/login",
+        "http://13.211.134.159:8080/music-service/api/Account/login",
         { email, password },
         { withCredentials: true }
       );
