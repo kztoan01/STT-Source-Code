@@ -23,7 +23,7 @@ public class ApplicationDBContext : IdentityDbContext<User>
     public DbSet<Collaboration> Collaborations { get; set; }
     public DbSet<RoomPlaylist> RoomPlaylists { get; set; }
     public DbSet<Room> Rooms { get; set; }
-    public DbSet<Follower> Followers { get; set; }
+    public DbSet<Follower> Follower { get; set; }
     public DbSet<Participant> Participants { get; set; }
     public DbSet<PlaylistMusic> PlaylistMusics { get; set; }
 

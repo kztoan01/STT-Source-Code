@@ -1,11 +1,12 @@
 "use client";
 import dynamic from "next/dynamic";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ChartOne from "../Charts/ChartOne";
 import ChartTwo from "../Charts/ChartTwo";
 import ChatCard from "../Chat/ChatCard";
 import TableOne from "../Tables/TableMusic";
 import CardDataStats from "../CardDataStats";
+import axiosInstance from "@/helpers/axiosInstance";
 
 const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
   ssr: false,
@@ -14,12 +15,119 @@ const MapOne = dynamic(() => import("@/components/Maps/MapOne"), {
 const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
   ssr: false,
 });
+interface Genre {
+  id: string;
+  genreName: string;
+  genreDescription: string;
+}
+type Artist = {
+  id: string;
+  userId: string;
+  artistName: string;
+  artistDescription: string;
+  numberOfFollower: number;
+};
+type MusicAlbum = {
+  id: string;
+  musicTitle: string;
+  musicUrl: string;
+  musicPicture: string;
+  musicPlays: number;
+  musicDuration: number;
+  releaseDate: string;
+  genreName: string;
+  artistName: string;
+}
+type Album = {
+  id: string;
+  albumTitle: string;
+  albumDescription: string;
+  releaseDate: string;
+  artist: Artist;
+  musics: Musics;
+  albumPicture: string;
+};
+type Musics = {
+  $id: string;
+  $values: MusicAlbum[];
+};
+type ApiResponse = {
+  $id: string;
+  $values: Album[];
+};
+interface AlbumDTO {
+  id: string;
+  albumTitle: string;
+  albumDescription: string;
+  releaseDate: string;
+  imageUrl: string | null;
+}
 
+interface Music {
+  id: string;
+  musicTitle: string;
+  musicUrl: string;
+  musicPicture: string;
+  musicPlays: number;
+  musicDuration: number;
+  releaseDate: string;
+  genreName: string;
+  artistName: string;
+  albumDTO: AlbumDTO;
+}
 const ECommerce: React.FC = () => {
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [musicList, setMusicList] = useState<Music[]>([]);
+  const getAlbums = async () => {
+
+    try {
+      const response = await axiosInstance.get(`/music-service/api/Album/getAllAlbums`);
+      console.log(response);
+      setAlbums(response.data.$values);
+    } catch (error) {
+      console.error("Error fetching albums:", error);
+    }
+  };
+
+  useEffect(() => {
+    getAlbums();
+  }, []);
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const fetchMusic = async () => {
+    try {
+      const response = await axiosInstance.get('/music-service/api/Music/all');
+      setMusicList(response.data.$values);
+    } catch (err) {
+      setError('Failed to fetch music data');
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchMusic();
+  }, []);
+
+  const [artists, setArtists] = useState<any[]>([]);
+  const getArtists = async () => {
+
+    try {
+      const response = await axiosInstance.get(`/music-service/api/Admin/getallartist`);
+      console.log(response);
+      setArtists(response.data.$values);
+    } catch (error) {
+      console.error("Error fetching artists:", error);
+    }
+  };
+
+  useEffect(() => {
+    getArtists();
+  }, []);
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total views" total="$3.456K" rate="0.43%" levelUp>
+        <CardDataStats title="Total listens" total={2208} rate="0.43%" levelUp>
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -38,7 +146,7 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Profit" total="$45,2K" rate="4.35%" levelUp>
+        <CardDataStats title="Total Album" total={albums.length} rate="4.35%" levelUp>
           <svg
             className="fill-primary dark:fill-white"
             width="20"
@@ -61,7 +169,7 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Product" total="2.450" rate="2.59%" levelUp>
+        <CardDataStats title="Total Musics" total={musicList.length} rate="2.59%" levelUp>
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -80,7 +188,7 @@ const ECommerce: React.FC = () => {
             />
           </svg>
         </CardDataStats>
-        <CardDataStats title="Total Users" total="3.456" rate="0.95%" levelDown>
+        <CardDataStats title="Total Artists" total={artists.length} rate="0.95%" levelDown>
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -105,15 +213,15 @@ const ECommerce: React.FC = () => {
         </CardDataStats>
       </div>
 
-      <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
+      <div className="mt-4 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
         <ChartOne />
-        <ChartTwo />
+        {/* <ChartTwo /> */}
         {/* <ChartThree />
         <MapOne /> */}
         <div className="col-span-12 xl:col-span-8">
           <TableOne />
         </div>
-        <ChatCard />
+
       </div>
     </>
   );

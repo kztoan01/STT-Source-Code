@@ -19,7 +19,11 @@ public class RoomHub : Hub<IRoomHub>
         await JoinRoom(groupName);
         await Clients.Group(groupName).AlertToRoom(groupName, username);
     }
-
+    public async Task Chat(string groupName, string username, string content)
+    {
+        //await JoinRoom(groupName);
+        await Clients.Group(groupName).Chat(groupName, username, content);
+    }
     public async Task UpdateParticipantsList(string groupName, string username)
     {
         await Clients.Group(groupName).UpdateParticipantsList();
