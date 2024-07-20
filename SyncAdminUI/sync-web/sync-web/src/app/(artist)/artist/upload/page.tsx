@@ -126,7 +126,7 @@ const Upload = () => {
         formData.append('musicDuration', "3.14");
         formData.append('albumId', album);
         formData.append('artistId', artistId);
-        formData.append('genreId', genre);
+        formData.append('genreId', "E77FA1AE-C18C-48F3-BFBA-9237A87C9771");
         console.log('Album ID: '  +  album)
         try {
             setLoading(true);
@@ -162,6 +162,7 @@ const Upload = () => {
 
         getGenres();
     }, []);
+    console.log(genres)
     useEffect(() => {
         const getAlbums = async () => {
             if (!artistId) {
