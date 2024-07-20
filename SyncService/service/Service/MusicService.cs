@@ -232,7 +232,8 @@ public class MusicService : IMusicService
                 artistName = music.Artist.User.userFullName
             };
         }
-}
+    }
+
 
 /*using Amazon.S3;
 using Amazon.S3.Model;
