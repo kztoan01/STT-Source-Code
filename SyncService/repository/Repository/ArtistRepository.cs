@@ -164,7 +164,7 @@ public class ArtistRepository : IArtistRepository
         // Remove related entities
         _context.Albums.RemoveRange(artist.Albums);
         _context.Musics.RemoveRange(artist.Musics);
-        _context.Follower.RemoveRange(artist.Followers);
+        _context.Followers.RemoveRange(artist.Followers);
         // Remove the artist
         _context.Artists.Remove(artist);
 
