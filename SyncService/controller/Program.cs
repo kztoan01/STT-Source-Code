@@ -54,6 +54,7 @@ builder.Services.AddCors(options => {
         policyBuilder.WithOrigins("http://localhost:3000");
         policyBuilder.WithOrigins("http://127.0.0.1:5500");
         policyBuilder.WithOrigins("http://127.0.0.1:5501");
+        policyBuilder.WithOrigins("https://stt-source-code.vercel.app");
         policyBuilder.AllowAnyHeader();
         policyBuilder.AllowAnyMethod();
         policyBuilder.AllowCredentials();

@@ -12,8 +12,8 @@ using data.Data;
 namespace data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240715010524_init")]
-    partial class init
+    [Migration("20240720012431_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,19 +54,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "86e4c337-c8ae-47e6-97ca-f11a2aaccb0b",
+                            Id = "8c837735-e616-4ce8-9b17-616b2e2c9e1e",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "228b6992-79cb-4754-888a-49ecbef84b77",
+                            Id = "904467dc-1b7f-40b0-a909-e94fa0409792",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "096310b3-5468-417e-87f2-8428959bc346",
+                            Id = "a266b57d-c55f-4b8f-8319-4ab80f82c3e0",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
