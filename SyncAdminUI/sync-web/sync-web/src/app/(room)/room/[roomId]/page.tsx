@@ -258,7 +258,7 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
 
     useEffect(() => {
         const newConnection = new HubConnectionBuilder()
-            .withUrl('http://192.168.1.123:5016/roomhub')
+            .withUrl('http://13.211.134.159:8080/roomhub')
             .configureLogging(LogLevel.Information)
             .withAutomaticReconnect()
             .build();
