@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: "Sync Artist",
-    description: "Artist's dashboard",
+    description: "Artist`s dashboard",
 };
 
 export default function ArtistLayout({
@@ -45,7 +45,7 @@ export default function ArtistLayout({
                                         decoding="async"
                                         data-nimg="1"
                                         className="w-full"
-                                        style={{ color: 'transparent' }}
+                                        style={{ color: `transparent` }}
                                         sizes="(min-width: 1024px) 20rem, (min-width: 640px) 16rem, 12rem"
                                         src={savage}
                                     />
@@ -70,16 +70,16 @@ export default function ArtistLayout({
                                     <p className="mt-2 text-base leading-7 text-slate-700 lg:line-clamp-4">Born in Newham, England and raised on the Eastside of Atlanta, 21 Savage, 
                                         comes from a background of poverty, struggle, 
                                         crime, and violence. This pain and anger come across as a clear message in his music, do not mess with me or my people. 
-                                        Starting with his debut mixtape 'The Slaughter Starting with his debut mixtape 'The Slaughter Tape,'released in May 2015, 
-                                        21 has developed a sound that is somewhere between Atlanta's Trap and Chicago's Drill as a hyper violent, hyper real view of the Real Atlanta. 
-                                        He has forged meaningful relationships with super producers Sonny Digital and Metro Boomin as well as upstart F-12. His follow-up tape 'Free Guwop EP' 
-                                        was a collaboration with Sonny Digital and his way of paying homage to the only rapper he has ever looked up to, East Atlanta's own GucciMane. 
-                                        His third release, Slaughter King, released Dec '15, officially put 21 on the map as an artist to watch. Not long after its release, 
-                                        Savage was named by XXL a 2016 Freshman. With the release, 'Savage Mode' (July 2016), a collaboration with super producer, Metro Boomin', 
+                                        Starting with his debut mixtape `The Slaughter Starting with his debut mixtape `The Slaughter Tape,`released in May 2015, 
+                                        21 has developed a sound that is somewhere between Atlanta`s Trap and Chicago`s Drill as a hyper violent, hyper real view of the Real Atlanta. 
+                                        He has forged meaningful relationships with super producers Sonny Digital and Metro Boomin as well as upstart F-12. His follow-up tape `Free Guwop EP` 
+                                        was a collaboration with Sonny Digital and his way of paying homage to the only rapper he has ever looked up to, East Atlanta`s own GucciMane. 
+                                        His third release, Slaughter King, released Dec `15, officially put 21 on the map as an artist to watch. Not long after its release, 
+                                        Savage was named by XXL a 2016 Freshman. With the release, `Savage Mode` (July 2016), a collaboration with super producer, Metro Boomin`, 
                                         21 Savage has taken his underground stardom to viable mainstream success, receiving 11.6k+ in sales total in its first week as a completely 
-                                        independent artist; charting #1 for a full week ahead of Drake, Schoolboy Q, and Logic. In it's 3rd week, 'Savage Mode' remained #4 on all of
-                                         Apple Music (not just hip-hop). Momentum only sped up for the rapper after 'Savage Mode,' he then dropped 'Issa' and the collaborative 'Without Warning' 
-                                         with Metro Boomin' and Offset of the Migos. 21 Savage has a partnership with Epic Records, a label owned by Sony Music Entertainment.</p><button
+                                        independent artist; charting #1 for a full week ahead of Drake, Schoolboy Q, and Logic. In it`s 3rd week, `Savage Mode` remained #4 on all of
+                                         Apple Music (not just hip-hop). Momentum only sped up for the rapper after `Savage Mode,` he then dropped `Issa` and the collaborative `Without Warning` 
+                                         with Metro Boomin` and Offset of the Migos. 21 Savage has a partnership with Epic Records, a label owned by Sony Music Entertainment.</p><button
                                             type="button"
                                             className="mt-2 hidden text-sm font-bold leading-6 text-pink-500 hover:text-pink-700 active:text-pink-900 lg:inline-block">Show
                                         more</button>

@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 export default function Promo() {
-    const linkImg = 'https://storage.cloud.google.com/Sync-bucket/'
+    const linkImg = `https://storage.cloud.google.com/Sync-bucket/`
     return (
       <div className="relative overflow-hidden bg-white">
         <div className="pb-80 pt-16 sm:pb-40 sm:pt-24 lg:pb-48 lg:pt-40">
@@ -11,7 +11,7 @@ export default function Promo() {
               Participate in the Highest Quality Courses
               </h1>
               <p className="mt-4 text-xl text-gray-500">
-              The world's highest quality drawing courses are on sale. Join now!
+              The world`s highest quality drawing courses are on sale. Join now!
               </p>
             </div>
             <div>

@@ -306,7 +306,7 @@ const Album = () => {
                                 <div className="mx-auto max-w-2xl py-8 sm:py-8 lg:max-w-none lg:py-8">
                                     <div className="space-y-12 lg:grid lg:grid-cols-4 lg:gap-x-6 lg:space-y-0">
                                         {albums?.map((album) => (
-                                            <Link href={`/artist/album/${album.id}`}>
+                                            <Link href={`/artist/album/${album.id}`} key={album.id}>
                                             <div key={album.id} className="group relative pb-8">
                                                 <div className=" relative h-60 w-60 overflow-hidden rounded-lg bg-white sm:aspect-h-1 sm:aspect-w-2 lg:aspect-h-1 lg:aspect-w-1 group-hover:opacity-75 sm:h-64">
                                                     <img
