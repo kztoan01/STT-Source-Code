@@ -69,6 +69,14 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
     const [chatData, setChatData] = useState<Chat[]>([
 
     ]);
+
+    const [chatBoxData, setChatBoxData] = useState<Chat[]>([
+
+    ]);
+
+    const [noti, setChatNoti] = useState<Chat[]>([
+
+    ]);
     useEffect(() => {
         if (audio) {
             audio.pause();
@@ -148,12 +156,12 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
         setCurrentTime(audio.currentTime);
     };
 
-    const handleAdd = async () => {
+    const handleAdd = async (musicID: String) => {
 
         try {
             const response = await axiosInstance.post(`/room-service/api/Room/music/add`, {
                 roomId: params.roomId,
-                musicId: musicId
+                musicId: musicID
             });
             console.log(response);
 
@@ -168,12 +176,12 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
             console.log("end");
         }
     };
-    const handleDelete = async () => {
+    const handleDelete = async (musicID: String) => {
 
         try {
             const response = await axiosInstance.post(`/room-service/api/Room/music/remove`, {
                 roomId: params.roomId,
-                musicId: musicId
+                musicId: musicID
             });
             console.log(response);
 
@@ -225,6 +233,7 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
     const [connection, setConnection] = useState<HubConnection | null>(null);
     const [roomName, setRoomName] = useState<string>('');
     const [username, setUsername] = useState<string>('');
+    const [chatContent, setChatContent] = useState<string>('');
     const [participants, setParticipants] = useState<any[]>([]);
     const [musics, setMusics] = useState<any[]>([]);
     const [newUser, setNewUser] = useState<string>('');
@@ -249,7 +258,7 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
 
     useEffect(() => {
         const newConnection = new HubConnectionBuilder()
-            .withUrl('http://13.211.134.159:8080/roomhub')
+            .withUrl('http://192.168.1.123:5016/roomhub')
             .configureLogging(LogLevel.Information)
             .withAutomaticReconnect()
             .build();
@@ -264,14 +273,55 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                 {
                     avatar: "/default.jpg",
                     name: username,
-                    text: "Just joined the room!",
+                    text: isHost ? "Host" : "Member",
                     time: Date.now(),
                     textCount: 0,
                     dot: 5,
                 }
             ]);
-        });
+            setChatNoti(prevChatData => {
+                const newChatEntry: Chat = {
+                    avatar: "/default.jpg",
+                    name: username,
+                    text: "Just joined the room",
+                    time: 0,
+                    textCount: 0,
+                    dot: 5,
+                };
 
+                const updatedChatData = [...prevChatData, newChatEntry];
+
+                if (updatedChatData.length > 10) {
+                    updatedChatData.shift();
+                }
+
+                return updatedChatData;
+            });
+        });
+        newConnection.on('chat', (groupName, username, content) => {
+            console.log("chat from" + username + "content: " + content);
+            //setNewUser(username);
+            setChatBoxData(prevChatData => {
+                const newChatEntry: Chat = {
+                    avatar: "/default.jpg",
+                    name: content,
+                    text: username,
+                    time: Date.now(),
+                    textCount: 0,
+                    dot: 5,
+                };
+
+                const updatedChatData = [...prevChatData, newChatEntry];
+
+                if (updatedChatData.length > 8) {
+                    updatedChatData.shift();
+                }
+
+                return updatedChatData;
+            });
+            console.log(chatData)
+
+        });
         newConnection.on('onLeaveRoom', (groupName, username) => {
             console.info(username);
             const testElement = document.getElementById('test');
@@ -285,6 +335,7 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                 const response = await axiosInstance.get(`/room-service/api/Room/${params.roomId}`);
                 const room = response.data;
                 setParticipants(room.participants?.$values || []);
+
             } catch (error) {
                 console.error('Error fetching participants:', error);
             }
@@ -295,6 +346,7 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                 const response = await axiosInstance.get(`/room-service/api/Room/${params.roomId}`);
                 const room = response.data;
                 setMusics(room.roomPlaylists?.$values || []);
+
             } catch (error) {
                 console.error('Error fetching musics:', error);
             }
@@ -306,13 +358,32 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
             if (testElement) {
                 testElement.innerHTML = `Music ${musicName} has been added to the room ${groupName}.`;
             }
+            setChatNoti(prevChatData => {
+                const newChatEntry: Chat = {
+                    avatar: "/default.jpg",
+                    name: musicName,
+                    text: `Music: ${musicName} has been added to the room.`,
+                    time: 0,
+                    textCount: 0,
+                    dot: 5,
+                };
+
+                const updatedChatData = [...prevChatData, newChatEntry];
+
+                if (updatedChatData.length > 10) {
+                    updatedChatData.shift();
+                }
+
+                return updatedChatData;
+            });
         });
 
         newConnection.on('musicStatus', (status, musicName, musicUrl) => {
-            const audioPlayer = document.getElementById('audioPlayer') as HTMLAudioElement;
+            
             setTitle(musicName);
             setSource(musicUrl);
-
+            console.log("rc musicName" + musicName)
+            console.log("rc musicUrl" + musicUrl)
             if (status === 'play') {
                 setIsPlaying(true);
             } else if (status === 'stop') {
@@ -347,7 +418,12 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
     const musicIdsSet = new Set(musics.map(music => music.musicId));
 
     const uniqueMusics = allMusics.filter(music => !musicIdsSet.has(music.id));
-
+    const convertTimestampToTime = (timestamp: any) => {
+        const date = new Date(timestamp);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
     const reversedUniqueMusics = uniqueMusics.slice().reverse();
     const fetchRoomDetails = async () => {
         try {
@@ -391,6 +467,17 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
             console.log("title: " + title)
             console.log("source: " + source)
             await connection.invoke('MusicStatus', params.roomId, 'stop', title, source);
+        }
+    };
+
+    const handleChat = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (connection) {
+            //await connection.invoke('JoinRoom', params.roomId);
+            await connection.invoke('Chat', params.roomId, username, chatContent);
+            //fetchRoomDetails();
+            //setIsHost(true);
         }
     };
     return (
@@ -593,9 +680,8 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                                                 <div className="hidden items-center justify-center p-2.5 sm:flex xl:p-5">
                                                     <p className="text-black dark:text-white">{music.albumName}</p>
                                                 </div>
-                                                <div className="col-span-1 flex items-center pl-20" onClick={()=> {
-                                                    setMusicId(music.musicId)
-                                                    handleDelete()
+                                                <div className="col-span-1 flex items-center pl-20" onClick={() => {
+                                                    handleDelete(music.musicId)
                                                 }}>
                                                     <p
                                                         className="inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium bg-red text-red">
@@ -617,11 +703,11 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                                                 }}
                                                 className="group relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-slate-700 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-offset-2 md:h-14 md:w-14"
                                                 aria-label="Play">
-                                                <div className="absolute -inset-3 md:hidden"></div><svg viewBox="0 0 36 36" aria-hidden="true"
-                                                    className="h-5 w-5 fill-white group-active:fill-white/80 md:h-7 md:w-7">
-                                                    <path
-                                                        d="M33.75 16.701C34.75 17.2783 34.75 18.7217 33.75 19.299L11.25 32.2894C10.25 32.8668 9 32.1451 9 30.9904L9 5.00962C9 3.85491 10.25 3.13323 11.25 3.71058L33.75 16.701Z">
-                                                    </path>
+                                                <div className="absolute -inset-3 md:hidden"></div><svg className="bg-white" fill="#000000" width="800px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 512 512" >
+                                                    <path d="M256,0C114.617,0,0,114.615,0,256s114.617,256,256,256s256-114.615,256-256S397.383,0,256,0z M224,320
+	                                                    c0,8.836-7.164,16-16,16h-32c-8.836,0-16-7.164-16-16V192c0-8.836,7.164-16,16-16h32c8.836,0,16,7.164,16,16V320z M352,320
+	                                                    c0,8.836-7.164,16-16,16h-32c-8.836,0-16-7.164-16-16V192c0-8.836,7.164-16,16-16h32c8.836,0,16,7.164,16,16V320z"/>
                                                 </svg>
                                             </button></div>
                                             <div className="hidden md:block"><button type="button"
@@ -767,6 +853,89 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                                 </div>
                             </div>
 
+                            <div className="h-203 col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
+                                <h4 className="mb-6 px-7.5 text-xl font-semibold text-black dark:text-white">
+                                    Chat
+                                </h4>
+                                <form onSubmit={handleChat} className="container px-8 flex">
+                                    <div className="mb-5.5 container">
+                                        <label
+                                            className="mb-3 block text-sm font-medium text-black dark:text-white"
+                                            htmlFor="Caption"
+                                        >
+                                            Chat
+                                        </label>
+                                        <input
+                                            className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                                            type="text"
+                                            name="Caption"
+                                            id="Caption"
+                                            placeholder="Sent a message"
+                                            value={chatContent}
+                                            onChange={(e) => setChatContent(e.target.value)}
+                                        />
+                                    </div>
+                                    <button
+
+                                        className="h-10 mt-9 ml-4 flex justify-center rounded lg:bg-purple-600 px-6 py-2 font-medium text-gray hover:bg-opacity-90"
+                                        type="submit"
+                                    >
+                                        Send
+                                    </button>
+                                </form>
+                                <div>
+                                    {chatBoxData.slice().reverse().map((chat, key) => (
+                                        <div
+
+                                            className="flex items-center gap-5 px-7.5 py-3 hover:bg-gray-3 dark:hover:bg-meta-4"
+                                            key={key}
+                                        >
+                                            <div className="relative h-14 w-14 rounded-full">
+                                                <Image
+                                                    width={56}
+                                                    height={56}
+                                                    src={chat.avatar}
+                                                    alt="User"
+                                                    style={{
+                                                        width: "auto",
+                                                        height: "auto",
+                                                    }}
+                                                />
+                                                <span
+                                                    className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${chat.dot === 6 ? "bg-meta-6" : `bg-meta-3`
+                                                        } `}
+                                                ></span>
+                                            </div>
+
+                                            <div className="flex flex-1 items-center justify-between">
+                                                <div>
+                                                    <h5 className="font-medium text-black dark:text-white">
+                                                        {chat.name}
+                                                    </h5>
+                                                    <p>
+                                                        <span className="text-sm text-black dark:text-white">
+                                                            From: {chat.text}
+                                                        </span>
+                                                        <span className="text-xs"> at {convertTimestampToTime(chat.time)}</span>
+                                                    </p>
+                                                </div>
+                                                {chat.textCount !== 0 && (
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary">
+                                                        <span className="text-sm font-medium text-white">
+                                                            {" "}
+                                                            {chat.textCount}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+
+
+                                </div>
+
+                            </div>
+
                             <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
                                 <h4 className="mb-6 px-7.5 text-xl font-semibold text-black dark:text-white">
                                     Participants
@@ -805,7 +974,62 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                                                         <span className="text-sm text-black dark:text-white">
                                                             {chat.text}
                                                         </span>
-                                                        <span className="text-xs"> . {chat.time} min</span>
+                                                        <span className="text-xs"> . at {convertTimestampToTime(chat.time)}</span>
+                                                    </p>
+                                                </div>
+                                                {chat.textCount !== 0 && (
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary">
+                                                        <span className="text-sm font-medium text-white">
+                                                            {" "}
+                                                            {chat.textCount}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="col-span-12 rounded-sm border border-stroke bg-white py-6 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-4">
+                                <h4 className="mb-6 px-7.5 text-xl font-semibold text-black dark:text-white">
+                                    Notifications
+                                </h4>
+
+                                <div>
+                                    {noti.slice().reverse().map((chat, key) => (
+                                        <div
+
+                                            className="flex items-center gap-5 px-7.5 py-3 hover:bg-gray-3 dark:hover:bg-meta-4"
+                                            key={key}
+                                        >
+                                            <div className="relative h-14 w-14 rounded-full">
+                                                <Image
+                                                    width={56}
+                                                    height={56}
+                                                    src={chat.avatar}
+                                                    alt="User"
+                                                    style={{
+                                                        width: "auto",
+                                                        height: "auto",
+                                                    }}
+                                                />
+                                                <span
+                                                    className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${chat.dot === 6 ? "bg-meta-6" : `bg-meta-3`
+                                                        } `}
+                                                ></span>
+                                            </div>
+
+                                            <div className="flex flex-1 items-center justify-between">
+                                                <div>
+                                                    <h5 className="font-medium text-black dark:text-white">
+                                                        {chat.name}
+                                                    </h5>
+                                                    <p>
+                                                        <span className="text-sm text-black dark:text-white">
+                                                            {chat.text}
+                                                        </span>
+                                                        <span className="text-xs"></span>
                                                     </p>
                                                 </div>
                                                 {chat.textCount !== 0 && (
@@ -874,7 +1098,7 @@ function AlbumDetail({ params }: { params: { roomId: string } }) {
                                                                     className={`grid grid-cols-[1fr] sm:grid-cols-[1fr] gap-4 w-80`}
                                                                     onClick={() => {
                                                                         setMusicId(music.id)
-                                                                        handleAdd()
+                                                                        handleAdd(music.id)
                                                                     }}
                                                                 >
                                                                     <div className="flex items-center gap-3 p-2.5 xl:p-5">

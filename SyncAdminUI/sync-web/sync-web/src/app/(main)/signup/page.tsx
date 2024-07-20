@@ -25,7 +25,7 @@ function Signup() {
 
         try {
             const res = await axios.post(
-                "http://13.211.134.159:8080/music-service/api/Account/register",
+                "http://192.168.1.123:5016/music-service/api/Account/register",
                 { username, email, password, isArtist : true },
                 { withCredentials: true }
             );

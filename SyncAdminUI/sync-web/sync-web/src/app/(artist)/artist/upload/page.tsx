@@ -126,7 +126,7 @@ const Upload = () => {
         formData.append('musicDuration', "3.14");
         formData.append('albumId', album);
         formData.append('artistId', artistId);
-        formData.append('genreId', "E77FA1AE-C18C-48F3-BFBA-9237A87C9771");
+        formData.append('genreId', genre);
         console.log('Album ID: '  +  album)
         try {
             setLoading(true);
@@ -381,7 +381,6 @@ const Upload = () => {
                                                     <select onChange={(e) => {
                                                         setAlbum(e.target.value);
                                                     }} id="album" name="album" autoComplete="album-name" className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary">
-                                                        <option value=''>Single</option>
                                                          {albums.map((album) => (
                                                             <option key={album.id} value={album.id}>{album.albumTitle}</option>
                                                          ))}
@@ -465,7 +464,7 @@ const Upload = () => {
                                                         />
                                                     ) : (
                                                         <Image
-                                                            src={'/images/user/user-06.png'}
+                                                            src={'/21.jpg'}
                                                             width={55}
                                                             height={55}
                                                             alt="User"

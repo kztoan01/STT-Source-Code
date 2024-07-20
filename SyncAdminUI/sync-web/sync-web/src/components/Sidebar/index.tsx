@@ -88,8 +88,6 @@ const menuGroups = [
           { label: "Songs", route: "/dashboard/manage/songs" },
           { label: "Albums", route: "/dashboard/manage/albums" },
           { label: "Artists", route: "/dashboard/manage/artists" },
-          { label: "Playlists", route: "/dashboard/manage/playlists" },
-          { label: "Accounts", route: "/dashboard/manage/accounts" },
         ],
       },
       {
