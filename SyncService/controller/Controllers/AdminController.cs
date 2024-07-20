@@ -2,8 +2,6 @@ using core.Objects;
 using Microsoft.AspNetCore.Mvc;
 using service.Service.Interfaces;
 
-namespace controller.Controllers;
-
 namespace controller.Controllers
 {
     [Route("music-service/api/[controller]")]
