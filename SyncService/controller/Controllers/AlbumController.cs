@@ -47,8 +47,12 @@ public class AlbumController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
+        var artist = await _artistService.GetArtistByUserIdAsync(artistId);
 
-        var albums = await _albumService.GetAllArtistAlbumsAsync(artistId, queryObject);
+        if (artist == null)
+            return NotFound();
+
+        var albums = await _albumService.GetAllArtistAlbumsAsync(artist.Id, queryObject);
 
 
         if (albums == null)

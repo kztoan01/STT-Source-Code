@@ -7,30 +7,37 @@ namespace controller.Controllers
 {
     [Route("music-service/api/[controller]")]
     [ApiController]
-    public class AdminController(IAdminService adminService) : ControllerBase
+    public class AdminController : ControllerBase
     {
+        private readonly IAdminService _adminService;
+
+        public AdminController(IAdminService adminService)
+        {
+            _adminService = adminService;
+        }
+
         [HttpGet("getallartist")]
         public async Task<IActionResult> GetAllArtist([FromQuery] QueryArtist queryObject)
         {
-            return Ok(await adminService.getArtist(queryObject));
+            return Ok(await _adminService.getArtist(queryObject));
         }
 
         [HttpGet("getuser")]
         public async Task<IActionResult> GetUser([FromQuery] QueryUser queryUser)
         {
-            return Ok(await adminService.getUser(queryUser));
+            return Ok(await _adminService.getUser(queryUser));
         }
 
         [HttpGet("getalbum")]
         public async Task<IActionResult> GetAlbum([FromQuery] QueryAlbum queryAlbum)
         {
-            var albums = await adminService.GetAlbum(queryAlbum);
+            var albums = await _adminService.GetAlbum(queryAlbum);
             return Ok(albums);
         }
         [HttpDelete("deleteartist/{id}")]
         public async Task<IActionResult> DeleteArtist(Guid id)
         {
-            var result = await adminService.DeleteArtist(id);
+            var result = await _adminService.DeleteArtist(id);
             if (result)
             {
                 return Ok(new { message = "Artist deleted successfully." });
@@ -41,7 +48,7 @@ namespace controller.Controllers
         [HttpDelete("deleteplaylist/{id}")]
         public async Task<IActionResult> DeletePlaylist(Guid id)
         {
-            var result = await adminService.DeletePlaylist(id);
+            var result = await _adminService.DeletePlaylist(id);
             if (result)
             {
                 return Ok(new { message = "Playlist deleted successfully." });
@@ -51,7 +58,7 @@ namespace controller.Controllers
         [HttpDelete("deletemusic/{id}")]
         public async Task<IActionResult> DeleteMusic(Guid id)
         {
-            var result = await adminService.DeleteMusic(id);
+            var result = await _adminService.DeleteMusic(id);
             if (result)
             {
                 return Ok(new { message = "Music deleted successfully." });

@@ -22,6 +22,10 @@ export default function NavBar() {
             name: 'Album'
         },
         {
+            href: '/artist/sync',
+            name: 'Sync'
+        },
+        {
             href: '/artist/account',
             name: 'Account'
         }

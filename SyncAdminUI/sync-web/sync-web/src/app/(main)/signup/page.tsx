@@ -57,7 +57,7 @@ function Signup() {
                         <Link className="mb-5.5 inline-block" href="/dashboard">
                             <Image
                                 className="dark:block"
-                                src={"/images/logo/logo.svg"}
+                                src={"/logo.jpg"}
                                 alt="Logo"
                                 width={176}
                                 height={32}

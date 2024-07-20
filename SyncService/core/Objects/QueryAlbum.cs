@@ -8,5 +8,5 @@ public class QueryAlbum
     public int PageSize { get; set; } = 10;
     public bool IsDescending { get; set; } = false;
     public AlbumSearchByEnum SortBy { get; set; } = AlbumSearchByEnum.AlbumTitle;
-    public string SearchTerm { get; set; }
+    public string? SearchTerm { get; set; }
 }

@@ -48,9 +48,9 @@ namespace service.Hub.iml
             await Clients.Group(groupName).MusicPlaytime(playtime);
         }
 
-        public async Task MusicStatus(string groupName, string status)
+        public async Task MusicStatus(string groupName, string status, string musicName, string musicUrl)
         {
-            await Clients.Group(groupName).MusicStatus(status);
+            await Clients.Group(groupName).MusicStatus(status, musicName, musicUrl);
         }
 
         public async Task LeaveRoom(string groupName)

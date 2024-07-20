@@ -23,6 +23,10 @@ namespace repository.Repository
             return await _context.Rooms
         .Include(r => r.RoomPlaylists)
             .ThenInclude(rp => rp.Music)
+                .ThenInclude(m => m.Artist)
+        .Include(r => r.RoomPlaylists)
+            .ThenInclude(rp => rp.Music)
+                .ThenInclude(m => m.Album)
         .Include(r => r.Participants)
             .ThenInclude(p => p.User)
         .FirstOrDefaultAsync(r => r.Id == roomId);

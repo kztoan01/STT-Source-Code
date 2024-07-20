@@ -51,19 +51,19 @@ namespace data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "86e4c337-c8ae-47e6-97ca-f11a2aaccb0b",
+                            Id = "d14553b3-0059-4c5b-9380-4d1e7d9e8ccb",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "228b6992-79cb-4754-888a-49ecbef84b77",
+                            Id = "a118c95a-0409-45f4-ade9-771108832048",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "096310b3-5468-417e-87f2-8428959bc346",
+                            Id = "6c85d0ac-7366-4a7e-bfcb-0b12d2b0f758",
                             Name = "Artist",
                             NormalizedName = "ARTIST"
                         });
@@ -273,7 +273,7 @@ namespace data.Migrations
 
                     b.HasIndex("artistId");
 
-                    b.ToTable("Follower");
+                    b.ToTable("Followers");
                 });
 
             modelBuilder.Entity("core.Models.Genre", b =>

@@ -1,11 +1,47 @@
-import { useState } from "react";
+"use client"
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
+import { jwtDecode, JwtPayload } from "jwt-decode";
+import { getCookie, deleteCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
 
+interface MyJwtPayload extends JwtPayload {
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': string,
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress' : string
+}
 const DropdownUser = () => {
+  
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  useEffect(() => {
+      const token = getCookie('token');
+      console.log('Token:', token);
 
+      if (typeof token === 'string') {
+          try {
+              const decoded = jwtDecode<MyJwtPayload>(token);
+              console.log('Decoded Token:', decoded);
+
+              const name = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
+              const email = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+              setName(name);
+              setEmail(email)
+          } catch (error) {
+              console.error('Failed to decode token:', error);
+          }
+      } else {
+        setName('null');
+        setEmail('null')
+      }
+  }, []);
+  const route = useRouter()
+  const handleLogout = () => {
+    deleteCookie('token')
+    route.push("/signin")
+  };
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
@@ -15,21 +51,22 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {name}
           </span>
-          <span className="block text-xs">UX Designer</span>
+          <span className="block text-xs">{email}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
           <Image
             width={112}
             height={112}
-            src={"/images/user/user-01.png"}
+            src={"/logo.jpg"}
             style={{
               width: "auto",
               height: "auto",
             }}
             alt="User"
+            className="rounded-xl"
           />
         </span>
 
@@ -58,7 +95,7 @@ const DropdownUser = () => {
           <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
             <li>
               <Link
-                href="/profile"
+                href="/dashboard/profile"
                 className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 <svg
@@ -83,7 +120,7 @@ const DropdownUser = () => {
             </li>
             <li>
               <Link
-                href="#"
+                href="/dashboard"
                 className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 <svg
@@ -104,7 +141,7 @@ const DropdownUser = () => {
             </li>
             <li>
               <Link
-                href="/settings"
+                href="/dashboard/settings"
                 className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 <svg
@@ -128,7 +165,8 @@ const DropdownUser = () => {
               </Link>
             </li>
           </ul>
-          <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+          <button className="flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base" 
+          onClick={handleLogout}>
             <svg
               className="fill-current"
               width="22"

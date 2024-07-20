@@ -1,6 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace controller.Controllers.AWSBucketsController;
@@ -18,6 +19,7 @@ public class BucketsController : ControllerBase
     }
 
     [HttpGet("list-buckets")]
+    [Authorize(Roles ="Admin")]
     public async Task<IActionResult> ListBukets()
     {
         var data = await _s3Client.ListBucketsAsync();
@@ -26,6 +28,7 @@ public class BucketsController : ControllerBase
     }
 
     [HttpPost("upload-music")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UploadFile(IFormFile file)
     {
         if (file == null || file.Length == 0)

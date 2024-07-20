@@ -36,16 +36,27 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSignalR();
 
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
         b =>
         {
             b.WithOrigins("http://127.0.0.1:5500")
                 .AllowAnyHeader()
-                .WithMethods("GET", "POST")
+                .AllowAnyMethod()
                 .AllowCredentials();
         });
+});*/
+
+builder.Services.AddCors(options => {
+    options.AddPolicy("SyncWeb", policyBuilder => {
+        policyBuilder.WithOrigins("http://localhost:3000");
+        policyBuilder.WithOrigins("http://127.0.0.1:5500");
+        policyBuilder.WithOrigins("http://127.0.0.1:5501");
+        policyBuilder.AllowAnyHeader();
+        policyBuilder.AllowAnyMethod();
+        policyBuilder.AllowCredentials();
+    });
 });
 
 builder.Services.AddControllers()
@@ -138,7 +149,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors();
+//app.UseCors();
+app.UseCors("SyncWeb");
 app.UseAuthentication();
 app.UseAuthorization();
 

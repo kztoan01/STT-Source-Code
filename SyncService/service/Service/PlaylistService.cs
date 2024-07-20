@@ -61,7 +61,7 @@ public class PlaylistService : IPlaylistService
             var existMusic = await _musicRepository.GetMusicByIdAsync(music.musicId);
             if (existMusic == null || existMusic.Id == Guid.Empty) throw new Exception("Music is null or not found");
 
-            var artistName = existMusic.Artist?.User?.UserName ?? "No artist available";
+            var artistName = existMusic.Artist?.User?.userFullName ?? "No artist available";
             var genreName = existMusic.Genre?.genreName ?? "No genre available";
 
             playlistDTO.musics.Add(new MusicDTO
@@ -121,7 +121,7 @@ public class PlaylistService : IPlaylistService
 
                 playlistDTO.musics.Add(new MusicDTO
                 {
-                    artistName = existMusic.Artist?.User?.UserName ?? "No artist available",
+                    artistName = existMusic.Artist?.User?.userFullName ?? "No artist available",
                     genreName = existMusic.Genre?.genreName ?? "No genre available",
                     musicDuration = existMusic.musicDuration,
                     musicPicture = existMusic.musicPicture,
@@ -404,12 +404,14 @@ public class PlaylistService : IPlaylistService
             await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
         }
 
-        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+        var aclResponse = await _s3Client.PutACLAsync(new PutACLRequest
         {
             BucketName = _bucketName,
             Key = filePath,
-            Expires = DateTime.UtcNow.AddMinutes(30)
+            CannedACL = S3CannedACL.PublicRead
         });
+
+        var url = $"https://{_bucketName}.s3.amazonaws.com/{filePath}";
 
         return url;
     }

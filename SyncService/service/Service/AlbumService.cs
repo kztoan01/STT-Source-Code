@@ -309,8 +309,8 @@ public class AlbumService : IAlbumService
             albumResponseDTO.artist = artistDTO;
             albumResponseDTOs.Add(albumResponseDTO);
         }
-        //return albums;
-        return albumResponseDTOs;
+        return albums;
+        //return albumResponseDTOs;
     }
 
 
@@ -331,12 +331,14 @@ public class AlbumService : IAlbumService
             await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
         }
 
-        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+        var aclResponse = await _s3Client.PutACLAsync(new PutACLRequest
         {
             BucketName = _bucketName,
             Key = filePath,
-            Expires = DateTime.UtcNow.AddMinutes(30)
+            CannedACL = S3CannedACL.PublicRead
         });
+
+        var url = $"https://{_bucketName}.s3.amazonaws.com/{filePath}";
 
         return url;
     }

@@ -40,13 +40,16 @@ public class ArtistRepository : IArtistRepository
             Id = artist.Id,
             userId = artist.userId,
             ArtistName = artist.User.userFullName,
+            artistImage = artist.ImageUrl,
             artistDescription = artist.artistDescription,
             NumberOfFollower = artist.Followers.Count,
             Albums = artist.Albums.Select(a => new AlbumDTO
             {
                 Id = a.Id,
                 albumTitle = a.albumTitle,
-                albumDescription = a.albumDescription
+                albumDescription = a.albumDescription,
+                releaseDate = a.releaseDate,
+                imageUrl = a.ImageUrl
             }).ToList(),
             ViralMusics = artist.Musics.Select(m => new MusicDTO
             {
@@ -122,14 +125,17 @@ public class ArtistRepository : IArtistRepository
             {
                 Id = tmp.Id,
                 userId = tmp.userId,
-                AristName = tmp.User.userFullName,
+                ArtistName = tmp.User.userFullName,
+                artistImage = tmp.ImageUrl,
                 artistDescription = tmp.artistDescription,
                 NumberOfFollower = tmp.Followers.Count,
                 Albums = tmp.Albums.Select(a => new AlbumDTO
                 {
                     Id = a.Id,
                     albumTitle = a.albumTitle,
-                    albumDescription = a.albumDescription
+                    albumDescription = a.albumDescription,
+                    releaseDate = a.releaseDate,
+                    imageUrl = a.ImageUrl
                 }).ToList(),
                 ViralMusics = tmp.Musics.Select(m => new MusicDTO
                 {

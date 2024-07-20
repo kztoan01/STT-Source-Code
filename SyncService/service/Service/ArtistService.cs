@@ -66,12 +66,14 @@ public class ArtistService : IArtistService
             await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
         }
 
-        var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+        var aclResponse = await _s3Client.PutACLAsync(new PutACLRequest
         {
             BucketName = _bucketName,
             Key = filePath,
-            Expires = DateTime.UtcNow.AddMinutes(30)
+            CannedACL = S3CannedACL.PublicRead
         });
+
+        var url = $"https://{_bucketName}.s3.amazonaws.com/{filePath}";
 
         return url;
     }

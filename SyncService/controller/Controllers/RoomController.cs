@@ -32,7 +32,7 @@ namespace controller.Controllers
             _musicService = musicService;
         }
         [HttpGet("{roomId}")]
-        [Authorize]
+
         public async Task<IActionResult> GetRoomById(Guid roomId)
         {
             var room = await _roomService.GetRoomByIdAsync(roomId);
@@ -48,7 +48,16 @@ namespace controller.Controllers
                 Image = room.Image,
                 HostId = room.HostId,
                 Participants = room.Participants.Select(p => new ParticipantDto { UserId = p.UserId, UserName = p.User.UserName }).ToList(),
-                RoomPlaylists = room.RoomPlaylists.Select(rp => new RoomPlaylistDto { MusicId = rp.MusicId, MusicName = rp.Music.musicTitle }).ToList()
+                RoomPlaylists = room.RoomPlaylists.Select(rp => new RoomPlaylistDto
+                {
+                    MusicId = rp.MusicId,
+                    MusicName = rp.Music?.musicTitle ?? string.Empty,
+                    musicUrl = rp.Music?.musicUrl ?? string.Empty,
+                    musicPicture = rp.Music?.musicPicture ?? string.Empty,
+                    artistName = rp.Music?.Artist?.User?.userFullName ?? string.Empty,
+                    albumName = rp.Music?.Album?.albumTitle ?? string.Empty,
+                    //genreName = rp.Music?.Genre?.genreName ?? string.Empty
+                }).ToList()
             };
         
             return Ok(roomDto);

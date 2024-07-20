@@ -11,6 +11,11 @@ namespace core.Dtos.Room
         public Guid MusicId { get; set; }
         public string MusicName { get; set; }
         public DateTime AddTime { get; set; }
+        public string musicUrl { get; set; }
+        public string musicPicture { get; set; }
+        public string artistName { get; set; }
+        public string albumName { get; set; }
+        public string genreName { get; set; }
     }
 
 }

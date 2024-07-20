@@ -5,6 +5,7 @@ using core.Dtos.Album;
 using core.Dtos.Music;
 using core.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using repository.Repository.Interfaces;
 using service.Service.Interfaces;
 
@@ -70,24 +71,31 @@ namespace service.Service
         {
             var musics = await _musicRepository.GetAllMusicAsync();
 
-            return musics.Where(m => m.artistId == artistId).Select(music => new MusicDTO
-            {
-                Id = music.Id,
-                genreName = music.Genre.genreName,
-                musicDuration = music.musicDuration,
-                musicPicture = music.musicPicture,
-                musicPlays = music.musicPlays,
-                musicTitle = music.musicTitle,
-                musicUrl = music.musicUrl,
-                releaseDate = music.releaseDate,
-                AlbumDTO = new AlbumDTO
+            return musics
+                .Where(m => m.artistId == artistId)
+                .Select(music => new MusicDTO
                 {
-                    Id = music.Album.Id,
-                    albumTitle = music.Album.albumTitle
-                },
-                artistName = music.Artist.User.userFullName
-            }).ToList();
+                    Id = music.Id,
+                    genreName = music.Genre?.genreName ?? string.Empty, // Null check for Genre
+                    musicDuration = music.musicDuration,
+                    musicPicture = music.musicPicture,
+                    musicPlays = music.musicPlays,
+                    musicTitle = music.musicTitle,
+                    musicUrl = music.musicUrl,
+                    releaseDate = music.releaseDate,
+                    AlbumDTO = music.Album == null ? null : new AlbumDTO
+                    {
+                        Id = music.Album.Id,
+                        albumTitle = music.Album.albumTitle,
+                        albumDescription = music.Album.albumDescription,
+                        releaseDate = music.Album.releaseDate,
+                        imageUrl = music.Album.ImageUrl
+                    },
+                    artistName = music.Artist?.User?.userFullName ?? string.Empty // Null check for Artist and User
+                })
+                .ToList();
         }
+
 
         public async Task<string> Add1ListenTimeWhenMusicIsListenedAsync(Guid musicId, string userId)
         {
@@ -196,12 +204,14 @@ namespace service.Service
                 await fileTransferUtility.UploadAsync(stream, _bucketName, filePath);
             }
 
-            var url = _s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
+            var aclResponse = await _s3Client.PutACLAsync(new PutACLRequest
             {
                 BucketName = _bucketName,
                 Key = filePath,
-                Expires = DateTime.UtcNow.AddMinutes(30)
+                CannedACL = S3CannedACL.PublicRead
             });
+
+            var url = $"https://{_bucketName}.s3.amazonaws.com/{filePath}";
 
             return url;
         }
@@ -222,7 +232,10 @@ namespace service.Service
                 AlbumDTO = new AlbumDTO
                 {
                     Id = music.Album.Id,
-                    albumTitle = music.Album.albumTitle
+                    albumTitle = music.Album.albumTitle,
+                    albumDescription = music.Album.albumDescription,
+                    releaseDate = music.Album.releaseDate,
+                    imageUrl = music.Album.ImageUrl
                 },
                 artistName = music.Artist.User.userFullName
             };

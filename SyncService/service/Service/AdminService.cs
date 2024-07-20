@@ -9,14 +9,27 @@ using service.Service.Interfaces;
 
 namespace service.Service;
 
-public class AdminService(
-    IArtistRepository artistRepository,
+public class AdminService : IAdminService
+{
+    private readonly IArtistRepository _artistRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IAlbumRepository _albumRepository;
+    private readonly IPlaylistRepository _playlistRepository;
+    private readonly IMusicRepository _musicRepository;
+
+    public AdminService(IArtistRepository artistRepository,
     IUserRepository userRepository,
     IAlbumRepository albumRepository,
     IPlaylistRepository playlistRepository,
     IMusicRepository musicRepository)
-    : IAdminService
-{
+    {
+        _artistRepository = artistRepository;
+        _userRepository = userRepository;
+        _albumRepository = albumRepository;
+        _playlistRepository = playlistRepository;
+        _musicRepository = musicRepository;
+    }
+
     public async Task<List<ArtistDTO>> getArtist(QueryArtist queryObject)
     {
         var page = queryObject.PageNumber;
@@ -25,30 +38,30 @@ public class AdminService(
         var sortBy = queryObject.SortBy;
         var search = queryObject.SearchTerm;
 
-        var list = await artistRepository.GetAllArtistDTOs();
+        var list = await _artistRepository.GetAllArtistDTOs();
 
         switch (sortBy)
         {
             case ArtistSearchByEnum.AristName:
-                list = list.Where(a => a.AristName.Contains(search ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
-                list = isDesc ? list.OrderByDescending(a => a.AristName).ToList() : list.OrderBy(a => a.AristName).ToList();
+                list = list.Where(a => a.ArtistName.Contains(search ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
+                list = isDesc ? list.OrderByDescending(a => a.ArtistName).ToList() : list.OrderBy(a => a.ArtistName).ToList();
                 break;
             case ArtistSearchByEnum.ArtistDescription:
                 list = list.Where(a => a.artistDescription.Contains(search ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
                 list = isDesc ? list.OrderByDescending(a => a.artistDescription).ToList() : list.OrderBy(a => a.artistDescription).ToList();
                 break;
             case ArtistSearchByEnum.NumberOfFollower:
-                list = list.Where(a => a.AristName.Contains(search ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
+                list = list.Where(a => a.ArtistName.Contains(search ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
                 list = isDesc ? list.OrderByDescending(a => a.NumberOfFollower).ToList() : list.OrderBy(a => a.NumberOfFollower).ToList();
                 break;
             default:
-                list = list.Where(a => a.AristName.Contains(search ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
-                list = isDesc ? list.OrderByDescending(a => a.AristName).ToList() : list.OrderBy(a => a.AristName).ToList();
+                list = list.Where(a => a.ArtistName.Contains(search ?? "", StringComparison.OrdinalIgnoreCase)).ToList();
+                list = isDesc ? list.OrderByDescending(a => a.ArtistName).ToList() : list.OrderBy(a => a.ArtistName).ToList();
                 break;
         }
 
         var paginatedList = list.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-        return paginatedList;
+        return list;
     }
 
 
@@ -61,7 +74,7 @@ public class AdminService(
         var isDes = queryObject.IsDecsending;
         var sort = queryObject.SortBy;
         var search = queryObject.Name;
-        var list = await userRepository.GetAllUser();
+        var list = await _userRepository.GetAllUser();
         if(sort == UserSearchByEnum.userFullName)
             list = list.Where(p => p.userFullName.Contains(search ?? "")).OrderBy(u => u.userFullName).ToList();
         else if(sort == UserSearchByEnum.birthday)
@@ -89,7 +102,7 @@ public class AdminService(
         var sortBy = queryObject.SortBy;
         var search = queryObject.SearchTerm;
 
-        var list = await albumRepository.getAllAlbumsAsync();
+        var list = await _albumRepository.getAllAlbumsAsync();
 
         switch (sortBy)
         {
@@ -126,16 +139,16 @@ public class AdminService(
     }
     public async Task<bool> DeleteArtist(Guid id)
     {
-        return await artistRepository.DeleteArtist(id);
+        return await _artistRepository.DeleteArtist(id);
     }
     public async Task<bool> DeletePlaylist(Guid id)
     {
-        return await playlistRepository.DeletePlaylistAsync(id)!=null;
+        return await _playlistRepository.DeletePlaylistAsync(id)!=null;
     }
 
     public async Task<bool> DeleteMusic(Guid id)
     {
-        return await musicRepository.DeleteMusicAsync(id);
+        return await _musicRepository.DeleteMusicAsync(id);
     }
 
     public Task DeleteAlbum(Guid albumId)

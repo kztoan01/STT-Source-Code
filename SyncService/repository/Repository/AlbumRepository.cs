@@ -151,7 +151,7 @@ public class AlbumRepository : IAlbumRepository
             albumTitle = album.albumTitle,
             releaseDate = album.releaseDate,
             albumDescription = album.albumDescription,
-            artist = artistDTO.Result,
+            artist = artistDTO,
             musics = listMusic,
             AlbumPicture = album.ImageUrl,
             

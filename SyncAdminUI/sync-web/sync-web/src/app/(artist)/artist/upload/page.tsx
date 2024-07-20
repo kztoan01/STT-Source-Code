@@ -11,6 +11,8 @@ import { CheckCircleIcon, ExclamationTriangleIcon, CodeBracketIcon } from '@hero
 import { getCookie, setCookie, deleteCookie, hasCookie } from 'cookies-next';
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import axiosInstance from "@/helpers/axiosInstance";
+import useAlbums from "@/helpers/AlbumHook";
+import Link from "next/link";
 
 interface MyJwtPayload extends JwtPayload {
     'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier': string;
@@ -21,8 +23,29 @@ interface Genre {
     genreName: string;
     genreDescription: string;
 }
-
+type Artist = {
+    id: string;
+    userId: string;
+    artistName: string;
+    artistDescription: string;
+    numberOfFollower: number;
+  };
+  
+  type Album = {
+    id: string;
+    albumTitle: string;
+    albumDescription: string;
+    releaseDate: string;
+    artist: Artist;
+    albumPicture: string;
+  };
+  
+  type ApiResponse = {
+    $id: string;
+    $values: Album[];
+  };
 const Upload = () => {
+    
 
     const [image, setImage] = useState<File | null>(null);
 
@@ -32,12 +55,15 @@ const Upload = () => {
 
     const [genre, setGenre] = useState<string>('');
 
+    const [album, setAlbum] = useState<string>('');
+
     const [message, setMessage] = useState<string>('');
 
     const [preview, setPreview] = useState<string | null>(null);
 
     const [loading, setLoading] = useState(false)
-
+    const [alert, setAlert] = useState(false)
+    const [albums, setAlbums] = useState<Album[]>([]);
     const cancelButtonRef = useRef(null)
 
     const [genres, setGenres] = useState<Genre[]>([]);
@@ -73,7 +99,7 @@ const Upload = () => {
                 console.error('Failed to decode token:', error);
             }
         } else {
-            setArtistId('null'); // If token is not a string, set artistId to null
+            setArtistId('null');
         }
     }, []);
 
@@ -98,10 +124,10 @@ const Upload = () => {
         formData.append('musicTitle', title);
         formData.append('musicPlays', "0");
         formData.append('musicDuration', "3.14");
-        formData.append('albumId', "AC45A20F-10A3-48DA-A987-08DC9F580B43");
+        formData.append('albumId', album);
         formData.append('artistId', artistId);
         formData.append('genreId', genre);
-
+        console.log('Album ID: '  +  album)
         try {
             setLoading(true);
             const response = await axiosInstance.post('/music-service/api/Music/add', formData);
@@ -109,10 +135,12 @@ const Upload = () => {
 
             if (response.status === 200) {
                 setLoading(false);
-                setMessage('File uploaded successfully');
+                setMessage('Music uploaded successfully');
+                setAlert(true)
             } else {
                 setLoading(false);
-                setMessage('Failed to upload file');
+                setMessage('Failed to upload music');
+                setAlert(true)
             }
         } catch (error) {
             setLoading(false);
@@ -134,7 +162,24 @@ const Upload = () => {
 
         getGenres();
     }, []);
+    useEffect(() => {
+        const getAlbums = async () => {
+            if (!artistId) {
+                console.error("Artist ID is null or undefined");
+                return;
+            }
 
+            try {
+                const response = await axiosInstance.get(`/music-service/api/Album/getAllArtistAlbums/${artistId}`);
+                console.log(response);
+                setAlbums(response.data.$values);
+            } catch (error) {
+                console.error("Error fetching albums:", error);
+            }
+        };
+
+        getAlbums();
+    }, [artistId]);
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedGenre(event.target.value);
     };
@@ -324,7 +369,24 @@ const Upload = () => {
                                                     />
                                                 </div>
                                             </div>
-
+                                            <div className="mb-5.5">
+                                                <label
+                                                    className="mb-3 block text-sm font-medium text-black dark:text-white"
+                                                    htmlFor="emailAddress"
+                                                >
+                                                    Select your album
+                                                </label>
+                                                <div className="relative">
+                                                    <select onChange={(e) => {
+                                                        setAlbum(e.target.value);
+                                                    }} id="album" name="album" autoComplete="album-name" className="w-full rounded border border-stroke bg-gray px-4.5 py-3 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary">
+                                                        <option value=''>Single</option>
+                                                         {albums.map((album) => (
+                                                            <option key={album.id} value={album.id}>{album.albumTitle}</option>
+                                                         ))}
+                                                    </select>
+                                                </div>
+                                            </div>
                                             <div className="mb-5.5">
                                                 <label
                                                     className="mb-3 block text-sm font-medium text-black dark:text-white"
@@ -557,6 +619,63 @@ const Upload = () => {
                     </div>
                 </Dialog>
             </Transition>
+            <Transition.Root show={alert} as={Fragment}>
+                <Dialog as="div" className="relative z-10" initialFocus={cancelButtonRef} onClose={setAlert}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                            <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            >
+                                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                                    <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                                        <div className="sm:flex sm:items-start">
+                                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                                                <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
+                                            </div>
+                                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                                <Dialog.Title as="h3" className="text-black font-semibold leading-6 text-gray-900">
+                                                    {message}
+                                                </Dialog.Title>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                        <Link href={"/artist"}>
+                                        <button
+                                            type="button"
+                                            className="inline-flex w-full justify-center rounded-md lg:bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 sm:ml-3 sm:w-auto"
+                                            onClick={() => {
+                                                setAlert(false)
+                                            }}
+                                        >
+                                            Close
+                                        </button>
+                                        </Link>
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition.Root>
         </div>
     );
 };

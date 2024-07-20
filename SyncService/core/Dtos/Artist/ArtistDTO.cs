@@ -12,4 +12,5 @@ public class ArtistDTO
     public List<AlbumDTO> Albums { get; set; }
     public List<MusicDTO> ViralMusics { get; set; }
     public int NumberOfFollower { get; set; }
+    public string artistImage { get; set; }
 }

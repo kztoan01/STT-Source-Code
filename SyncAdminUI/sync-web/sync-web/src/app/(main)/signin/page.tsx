@@ -35,7 +35,7 @@ function Login() {
         console.log(decodedToken);
         const role = decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
-        if (role === 'User') {
+        if (role === 'Admin') {
           console.log("navigate to admin");
           router.push("/dashboard");
         } else if (role === 'Artist') {
@@ -66,7 +66,7 @@ function Login() {
             <Link className="mb-5.5 inline-block" href="/dashboard">
               <Image
                 className="dark:block"
-                src={"/images/logo/logo.svg"}
+                src={"/logo.jpg"}
                 alt="Logo"
                 width={176}
                 height={32}
