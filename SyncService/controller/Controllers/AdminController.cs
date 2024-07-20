@@ -1,7 +1,8 @@
 using core.Objects;
 using Microsoft.AspNetCore.Mvc;
 using service.Service.Interfaces;
-using core.Dtos.Album;
+
+namespace controller.Controllers;
 
 namespace controller.Controllers
 {

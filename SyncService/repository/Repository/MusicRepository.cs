@@ -1,4 +1,3 @@
-using core.Dtos.Music;
 using core.Models;
 using data.Data;
 using Microsoft.EntityFrameworkCore;
@@ -22,17 +21,17 @@ public class MusicRepository : IMusicRepository
         return music;
     }
 
-        public async Task<Music?> GetMusicByIdAsync(Guid id)
-        {
-            return await _context.Musics
-                .Include(m => m.Album)
-                .Include(m => m.Artist)
-                    .ThenInclude(a => a.User)
-                .Include(m => m.Genre)
-                .Include(m => m.MusicHistories)
-                .Include(m => m.MusicListens)
-                .FirstOrDefaultAsync(m => m.Id == id);
-        }
+    public async Task<Music?> GetMusicByIdAsync(Guid id)
+    {
+        return await _context.Musics
+            .Include(m => m.Album)
+            .Include(m => m.Artist)
+            .ThenInclude(a => a.User)
+            .Include(m => m.Genre)
+            .Include(m => m.MusicHistories)
+            .Include(m => m.MusicListens)
+            .FirstOrDefaultAsync(m => m.Id == id);
+    }
 
 
     public async Task<List<Music>> GetAllMusicAsync()
@@ -52,16 +51,16 @@ public class MusicRepository : IMusicRepository
         if (existingMusic == null)
             return null;
 
-            existingMusic.musicTitle = music.musicTitle;
-            existingMusic.musicUrl = music.musicUrl;
-            existingMusic.musicPicture = music.musicPicture;
-            existingMusic.musicPlays = music.musicPlays;
-            existingMusic.musicDuration = music.musicDuration;
-            existingMusic.releaseDate = music.releaseDate;
-            existingMusic.albumId = music.albumId;
-            existingMusic.artistId = music.artistId;
-            existingMusic.genreId = music.genreId;
-            existingMusic.MusicHistories = music.MusicHistories;
+        existingMusic.musicTitle = music.musicTitle;
+        existingMusic.musicUrl = music.musicUrl;
+        existingMusic.musicPicture = music.musicPicture;
+        existingMusic.musicPlays = music.musicPlays;
+        existingMusic.musicDuration = music.musicDuration;
+        existingMusic.releaseDate = music.releaseDate;
+        existingMusic.albumId = music.albumId;
+        existingMusic.artistId = music.artistId;
+        existingMusic.genreId = music.genreId;
+        existingMusic.MusicHistories = music.MusicHistories;
 
         await _context.SaveChangesAsync();
         return existingMusic;

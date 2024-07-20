@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
+using controller.Extensions;
 using core.Dtos.Music;
 using core.Models;
 using data.Data;
@@ -60,10 +61,7 @@ builder.Services.AddCors(options => {
 });
 
 builder.Services.AddControllers()
-        .AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-        });
+    .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 // AWS Configuration
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
@@ -138,6 +136,7 @@ builder.Services.AddScoped<IGenreService, GenreService>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IFollowerRepository, FollowerRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -148,6 +147,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MigrationDB();
 app.UseRouting();
 //app.UseCors();
 app.UseCors("SyncWeb");

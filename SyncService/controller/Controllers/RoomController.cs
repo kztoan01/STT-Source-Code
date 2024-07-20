@@ -1,27 +1,24 @@
-using core.Dtos.Music;
 using core.Dtos.Room;
 using core.Models;
-using Elastic.Clients.Elasticsearch;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using service.Hub;
 using service.Hub.iml;
-using service.Service;
 using service.Service.Interfaces;
 
-namespace controller.Controllers
+namespace controller.Controllers;
+
+[Route("room-service/api/[controller]")]
+[ApiController]
+public class RoomController : ControllerBase
 {
-    [Route("room-service/api/[controller]")]
-    [ApiController]
-    public class RoomController : ControllerBase
-    {
-        private readonly IRoomService _roomService;
-        private readonly UserManager<User> _userManager;
-        private readonly IUserService _userService;
-        private readonly IHubContext<RoomHub, IRoomHub> _hubContext;
-        private readonly IMusicService _musicService;
+    private readonly IHubContext<RoomHub, IRoomHub> _hubContext;
+    private readonly IMusicService _musicService;
+    private readonly IRoomService _roomService;
+    private readonly UserManager<User> _userManager;
+    private readonly IUserService _userService;
 
         public RoomController( IMusicService musicService, IRoomService roomService, IHubContext<RoomHub, IRoomHub> hubContext, IUserService userService, UserManager<User> userManager)
         {
@@ -63,110 +60,123 @@ namespace controller.Controllers
             return Ok(roomDto);
         }
 
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetAllRooms()
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> GetAllRooms()
+    {
+        var rooms = await _roomService.GetAllRoomsAsync();
+        return Ok(rooms);
+    }
+
+    [HttpPost("AddRoom")]
+    [Authorize]
+    public async Task<IActionResult> AddRoom([FromBody] AddRoomDTO addRoomDTO)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
         {
-            var rooms = await _roomService.GetAllRoomsAsync();
-            return Ok(rooms);
+            return NotFound("User not found");
         }
 
-        [HttpPost("AddRoom")]
-        [Authorize]
-        public async Task<IActionResult> AddRoom([FromBody] AddRoomDTO addRoomDTO)
+        Room existedRoom = await _roomService.GetRoomByUserIdAsync(user.Id);
+        if (existedRoom != null)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return NotFound("User not found");
-            Room room = new Room
-            {
-                Code = GenerateUniqueCode(), 
-                Image = addRoomDTO.Image,
-                Name = addRoomDTO.Name,
-                HostId = user.Id,
-            };
-
-            await _roomService.AddRoomAsync(room);
-            return CreatedAtAction(nameof(GetRoomById), new { roomId = room.Id }, room);
+            return BadRequest("One user can create only one room at a time!");
         }
 
-        private string GenerateUniqueCode()
+        var room = new Room
         {
-            return Guid.NewGuid().ToString().Substring(0, 6); 
-        }
+            Code = GenerateUniqueCode(),
+            Image = addRoomDTO.Image,
+            Name = addRoomDTO.Name,
+            HostId = user.Id
+        };
+
+        await _roomService.AddRoomAsync(room);
+        return CreatedAtAction(nameof(GetRoomById), new { roomId = room.Id }, room);
+    }
+
+    private string GenerateUniqueCode()
+    {
+        return Guid.NewGuid().ToString().Substring(0, 6);
+    }
 
 
-        [HttpPut("{roomId}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateRoom(Guid roomId, [FromBody] Room room)
-        {
-            if (roomId != room.Id)
-            {
-                return BadRequest();
-            }
+    [HttpPut("{roomId}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateRoom(Guid roomId, [FromBody] Room room)
+    {
+        if (roomId != room.Id) return BadRequest();
 
-            await _roomService.UpdateRoomAsync(room);
-            return NoContent();
-        }
+        await _roomService.UpdateRoomAsync(room);
+        return NoContent();
+    }
 
-        [HttpDelete("{roomId}")]
-        public async Task<IActionResult> DeleteRoom(Guid roomId)
-        {
-            await _roomService.DeleteRoomAsync(roomId);
-            return NoContent();
-        }
+    [HttpDelete("{roomId}")]
+    public async Task<IActionResult> DeleteRoom(Guid roomId)
+    {
+        await _roomService.DeleteRoomAsync(roomId);
+        return NoContent();
+    }
 
-        [HttpPost("join")]
-        [Authorize]
-        public async Task<IActionResult> JoinRoom([FromBody] JoinRoomDTO joinRoomDTO )
-        {
-            try
-            {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null) return NotFound("User not found");
-                await _roomService.JoinRoomAsync(user.Id,Guid.Parse(joinRoomDTO.roomId),joinRoomDTO.code);
-                await _hubContext.Clients.Group(joinRoomDTO.roomId).AlertToRoom(joinRoomDTO.roomId,user.UserName);
-                await _hubContext.Clients.Group(joinRoomDTO.roomId).UpdateParticipantsList();
-                Room room = await _roomService.GetRoomByIdAsync(Guid.Parse(joinRoomDTO.roomId));
-                return Ok(room);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpPost("leave")]
-        [Authorize]
-        public async Task<IActionResult> RemoveUserOutOfRoom([FromBody] LeaveRoomDTO leaveRoomDTO  )
+    [HttpPost("join")]
+    [Authorize]
+    public async Task<IActionResult> JoinRoom([FromBody] JoinRoomDTO joinRoomDTO)
+    {
+        try
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound("User not found");
-            await _roomService.RemoveUserOutOfRoomAsync(user.Id, Guid.Parse(leaveRoomDTO.roomId));
-            await _hubContext.Clients.Group(leaveRoomDTO.roomId).OnLeaveRoom(leaveRoomDTO.roomId, user.UserName);
-            await _hubContext.Clients.Group(leaveRoomDTO.roomId).UpdateParticipantsList();
-            return Ok();
+            Room room =  await _roomService.JoinRoomAsync(user.Id, joinRoomDTO.code);
+            if(room == null) return BadRequest("Unable to join room.Check your code and retry.");
+            await _hubContext.Clients.Group(room.Id.ToString()).AlertToRoom(room.Id.ToString(), user.UserName);
+            await _hubContext.Clients.Group(room.Id.ToString()).UpdateParticipantsList();
+            return Ok(room);
         }
-
-        [HttpPost("music/add")]
-        [Authorize]
-        public async Task<IActionResult> AddMusicToRoom(AddRoomMusicDTO addRoomMusicDTO)
+        catch (Exception ex)
         {
-            Music music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(addRoomMusicDTO.musicId));
-            await _roomService.AddMusicToRoomAsync(music.Id, Guid.Parse(addRoomMusicDTO.roomId));
-            await _hubContext.Clients.Group(addRoomMusicDTO.roomId).OnAddRoomMusic(addRoomMusicDTO.roomId, music.musicTitle);
-            await _hubContext.Clients.Group(addRoomMusicDTO.roomId).UpdateMusicsList();
-            return Ok();
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpPost("music/remove")]
-        [Authorize]
-        public async Task<IActionResult> RemoveMusicOutOfRoom(RemoveRoomMusicDTO removeRoomMusicDTO)
+    [HttpPost("leave")]
+    [Authorize]
+    public async Task<IActionResult> RemoveUserOutOfRoom([FromBody] LeaveRoomDTO leaveRoomDTO)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound("User not found");
+        await _roomService.RemoveUserOutOfRoomAsync(user.Id, Guid.Parse(leaveRoomDTO.roomId));
+        await _hubContext.Clients.Group(leaveRoomDTO.roomId).OnLeaveRoom(leaveRoomDTO.roomId, user.UserName);
+        await _hubContext.Clients.Group(leaveRoomDTO.roomId).UpdateParticipantsList();
+        return Ok();
+    }
+
+    [HttpPost("music/add")]
+    [Authorize]
+    public async Task<IActionResult> AddMusicToRoom(AddRoomMusicDTO addRoomMusicDTO)
+    {
+        var music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(addRoomMusicDTO.musicId));
+        if (music == null) return BadRequest("This music is currently unavailable!");
+        bool res =  await _roomService.AddMusicToRoomAsync(music.Id, Guid.Parse(addRoomMusicDTO.roomId));
+        if(!res )
         {
-            Music music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(removeRoomMusicDTO.musicId));
-            await _roomService.RemoveMusicOutOfRoomAsync(music.Id, Guid.Parse(removeRoomMusicDTO.roomId));
-            await _hubContext.Clients.Group(removeRoomMusicDTO.roomId).OnRemoveRoomMusic(removeRoomMusicDTO.roomId, music.musicTitle);
-            await _hubContext.Clients.Group(removeRoomMusicDTO.roomId).UpdateMusicsList();
-            return Ok();
+            return BadRequest("This music is already in the playlist");
         }
+        await _hubContext.Clients.Group(addRoomMusicDTO.roomId).OnAddRoomMusic(addRoomMusicDTO.roomId, music.musicTitle);
+        await _hubContext.Clients.Group(addRoomMusicDTO.roomId).UpdateMusicsList();
+        return Ok();
+    }
+
+    [HttpPost("music/remove")]
+    [Authorize]
+    public async Task<IActionResult> RemoveMusicOutOfRoom(RemoveRoomMusicDTO removeRoomMusicDTO)
+    {
+        var music = await _musicService.GetMusicByMusicIdAsync(Guid.Parse(removeRoomMusicDTO.musicId));
+        if (music == null) return BadRequest("This music is currently unavailable!");
+        await _roomService.RemoveMusicOutOfRoomAsync(music.Id, Guid.Parse(removeRoomMusicDTO.roomId));
+        await _hubContext.Clients.Group(removeRoomMusicDTO.roomId)
+            .OnRemoveRoomMusic(removeRoomMusicDTO.roomId, music.musicTitle);
+        await _hubContext.Clients.Group(removeRoomMusicDTO.roomId).UpdateMusicsList();
+        return Ok();
     }
 }

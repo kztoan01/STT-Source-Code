@@ -12,13 +12,12 @@ public class ArtistRepository : IArtistRepository
 {
     private readonly ApplicationDBContext _context;
 
-    public ArtistRepository(ApplicationDBContext context )
+    public ArtistRepository(ApplicationDBContext context)
     {
         _context = context;
-
     }
 
- 
+
     public async Task<ArtistDTO> GetArtistDTOById(Guid id)
     {
         var artist = await _context.Artists
@@ -107,7 +106,7 @@ public class ArtistRepository : IArtistRepository
     public async Task<List<ArtistDTO>> GetAllArtistDTOs()
     {
         var artist = await _context.Artists
-            .Include(a => a.User)
+            .Include(a => a.User).ThenInclude(user => user.Followers)
             .Include(a => a.Musics)
             .ThenInclude(m => m.Genre)
             .Include(a => a.Musics)
@@ -115,10 +114,8 @@ public class ArtistRepository : IArtistRepository
             .Include(a => a.Musics)
             .ThenInclude(m => m.playlistMusics)
             .Include(a => a.Albums)
-            .Include(a => a.Followers)
             .ToListAsync();
-        if (artist == null) return null;
-        List<ArtistDTO> listArtistDtOs = new List<ArtistDTO>();
+        var listArtistDtOs = new List<ArtistDTO>();
         foreach (var tmp in artist)
         {
             var artistDTO = new ArtistDTO
@@ -128,7 +125,7 @@ public class ArtistRepository : IArtistRepository
                 ArtistName = tmp.User.userFullName,
                 artistImage = tmp.ImageUrl,
                 artistDescription = tmp.artistDescription,
-                NumberOfFollower = tmp.Followers.Count,
+                NumberOfFollower = tmp.User.Followers.Count,
                 Albums = tmp.Albums.Select(a => new AlbumDTO
                 {
                     Id = a.Id,
@@ -148,7 +145,6 @@ public class ArtistRepository : IArtistRepository
                     musicUrl = m.musicUrl,
                     releaseDate = m.releaseDate
                 }).ToList()
-                
             };
             listArtistDtOs.Add(artistDTO);
         }
@@ -163,15 +159,12 @@ public class ArtistRepository : IArtistRepository
             .Include(a => a.Musics)
             .Include(a => a.Followers)
             .FirstOrDefaultAsync(a => a.Id == id);
-        if (artist == null)
-        {
-            return false;
-        }
+        if (artist == null) return false;
 
         // Remove related entities
         _context.Albums.RemoveRange(artist.Albums);
         _context.Musics.RemoveRange(artist.Musics);
-        _context.Followers.RemoveRange(artist.Followers);
+        _context.Follower.RemoveRange(artist.Followers);
         // Remove the artist
         _context.Artists.Remove(artist);
 

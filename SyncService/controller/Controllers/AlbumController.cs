@@ -28,7 +28,8 @@ public class AlbumController : ControllerBase
 
     [HttpGet("getAlbumsByGenreName/{genreName}")]
     //[Authorize]
-    public async Task<IActionResult> GetAlbumByGenreName([FromRoute] string genreName, [FromQuery] QueryObject queryObject)
+    public async Task<IActionResult> GetAlbumByGenreName([FromRoute] string genreName,
+        [FromQuery] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -41,9 +42,10 @@ public class AlbumController : ControllerBase
         return Ok(albums);
     }
 
-    [HttpGet("getAllArtistAlbums/{artistId}")]
+    [HttpGet("getAllArtistAlbums/{artistId:Guid}")]
     //[Authorized]
-    public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId, [FromQuery] QueryObject queryObject)
+    public async Task<IActionResult> GetAllArtistAlbumsAsync([FromRoute] Guid artistId,
+        [FromQuery] QueryObject queryObject)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -106,10 +108,7 @@ public class AlbumController : ControllerBase
         if (album == null) return NotFound("Album not found");
 
         var deletedAlbum = await _albumService.DeleteAlbumAsync(albumId);
-        if (deletedAlbum)
-        {
-            return Ok("Album deleted successfully");
-        }
+        if (deletedAlbum) return Ok("Album deleted successfully");
         return StatusCode(500, "An error occurred while deleting the album");
     }
 

@@ -37,5 +37,8 @@ COPY --from=publish /app/out .
 
 RUN apt-get update && apt-get install -y iputils-ping
 
+
+RUN apt-get install -y awscli
+
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-ENTRYPOINT [ "dotnet", "controller.dll"]
+ENTRYPOINT ["dotnet", "controller.dll"]

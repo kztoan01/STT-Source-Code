@@ -4,16 +4,9 @@ namespace core.Dtos.User;
 
 public class UserDTO
 {
-    public UserDTO(){}
-    public string userFullName { get; set; }
-    public DateTime birthday { get; set; }
-    public string address { get; set; }
-    public string city { get; set; }
-    public bool status { get; set; }
-    public List<Models.Playlist> Playlists { get; set; }
-    public List<Follower> Followers { get; set; }
-
-    public List<MusicHistory> MusicHistories  { get; set; } 
+    public UserDTO()
+    {
+    }
 
     public UserDTO(Models.User user)
     {
@@ -26,4 +19,14 @@ public class UserDTO
         Followers = user.Followers;
         MusicHistories = user.MusicHistories;
     }
+
+    public string userFullName { get; set; }
+    public DateTime birthday { get; set; }
+    public string address { get; set; }
+    public string city { get; set; }
+    public bool status { get; set; }
+    public List<Models.Playlist> Playlists { get; set; }
+    public List<Follower> Followers { get; set; }
+
+    public List<MusicHistory> MusicHistories { get; set; }
 }
