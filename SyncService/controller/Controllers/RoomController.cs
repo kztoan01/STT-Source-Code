@@ -139,6 +139,25 @@ public class RoomController : ControllerBase
         }
     }
 
+    [HttpPost("deleteRoom")]
+    [Authorize]
+    public async Task<IActionResult> DeleteRoom([FromBody] DeleteRoomDTO deleteRoomDTO)
+    {
+        try
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound("User not found");
+            await _roomService.DeleteRoomAsync(deleteRoomDTO.RoomId);
+            await _hubContext.Clients.Group(deleteRoomDTO.RoomId.ToString()).OnDeleteRoom(deleteRoomDTO.RoomId.ToString(), user.UserName);
+            await _hubContext.Clients.Group(deleteRoomDTO.RoomId.ToString()).UpdateParticipantsList();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpPost("leave")]
     [Authorize]
     public async Task<IActionResult> RemoveUserOutOfRoom([FromBody] LeaveRoomDTO leaveRoomDTO)

@@ -8,6 +8,7 @@ public interface IRoomHub
 
     Task MusicPlaytime(double playtime);
 
+    Task OnDeleteRoom(string groupName, string username);
     Task OnLeaveRoom(string groupName, string username);
 
     Task OnAddRoomMusic(string groupName, string musicId);

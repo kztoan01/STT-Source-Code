@@ -19,6 +19,11 @@ public class RoomHub : Hub<IRoomHub>
         await JoinRoom(groupName);
         await Clients.Group(groupName).AlertToRoom(groupName, username);
     }
+
+    public async Task OnDeleteRoom(string groupName, string username)
+    {
+        await Clients.Group(groupName).OnDeleteRoom(groupName, username);
+    }
     public async Task Chat(string groupName, string username, string content)
     {
         //await JoinRoom(groupName);
